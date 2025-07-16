@@ -50,7 +50,7 @@ const arrowVariants = cva('absolute w-2 h-2 rotate-45', {
 type TooltipPosition = 'top' | 'bottom' | 'left' | 'right'
 
 export interface TooltipProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'content'>,
     VariantProps<typeof tooltipVariants> {
   content: React.ReactNode
   position?: TooltipPosition

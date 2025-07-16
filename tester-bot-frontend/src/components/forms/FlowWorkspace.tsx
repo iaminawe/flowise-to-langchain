@@ -173,8 +173,8 @@ export function FlowWorkspace({
     switch (status) {
       case 'complete':
         return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'error':
-        return <AlertCircle className="h-4 w-4 text-red-500" />
+      case 'pending':
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />
       default:
         return null
     }

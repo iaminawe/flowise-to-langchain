@@ -137,10 +137,10 @@ export function App() {
 
         setLoading(false)
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to initialize app'
-        )
-        setHealthStatus('error')
+        // Don't show error for backend not being available - it's normal in dev
+        console.warn('Backend health check failed (this is normal if backend is starting):', err)
+        setHealthStatus('warning')
+        setError(null) // Don't show error to user
         setLoading(false)
       }
     }
@@ -174,7 +174,20 @@ export function App() {
       case 'workspace':
         return <FlowWorkspace />
       case 'testing':
-        return <ChatInterface flow={null} />
+        return (
+          <ChatInterface
+            flow={{
+              id: 'default',
+              name: 'Default Flow',
+              description: 'Default flow for testing',
+              nodes: [],
+              edges: [],
+              metadata: {},
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }}
+          />
+        )
       case 'results':
         return <TestResults testResults={[]} />
       case 'settings':

@@ -37,7 +37,7 @@ import {
   Layers,
   Network,
   Cpu,
-  Memory,
+  HardDrive as Memory,
   HardDrive,
   Workflow,
 } from 'lucide-react'
