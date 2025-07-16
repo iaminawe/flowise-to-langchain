@@ -1,11 +1,16 @@
 /**
  * Tool Converter for Flowise Tool Nodes
- * 
+ *
  * Converts Flowise tool nodes (like Calculator, WebBrowser, Custom Tools, etc.)
  * to LangChain tool implementations.
  */
 
-import type { IRNode, IRConnection, CodeFragment, GenerationContext } from '../../../ir/types.js';
+import type {
+  IRNode,
+  IRConnection,
+  CodeFragment,
+  GenerationContext,
+} from '../../../ir/types.js';
 import { BaseConverter } from './base-converter.js';
 
 export interface ToolConverter {
@@ -17,26 +22,33 @@ export interface ToolConverter {
 /**
  * Calculator Tool Converter
  */
-export class CalculatorConverter extends BaseConverter implements ToolConverter {
+export class CalculatorConverter
+  extends BaseConverter
+  implements ToolConverter
+{
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragment
-    fragments.push(this.createImportFragment(
-      'langchain-calculator-import',
-      ['Calculator'],
-      'langchain/tools/calculator'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-calculator-import',
+        ['Calculator'],
+        'langchain/tools/calculator'
+      )
+    );
 
     // Tool initialization
     const initCode = `const ${this.getVariableName(node)} = new Calculator();`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      ['Calculator'],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        ['Calculator'],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -53,46 +65,57 @@ export class CalculatorConverter extends BaseConverter implements ToolConverter 
 /**
  * Web Browser Tool Converter
  */
-export class WebBrowserConverter extends BaseConverter implements ToolConverter {
+export class WebBrowserConverter
+  extends BaseConverter
+  implements ToolConverter
+{
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     // Get connections from context or graph if available
     const connections: IRConnection[] = (context as any).connections || [];
     const fragments: CodeFragment[] = [];
 
     // Import fragments
-    fragments.push(this.createImportFragment(
-      'langchain-webbrowser-import',
-      ['WebBrowser'],
-      'langchain/tools/webbrowser'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-webbrowser-import',
+        ['WebBrowser'],
+        'langchain/tools/webbrowser'
+      )
+    );
 
     // Get connected LLM and embeddings
-    const llmConnection = connections.find(conn => 
-      conn.target === node.id && conn.targetHandle === 'llm'
+    const llmConnection = connections.find(
+      (conn) => conn.target === node.id && conn.targetHandle === 'llm'
     );
-    const embeddingsConnection = connections.find(conn => 
-      conn.target === node.id && conn.targetHandle === 'embeddings'
+    const embeddingsConnection = connections.find(
+      (conn) => conn.target === node.id && conn.targetHandle === 'embeddings'
     );
 
     if (!llmConnection || !embeddingsConnection) {
-      throw new Error(`WebBrowser tool ${node.id} requires both LLM and embeddings connections`);
+      throw new Error(
+        `WebBrowser tool ${node.id} requires both LLM and embeddings connections`
+      );
     }
 
     // Tool initialization
     const llmVar = this.getVariableName({ id: llmConnection.source } as IRNode);
-    const embeddingsVar = this.getVariableName({ id: embeddingsConnection.source } as IRNode);
-    
+    const embeddingsVar = this.getVariableName({
+      id: embeddingsConnection.source,
+    } as IRNode);
+
     const initCode = `const ${this.getVariableName(node)} = new WebBrowser({
   model: ${llmVar},
   embeddings: ${embeddingsVar}
 });`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      ['WebBrowser'],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        ['WebBrowser'],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -109,22 +132,35 @@ export class WebBrowserConverter extends BaseConverter implements ToolConverter 
 /**
  * Custom Tool Converter
  */
-export class CustomToolConverter extends BaseConverter implements ToolConverter {
+export class CustomToolConverter
+  extends BaseConverter
+  implements ToolConverter
+{
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragments
-    fragments.push(this.createImportFragment(
-      'langchain-tool-import',
-      ['Tool'],
-      'langchain/tools'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-tool-import',
+        ['Tool'],
+        'langchain/tools'
+      )
+    );
 
     // Configuration parameters
     const name = this.getParameterValue(node, 'name', 'custom_tool');
-    const description = this.getParameterValue(node, 'description', 'A custom tool');
+    const description = this.getParameterValue(
+      node,
+      'description',
+      'A custom tool'
+    );
     const schema = this.getParameterValue(node, 'schema', '{}');
-    const func = this.getParameterValue(node, 'func', 'async (input) => { return "Result"; }');
+    const func = this.getParameterValue(
+      node,
+      'func',
+      'async (input) => { return "Result"; }'
+    );
 
     // Tool initialization
     const initCode = `const ${this.getVariableName(node)} = new Tool({
@@ -134,12 +170,14 @@ export class CustomToolConverter extends BaseConverter implements ToolConverter 
   func: ${func}
 });`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      ['Tool'],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        ['Tool'],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -161,21 +199,25 @@ export class ShellToolConverter extends BaseConverter implements ToolConverter {
     const fragments: CodeFragment[] = [];
 
     // Import fragments
-    fragments.push(this.createImportFragment(
-      'langchain-shell-import',
-      ['ShellTool'],
-      'langchain/tools/shell'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-shell-import',
+        ['ShellTool'],
+        'langchain/tools/shell'
+      )
+    );
 
     // Tool initialization
     const initCode = `const ${this.getVariableName(node)} = new ShellTool();`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      ['ShellTool'],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        ['ShellTool'],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -197,25 +239,36 @@ export class SearchAPIConverter extends BaseConverter implements ToolConverter {
     const fragments: CodeFragment[] = [];
 
     // Import fragments
-    fragments.push(this.createImportFragment(
-      'langchain-search-import',
-      ['SerpAPI'],
-      '@langchain/community/tools/serpapi'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-search-import',
+        ['SerpAPI'],
+        '@langchain/community/tools/serpapi'
+      )
+    );
 
     // Configuration parameters
-    const apiKey = this.getParameterValue(node, 'apiKey', 'process.env.SERPAPI_API_KEY');
+    const apiKey = this.getParameterValue(
+      node,
+      'apiKey',
+      'process.env.SERPAPI_API_KEY'
+    );
 
     // Tool initialization - SerpAPI takes string parameter, not object
-    const keyParam = typeof apiKey === 'string' && !apiKey.startsWith('process.env') ? `"${apiKey}"` : apiKey;
+    const keyParam =
+      typeof apiKey === 'string' && !apiKey.startsWith('process.env')
+        ? `"${apiKey}"`
+        : apiKey;
     const initCode = `const ${this.getVariableName(node)} = new SerpAPI(${keyParam});`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      ['SerpAPI'],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        ['SerpAPI'],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -225,40 +278,53 @@ export class SearchAPIConverter extends BaseConverter implements ToolConverter {
   }
 
   canConvert(node: IRNode): boolean {
-    return node.type === 'searchAPI' || node.type === 'SearchAPI' || node.type === 'SerpAPI' || node.type === 'serpAPI';
+    return (
+      node.type === 'searchAPI' ||
+      node.type === 'SearchAPI' ||
+      node.type === 'SerpAPI' ||
+      node.type === 'serpAPI'
+    );
   }
 }
 
 /**
  * Request Tool Converter
  */
-export class RequestToolConverter extends BaseConverter implements ToolConverter {
+export class RequestToolConverter
+  extends BaseConverter
+  implements ToolConverter
+{
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragments
-    fragments.push(this.createImportFragment(
-      'langchain-request-import',
-      ['RequestsGetTool', 'RequestsPostTool'],
-      'langchain/tools'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-request-import',
+        ['RequestsGetTool', 'RequestsPostTool'],
+        'langchain/tools'
+      )
+    );
 
     // Configuration parameters
     const method = this.getParameterValue(node, 'method', 'GET');
     const headers = this.getParameterValue(node, 'headers', '{}');
 
     // Tool initialization based on method
-    const toolClass = method.toUpperCase() === 'POST' ? 'RequestsPostTool' : 'RequestsGetTool';
+    const toolClass =
+      method.toUpperCase() === 'POST' ? 'RequestsPostTool' : 'RequestsGetTool';
     const initCode = `const ${this.getVariableName(node)} = new ${toolClass}({
   headers: ${headers}
 });`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      [toolClass],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        [toolClass],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -275,16 +341,21 @@ export class RequestToolConverter extends BaseConverter implements ToolConverter
 /**
  * File System Tool Converter
  */
-export class FileSystemConverter extends BaseConverter implements ToolConverter {
+export class FileSystemConverter
+  extends BaseConverter
+  implements ToolConverter
+{
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragments
-    fragments.push(this.createImportFragment(
-      'langchain-filesystem-import',
-      ['ReadFileTool', 'WriteFileTool', 'ListDirectoryTool'],
-      'langchain/tools/fs'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-filesystem-import',
+        ['ReadFileTool', 'WriteFileTool', 'ListDirectoryTool'],
+        'langchain/tools/fs'
+      )
+    );
 
     // Configuration parameters
     const operation = this.getParameterValue(node, 'operation', 'read');
@@ -307,12 +378,14 @@ export class FileSystemConverter extends BaseConverter implements ToolConverter 
   rootDir: ${rootDir}
 });`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      [toolClass],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        [toolClass],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -328,25 +401,25 @@ export class FileSystemConverter extends BaseConverter implements ToolConverter 
 
 // Tool converter registry
 export const toolConverters: Record<string, new () => ToolConverter> = {
-  'calculator': CalculatorConverter,
-  'webBrowser': WebBrowserConverter,
-  'customTool': CustomToolConverter,
-  'shellTool': ShellToolConverter,
-  'searchAPI': SearchAPIConverter,
-  'serpAPI': SearchAPIConverter,
-  'requestTool': RequestToolConverter,
-  'fileSystem': FileSystemConverter,
+  calculator: CalculatorConverter,
+  webBrowser: WebBrowserConverter,
+  customTool: CustomToolConverter,
+  shellTool: ShellToolConverter,
+  searchAPI: SearchAPIConverter,
+  serpAPI: SearchAPIConverter,
+  requestTool: RequestToolConverter,
+  fileSystem: FileSystemConverter,
   // Aliases
-  'Calculator': CalculatorConverter,
-  'WebBrowser': WebBrowserConverter,
-  'CustomTool': CustomToolConverter,
-  'ShellTool': ShellToolConverter,
-  'SearchAPI': SearchAPIConverter,
-  'SerpAPI': SearchAPIConverter,
-  'RequestTool': RequestToolConverter,
-  'FileSystem': FileSystemConverter,
-  'RequestsGetTool': RequestToolConverter,
-  'RequestsPostTool': RequestToolConverter
+  Calculator: CalculatorConverter,
+  WebBrowser: WebBrowserConverter,
+  CustomTool: CustomToolConverter,
+  ShellTool: ShellToolConverter,
+  SearchAPI: SearchAPIConverter,
+  SerpAPI: SearchAPIConverter,
+  RequestTool: RequestToolConverter,
+  FileSystem: FileSystemConverter,
+  RequestsGetTool: RequestToolConverter,
+  RequestsPostTool: RequestToolConverter,
 };
 
 /**
@@ -374,9 +447,14 @@ export function getSupportedToolTypes(): string[] {
 /**
  * Create a tool array for agent usage
  */
-export function createToolArray(toolNodes: IRNode[], context: GenerationContext): CodeFragment {
-  const toolVars = toolNodes.map(node => `node_${node.id.replace(/[^a-zA-Z0-9]/g, '_')}`);
-  
+export function createToolArray(
+  toolNodes: IRNode[],
+  context: GenerationContext
+): CodeFragment {
+  const toolVars = toolNodes.map(
+    (node) => `node_${node.id.replace(/[^a-zA-Z0-9]/g, '_')}`
+  );
+
   const arrayCode = `const tools = [
   ${toolVars.join(',\n  ')}
 ];`;
@@ -391,8 +469,8 @@ export function createToolArray(toolNodes: IRNode[], context: GenerationContext)
       order: 100,
       description: 'Array of tools for agent usage',
       category: 'tools',
-      exports: ['tools']
-    }
+      exports: ['tools'],
+    },
   };
 }
 
@@ -402,5 +480,5 @@ export default {
   hasToolConverter,
   getSupportedToolTypes,
   createToolArray,
-  toolConverters
+  toolConverters,
 };

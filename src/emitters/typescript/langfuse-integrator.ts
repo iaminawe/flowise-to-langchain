@@ -1,10 +1,15 @@
 /**
  * LangFuse Integration for TypeScript Code Generation
- * 
+ *
  * Provides LangFuse observability integration for generated LangChain applications.
  */
 
-import { IRGraph, IRNode, CodeFragment, GenerationContext } from '../../ir/types.js';
+import {
+  IRGraph,
+  IRNode,
+  CodeFragment,
+  GenerationContext,
+} from '../../ir/types.js';
 
 export interface LangFuseConfig {
   enabled: boolean;
@@ -40,14 +45,17 @@ export class LangFuseIntegrator {
       generateSpans: true,
       trackTokenUsage: true,
       trackLatency: true,
-      ...config
+      ...config,
     };
   }
 
   /**
    * Generate LangFuse integration code fragments
    */
-  generateIntegrationFragments(graph: IRGraph, context: GenerationContext): CodeFragment[] {
+  generateIntegrationFragments(
+    graph: IRGraph,
+    context: GenerationContext
+  ): CodeFragment[] {
     if (!context.includeLangfuse || !this.config.enabled) {
       return [];
     }
@@ -82,19 +90,22 @@ export class LangFuseIntegrator {
       metadata: {
         order: 1,
         description: 'LangFuse import',
-        category: 'observability'
-      }
+        category: 'observability',
+      },
     };
   }
 
   /**
    * Generate configuration fragment
    */
-  private generateConfigFragment(graph: IRGraph, context: GenerationContext): CodeFragment {
+  private generateConfigFragment(
+    graph: IRGraph,
+    context: GenerationContext
+  ): CodeFragment {
     const config = {
       apiKey: 'process.env.LANGFUSE_API_KEY',
       baseUrl: 'process.env.LANGFUSE_BASE_URL || "https://cloud.langfuse.com"',
-      enabled: 'process.env.LANGFUSE_ENABLED === "true"'
+      enabled: 'process.env.LANGFUSE_ENABLED === "true"',
     };
 
     const content = `// LangFuse configuration
@@ -113,8 +124,8 @@ const langfuseConfig = {
       metadata: {
         order: 100,
         description: 'LangFuse configuration',
-        category: 'observability'
-      }
+        category: 'observability',
+      },
     };
   }
 
@@ -139,8 +150,8 @@ const langfuse = langfuseConfig.enabled ? new Langfuse({
       metadata: {
         order: 200,
         description: 'LangFuse initialization',
-        category: 'observability'
-      }
+        category: 'observability',
+      },
     };
   }
 
@@ -154,19 +165,19 @@ const langfuse = langfuseConfig.enabled ? new Langfuse({
     fragments.push(this.generateMainTraceFragment(graph));
 
     // Generation tracking for LLM nodes
-    const llmNodes = graph.nodes.filter(node => node.category === 'llm');
+    const llmNodes = graph.nodes.filter((node) => node.category === 'llm');
     if (llmNodes.length > 0) {
       fragments.push(this.generateLLMTracingFragment(llmNodes));
     }
 
     // Chain tracing
-    const chainNodes = graph.nodes.filter(node => node.category === 'chain');
+    const chainNodes = graph.nodes.filter((node) => node.category === 'chain');
     if (chainNodes.length > 0) {
       fragments.push(this.generateChainTracingFragment(chainNodes));
     }
 
     // Tool tracing
-    const toolNodes = graph.nodes.filter(node => node.category === 'tool');
+    const toolNodes = graph.nodes.filter((node) => node.category === 'tool');
     if (toolNodes.length > 0) {
       fragments.push(this.generateToolTracingFragment(toolNodes));
     }
@@ -201,8 +212,8 @@ const mainTrace = langfuse?.trace({
         order: 500,
         description: 'Main trace initialization',
         category: 'observability',
-        async: false
-      }
+        async: false,
+      },
     };
   }
 
@@ -213,18 +224,20 @@ const mainTrace = langfuse?.trace({
     const content = `// LLM generation tracking
 const llmGenerations = new Map();
 
-${llmNodes.map((node, index) => {
-  const variableName = this.sanitizeVariableName(node.label);
-  const modelName = this.getParameterValue(node, 'modelName', 'unknown');
-  
-  return `// Track ${node.label} generations
+${llmNodes
+  .map((node, index) => {
+    const variableName = this.sanitizeVariableName(node.label);
+    const modelName = this.getParameterValue(node, 'modelName', 'unknown');
+
+    return `// Track ${node.label} generations
 const ${variableName}Generation = mainTrace?.generation({
   name: '${node.label}',
   model: '${modelName}',
   tags: ['llm', '${node.type}']
 });
 llmGenerations.set('${node.id}', ${variableName}Generation);`;
-}).join('\n\n')}`;
+  })
+  .join('\n\n')}`;
 
     return {
       id: 'langfuse_llm_tracing',
@@ -236,8 +249,8 @@ llmGenerations.set('${node.id}', ${variableName}Generation);`;
         order: 510,
         description: 'LLM generation tracking',
         category: 'observability',
-        async: false
-      }
+        async: false,
+      },
     };
   }
 
@@ -248,10 +261,11 @@ llmGenerations.set('${node.id}', ${variableName}Generation);`;
     const content = `// Chain execution tracking
 const chainSpans = new Map();
 
-${chainNodes.map((node, index) => {
-  const variableName = this.sanitizeVariableName(node.label);
-  
-  return `// Track ${node.label} execution
+${chainNodes
+  .map((node, index) => {
+    const variableName = this.sanitizeVariableName(node.label);
+
+    return `// Track ${node.label} execution
 const ${variableName}Span = mainTrace?.span({
   name: '${node.label}',
   tags: ['chain', '${node.type}'],
@@ -261,7 +275,8 @@ const ${variableName}Span = mainTrace?.span({
   }
 });
 chainSpans.set('${node.id}', ${variableName}Span);`;
-}).join('\n\n')}`;
+  })
+  .join('\n\n')}`;
 
     return {
       id: 'langfuse_chain_tracing',
@@ -273,8 +288,8 @@ chainSpans.set('${node.id}', ${variableName}Span);`;
         order: 520,
         description: 'Chain execution tracking',
         category: 'observability',
-        async: false
-      }
+        async: false,
+      },
     };
   }
 
@@ -285,10 +300,11 @@ chainSpans.set('${node.id}', ${variableName}Span);`;
     const content = `// Tool usage tracking
 const toolSpans = new Map();
 
-${toolNodes.map((node, index) => {
-  const variableName = this.sanitizeVariableName(node.label);
-  
-  return `// Track ${node.label} usage
+${toolNodes
+  .map((node, index) => {
+    const variableName = this.sanitizeVariableName(node.label);
+
+    return `// Track ${node.label} usage
 const ${variableName}Span = mainTrace?.span({
   name: '${node.label}',
   tags: ['tool', '${node.type}'],
@@ -298,7 +314,8 @@ const ${variableName}Span = mainTrace?.span({
   }
 });
 toolSpans.set('${node.id}', ${variableName}Span);`;
-}).join('\n\n')}`;
+  })
+  .join('\n\n')}`;
 
     return {
       id: 'langfuse_tool_tracing',
@@ -310,8 +327,8 @@ toolSpans.set('${node.id}', ${variableName}Span);`;
         order: 530,
         description: 'Tool usage tracking',
         category: 'observability',
-        async: false
-      }
+        async: false,
+      },
     };
   }
 
@@ -425,20 +442,20 @@ const ${this.sanitizeVariableName(nodeId)}Callback = langfuse ? {
         name: 'LANGFUSE_API_KEY',
         description: 'LangFuse API key for observability tracking',
         example: 'lf_...',
-        required: false
+        required: false,
       },
       {
         name: 'LANGFUSE_BASE_URL',
         description: 'LangFuse instance URL (defaults to cloud.langfuse.com)',
         example: 'https://cloud.langfuse.com',
-        required: false
+        required: false,
       },
       {
         name: 'LANGFUSE_ENABLED',
         description: 'Enable/disable LangFuse tracking (true/false)',
         example: 'true',
-        required: false
-      }
+        required: false,
+      },
     ];
   }
 
@@ -497,8 +514,12 @@ const performanceTracker = {
       .toLowerCase();
   }
 
-  private getParameterValue(node: IRNode, paramName: string, defaultValue: string = 'unknown'): string {
-    const param = node.parameters.find(p => p.name === paramName);
+  private getParameterValue(
+    node: IRNode,
+    paramName: string,
+    defaultValue: string = 'unknown'
+  ): string {
+    const param = node.parameters.find((p) => p.name === paramName);
     return param?.value?.toString() || defaultValue;
   }
 

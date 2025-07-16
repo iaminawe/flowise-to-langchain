@@ -1,6 +1,6 @@
 /**
  * RAG Chain Converters
- * 
+ *
  * Converts Flowise RAG (Retrieval Augmented Generation) nodes into LangChain RAG implementations
  */
 
@@ -15,18 +15,26 @@ export class AdvancedRAGChainConverter extends BaseConverter {
   readonly flowiseType = 'advancedRAGChain';
   readonly category = 'rag';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'advanced_rag');
-    const retrievalStrategy = this.getParameterValue(node, 'retrievalStrategy', 'similarity');
+    const retrievalStrategy = this.getParameterValue(
+      node,
+      'retrievalStrategy',
+      'similarity'
+    );
     const k = this.getParameterValue(node, 'k', 4);
     const scoreThreshold = this.getParameterValue(node, 'scoreThreshold', 0.5);
-    const rerankStrategy = this.getParameterValue(node, 'rerankStrategy', 'none');
+    const rerankStrategy = this.getParameterValue(
+      node,
+      'rerankStrategy',
+      'none'
+    );
     const verbose = this.getParameterValue(node, 'verbose', false);
 
-    const imports = this.generateImport(
-      '@langchain/core/runnables',
-      ['RunnablePassthrough', 'RunnableSequence']
-    );
+    const imports = this.generateImport('@langchain/core/runnables', [
+      'RunnablePassthrough',
+      'RunnableSequence',
+    ]);
 
     const implementation = `const ${variableName} = RunnableSequence.from([
   {
@@ -42,13 +50,17 @@ export class AdvancedRAGChainConverter extends BaseConverter {
       
       const docs = await retriever.getRelevantDocuments(input.question);
       
-      ${rerankStrategy !== 'none' ? `
+      ${
+        rerankStrategy !== 'none'
+          ? `
       // Rerank documents using ${rerankStrategy} strategy
       const rerankedDocs = await rerankDocuments(docs, input.question, '${rerankStrategy}');
       return rerankedDocs.map(doc => doc.pageContent).join('\\n\\n');
-      ` : `
+      `
+          : `
       return docs.map(doc => doc.pageContent).join('\\n\\n');
-      `}
+      `
+      }
     },
     question: (input: { question: string }) => input.question,
   },
@@ -62,18 +74,24 @@ Answer based on the context above:\`;
       
       const response = await llm.call(prompt);
       
-      ${verbose ? `
+      ${
+        verbose
+          ? `
       console.log('RAG Context:', input.context);
       console.log('RAG Question:', input.question);
       console.log('RAG Answer:', response);
-      ` : ''}
+      `
+          : ''
+      }
       
       return response;
     }
   }
 ]);
 
-${rerankStrategy !== 'none' ? `
+${
+  rerankStrategy !== 'none'
+    ? `
 // Reranking function
 async function rerankDocuments(docs: any[], query: string, strategy: string) {
   switch (strategy) {
@@ -87,7 +105,9 @@ async function rerankDocuments(docs: any[], query: string, strategy: string) {
       return docs;
   }
 }
-` : ''}`;
+`
+    : ''
+}`;
 
     return [
       this.createCodeFragment(
@@ -105,7 +125,7 @@ async function rerankDocuments(docs: any[], query: string, strategy: string) {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -122,27 +142,34 @@ export class MultiVectorRAGChainConverter extends BaseConverter {
   readonly flowiseType = 'multiVectorRAGChain';
   readonly category = 'rag';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'multi_vector_rag');
-    const vectorStores = this.getParameterValue(node, 'vectorStores', ['primary', 'secondary']);
+    const vectorStores = this.getParameterValue(node, 'vectorStores', [
+      'primary',
+      'secondary',
+    ]);
     const weights = this.getParameterValue(node, 'weights', [0.7, 0.3]);
     const k = this.getParameterValue(node, 'k', 4);
 
-    const imports = this.generateImport(
-      '@langchain/core/runnables',
-      ['RunnablePassthrough', 'RunnableSequence']
-    );
+    const imports = this.generateImport('@langchain/core/runnables', [
+      'RunnablePassthrough',
+      'RunnableSequence',
+    ]);
 
     const implementation = `const ${variableName} = RunnableSequence.from([
   {
     context: async (input: { question: string }) => {
       // Retrieve from multiple vector stores
       const allResults = await Promise.all([
-        ${(vectorStores || []).map((store: string, index: number) => `
+        ${(vectorStores || [])
+          .map(
+            (store: string, index: number) => `
         ${store}VectorStore.asRetriever({ k: ${Math.ceil((k || 4) * ((weights || [])[index] || 1))} })
           .getRelevantDocuments(input.question)
-          .then(docs => docs.map(doc => ({ ...doc, source: '${store}', weight: ${((weights || [])[index] || 1)} })))
-        `).join(',')}
+          .then(docs => docs.map(doc => ({ ...doc, source: '${store}', weight: ${(weights || [])[index] || 1} })))
+        `
+          )
+          .join(',')}
       ]);
       
       // Combine and weight results
@@ -189,7 +216,7 @@ Provide a comprehensive answer based on the context from multiple sources:\`;
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -206,16 +233,19 @@ export class ConversationalRAGChainConverter extends BaseConverter {
   readonly flowiseType = 'conversationalRAGChain';
   readonly category = 'rag';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'conversational_rag');
     const memoryKey = this.getParameterValue(node, 'memoryKey', 'chat_history');
     const k = this.getParameterValue(node, 'k', 4);
-    const returnSourceDocuments = this.getParameterValue(node, 'returnSourceDocuments', true);
-
-    const imports = this.generateImport(
-      'langchain/chains',
-      ['ConversationalRetrievalQAChain']
+    const returnSourceDocuments = this.getParameterValue(
+      node,
+      'returnSourceDocuments',
+      true
     );
+
+    const imports = this.generateImport('langchain/chains', [
+      'ConversationalRetrievalQAChain',
+    ]);
 
     const implementation = `const ${variableName} = ConversationalRetrievalQAChain.fromLLM(
   llm,
@@ -295,7 +325,7 @@ Follow-up questions:\`;
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -312,21 +342,30 @@ export class GraphRAGChainConverter extends BaseConverter {
   readonly flowiseType = 'graphRAGChain';
   readonly category = 'rag';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'graph_rag');
-    const graphDatabase = this.getParameterValue(node, 'graphDatabase', 'neo4j');
-    const maxHops = this.getParameterValue(node, 'maxHops', 2);
-    const entityExtraction = this.getParameterValue(node, 'entityExtraction', true);
-
-    const imports = this.generateImport(
-      '@langchain/core/runnables',
-      ['RunnableSequence']
+    const graphDatabase = this.getParameterValue(
+      node,
+      'graphDatabase',
+      'neo4j'
     );
+    const maxHops = this.getParameterValue(node, 'maxHops', 2);
+    const entityExtraction = this.getParameterValue(
+      node,
+      'entityExtraction',
+      true
+    );
+
+    const imports = this.generateImport('@langchain/core/runnables', [
+      'RunnableSequence',
+    ]);
 
     const implementation = `const ${variableName} = RunnableSequence.from([
   {
     entities: async (input: { question: string }) => {
-      ${entityExtraction ? `
+      ${
+        entityExtraction
+          ? `
       // Extract entities from the question
       const entityPrompt = \`Extract named entities from this question:
 Question: \${input.question}
@@ -335,9 +374,11 @@ Entities (person, organization, location, concept):\`;
       
       const entitiesResponse = await llm.call(entityPrompt);
       return entitiesResponse.split(',').map(e => e.trim()).filter(e => e);
-      ` : `
+      `
+          : `
       return [];
-      `}
+      `
+      }
     },
     question: (input: { question: string }) => input.question,
   },
@@ -407,7 +448,7 @@ async function executeGraphQuery(query: string) {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -424,15 +465,24 @@ export class AdaptiveRAGChainConverter extends BaseConverter {
   readonly flowiseType = 'adaptiveRAGChain';
   readonly category = 'rag';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'adaptive_rag');
-    const queryClassifier = this.getParameterValue(node, 'queryClassifier', 'llm');
-    const strategies = this.getParameterValue(node, 'strategies', ['factual', 'analytical', 'creative']);
+    // Query classification for adaptive RAG
+    // const queryClassifier = this.getParameterValue(
+    //   node,
+    //   'queryClassifier',
+    //   'llm'
+    // );
+    // const strategies = this.getParameterValue(node, 'strategies', [
+    //   'factual',
+    //   'analytical',
+    //   'creative',
+    // ]);
 
-    const imports = this.generateImport(
-      '@langchain/core/runnables',
-      ['RunnableSequence', 'RunnableBranch']
-    );
+    const imports = this.generateImport('@langchain/core/runnables', [
+      'RunnableSequence',
+      'RunnableBranch',
+    ]);
 
     const implementation = `const ${variableName} = RunnableSequence.from([
   {
@@ -538,7 +588,7 @@ Use the context as inspiration to provide a creative response:\`
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 

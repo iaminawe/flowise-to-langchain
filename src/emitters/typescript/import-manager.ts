@@ -1,6 +1,6 @@
 /**
  * Import Manager for TypeScript Code Generation
- * 
+ *
  * Handles import consolidation, deduplication, and organization for generated TypeScript code.
  */
 
@@ -36,14 +36,18 @@ export class ImportManager {
   /**
    * Add an import statement
    */
-  addImport(from: string, imported: string | string[], options: {
-    default?: string;
-    namespace?: string;
-    isType?: boolean;
-  } = {}): void {
+  addImport(
+    from: string,
+    imported: string | string[],
+    options: {
+      default?: string;
+      namespace?: string;
+      isType?: boolean;
+    } = {}
+  ): void {
     const targetMap = options.isType ? this.typeImports : this.imports;
     const existing = targetMap.get(from);
-    
+
     if (existing) {
       // Merge with existing import
       if (Array.isArray(imported)) {
@@ -51,15 +55,15 @@ export class ImportManager {
       } else {
         existing.named.push(imported);
       }
-      
+
       if (options.default && !existing.default) {
         existing.default = options.default;
       }
-      
+
       if (options.namespace && !existing.namespace) {
         existing.namespace = options.namespace;
       }
-      
+
       // Deduplicate named imports
       existing.named = Array.from(new Set(existing.named));
     } else {
@@ -69,7 +73,7 @@ export class ImportManager {
         named: Array.isArray(imported) ? imported : [imported],
         default: options.default,
         namespace: options.namespace,
-        type: options.isType ? 'type' : 'value'
+        type: options.isType ? 'type' : 'value',
       });
     }
   }
@@ -93,7 +97,11 @@ export class ImportManager {
   /**
    * Add Node.js built-in import
    */
-  addNodeImport(module: string, imports: string | string[], namespace?: string): void {
+  addNodeImport(
+    module: string,
+    imports: string | string[],
+    namespace?: string
+  ): void {
     const importList = Array.isArray(imports) ? imports : [imports];
     this.addImport(`node:${module}`, importList, { namespace });
   }
@@ -133,19 +141,25 @@ export class ImportManager {
 
     // Add external imports
     if (groups.external.length > 0) {
-      statements.push(...groups.external.map(imp => this.formatImportStatement(imp)));
+      statements.push(
+        ...groups.external.map((imp) => this.formatImportStatement(imp))
+      );
       statements.push('');
     }
 
     // Add internal imports
     if (groups.internal.length > 0) {
-      statements.push(...groups.internal.map(imp => this.formatImportStatement(imp)));
+      statements.push(
+        ...groups.internal.map((imp) => this.formatImportStatement(imp))
+      );
       statements.push('');
     }
 
     // Add type imports
     if (groups.types.length > 0) {
-      statements.push(...groups.types.map(imp => this.formatImportStatement(imp)));
+      statements.push(
+        ...groups.types.map((imp) => this.formatImportStatement(imp))
+      );
       statements.push('');
     }
 
@@ -158,44 +172,52 @@ export class ImportManager {
   private parseImportStatement(statement: string): void {
     // Basic parsing for common import patterns
     const trimmed = statement.trim();
-    
+
     // Skip non-import statements
     if (!trimmed.startsWith('import ')) {
       return;
     }
 
     // Parse: import defaultExport from 'module';
-    const defaultMatch = trimmed.match(/^import\s+(\w+)\s+from\s+['"]([^'"]+)['"];?$/);
+    const defaultMatch = trimmed.match(
+      /^import\s+(\w+)\s+from\s+['"]([^'"]+)['"];?$/
+    );
     if (defaultMatch) {
       this.addImport(defaultMatch[2], [], { default: defaultMatch[1] });
       return;
     }
 
     // Parse: import { named } from 'module';
-    const namedMatch = trimmed.match(/^import\s+\{\s*([^}]+)\s*\}\s+from\s+['"]([^'"]+)['"];?$/);
+    const namedMatch = trimmed.match(
+      /^import\s+\{\s*([^}]+)\s*\}\s+from\s+['"]([^'"]+)['"];?$/
+    );
     if (namedMatch) {
       const named = namedMatch[1]
         .split(',')
-        .map(n => n.trim())
-        .filter(n => n.length > 0);
+        .map((n) => n.trim())
+        .filter((n) => n.length > 0);
       this.addImport(namedMatch[2], named);
       return;
     }
 
     // Parse: import * as namespace from 'module';
-    const namespaceMatch = trimmed.match(/^import\s+\*\s+as\s+(\w+)\s+from\s+['"]([^'"]+)['"];?$/);
+    const namespaceMatch = trimmed.match(
+      /^import\s+\*\s+as\s+(\w+)\s+from\s+['"]([^'"]+)['"];?$/
+    );
     if (namespaceMatch) {
       this.addImport(namespaceMatch[2], [], { namespace: namespaceMatch[1] });
       return;
     }
 
     // Parse: import type { Type } from 'module';
-    const typeMatch = trimmed.match(/^import\s+type\s+\{\s*([^}]+)\s*\}\s+from\s+['"]([^'"]+)['"];?$/);
+    const typeMatch = trimmed.match(
+      /^import\s+type\s+\{\s*([^}]+)\s*\}\s+from\s+['"]([^'"]+)['"];?$/
+    );
     if (typeMatch) {
       const types = typeMatch[1]
         .split(',')
-        .map(t => t.trim())
-        .filter(t => t.length > 0);
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0);
       this.addImport(typeMatch[2], types, { isType: true });
       return;
     }
@@ -241,7 +263,11 @@ export class ImportManager {
    * Check if module is external (npm package)
    */
   private isExternalModule(modulePath: string): boolean {
-    return !modulePath.startsWith('.') && !modulePath.startsWith('/') && !modulePath.startsWith('node:');
+    return (
+      !modulePath.startsWith('.') &&
+      !modulePath.startsWith('/') &&
+      !modulePath.startsWith('node:')
+    );
   }
 
   /**
@@ -307,14 +333,14 @@ export class ImportManager {
     return {
       '@langchain/core/messages': [
         'HumanMessage',
-        'AIMessage', 
+        'AIMessage',
         'SystemMessage',
-        'BaseMessage'
+        'BaseMessage',
       ],
       '@langchain/core/prompts': [
         'ChatPromptTemplate',
         'PromptTemplate',
-        'MessagesPlaceholder'
+        'MessagesPlaceholder',
       ],
       '@langchain/core/language_models/llms': ['LLM'],
       '@langchain/core/language_models/chat_models': ['BaseChatModel'],
@@ -325,7 +351,7 @@ export class ImportManager {
       '@langchain/core/vectorstores': ['VectorStore'],
       '@langchain/core/embeddings': ['Embeddings'],
       '@langchain/core/retrievers': ['BaseRetriever'],
-      '@langchain/core/output_parsers': ['BaseOutputParser']
+      '@langchain/core/output_parsers': ['BaseOutputParser'],
     };
   }
 
@@ -336,17 +362,17 @@ export class ImportManager {
     return {
       '@langchain/openai': {
         llm: ['OpenAI', 'ChatOpenAI'],
-        embeddings: ['OpenAIEmbeddings']
+        embeddings: ['OpenAIEmbeddings'],
       },
       '@langchain/anthropic': {
-        llm: ['ChatAnthropic']
+        llm: ['ChatAnthropic'],
       },
       '@langchain/community': {
         tools: ['Calculator', 'SerpAPI'],
         vectorstores: ['Chroma', 'Pinecone', 'FAISS'],
         memory: ['BufferMemory', 'BufferWindowMemory'],
-        retrievers: ['VectorStoreRetriever']
-      }
+        retrievers: ['VectorStoreRetriever'],
+      },
     };
   }
 }

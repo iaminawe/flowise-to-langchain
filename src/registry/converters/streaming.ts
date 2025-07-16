@@ -1,6 +1,6 @@
 /**
  * Streaming Converters
- * 
+ *
  * Converts Flowise streaming nodes into LangChain streaming implementations
  */
 
@@ -15,17 +15,22 @@ export class StreamingLLMConverter extends BaseConverter {
   readonly flowiseType = 'streamingLLM';
   readonly category = 'streaming';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'streaming_llm');
-    const modelName = this.getParameterValue(node, 'modelName', 'gpt-3.5-turbo');
+    const modelName = this.getParameterValue(
+      node,
+      'modelName',
+      'gpt-3.5-turbo'
+    );
     const temperature = this.getParameterValue(node, 'temperature', 0.7);
     const streaming = this.getParameterValue(node, 'streaming', true);
-    const apiKey = this.getParameterValue(node, 'openAIApiKey', 'process.env.OPENAI_API_KEY');
-
-    const imports = this.generateImport(
-      '@langchain/openai',
-      ['ChatOpenAI']
+    const apiKey = this.getParameterValue(
+      node,
+      'openAIApiKey',
+      'process.env.OPENAI_API_KEY'
     );
+
+    const imports = this.generateImport('@langchain/openai', ['ChatOpenAI']);
 
     const implementation = `const ${variableName} = new ChatOpenAI({
   modelName: ${this.formatParameterValue(modelName)},
@@ -58,7 +63,7 @@ export class StreamingLLMConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -75,14 +80,11 @@ export class StreamingChainConverter extends BaseConverter {
   readonly flowiseType = 'streamingChain';
   readonly category = 'streaming';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'streaming_chain');
     const verbose = this.getParameterValue(node, 'verbose', false);
 
-    const imports = this.generateImport(
-      'langchain/chains',
-      ['LLMChain']
-    );
+    const imports = this.generateImport('langchain/chains', ['LLMChain']);
 
     const implementation = `const ${variableName} = new LLMChain({
   llm: /* LLM reference */,
@@ -119,7 +121,7 @@ export class StreamingChainConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -136,15 +138,12 @@ export class StreamingAgentConverter extends BaseConverter {
   readonly flowiseType = 'streamingAgent';
   readonly category = 'streaming';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'streaming_agent');
     const maxIterations = this.getParameterValue(node, 'maxIterations', 10);
     const verbose = this.getParameterValue(node, 'verbose', true);
 
-    const imports = this.generateImport(
-      'langchain/agents',
-      ['AgentExecutor']
-    );
+    const imports = this.generateImport('langchain/agents', ['AgentExecutor']);
 
     const implementation = `const ${variableName} = new AgentExecutor({
   agent: /* Agent reference */,
@@ -182,7 +181,7 @@ export class StreamingAgentConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -199,15 +198,14 @@ export class RealTimeStreamingConverter extends BaseConverter {
   readonly flowiseType = 'realTimeStreaming';
   readonly category = 'streaming';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'realtime_streaming');
     const bufferSize = this.getParameterValue(node, 'bufferSize', 1);
     const flushInterval = this.getParameterValue(node, 'flushInterval', 100);
 
-    const imports = this.generateImport(
-      '@langchain/core/runnables',
-      ['RunnablePassthrough']
-    );
+    const imports = this.generateImport('@langchain/core/runnables', [
+      'RunnablePassthrough',
+    ]);
 
     const implementation = `const ${variableName} = RunnablePassthrough.assign({
   streamingResponse: async (input: any) => {
@@ -252,7 +250,7 @@ export class RealTimeStreamingConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -269,7 +267,7 @@ export class WebSocketStreamingConverter extends BaseConverter {
   readonly flowiseType = 'webSocketStreaming';
   readonly category = 'streaming';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'websocket_streaming');
     const port = this.getParameterValue(node, 'port', 8080);
     const path = this.getParameterValue(node, 'path', '/stream');
@@ -335,7 +333,7 @@ ${variableName}.on('connection', (ws: WebSocket) => {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -352,7 +350,7 @@ export class SSEStreamingConverter extends BaseConverter {
   readonly flowiseType = 'sseStreaming';
   readonly category = 'streaming';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'sse_streaming');
     const endpoint = this.getParameterValue(node, 'endpoint', '/api/stream');
     const headers = this.getParameterValue(node, 'headers', {});
@@ -420,7 +418,7 @@ export class SSEStreamingConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 

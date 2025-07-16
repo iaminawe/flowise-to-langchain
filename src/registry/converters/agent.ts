@@ -1,6 +1,6 @@
 /**
  * Agent Converters for Flowise-to-LangChain
- * 
+ *
  * This module provides converters for various agent types including:
  * - OpenAI Functions Agent
  * - Conversational Agent
@@ -13,7 +13,7 @@
  * - Chat Agent
  */
 
-import { IRNode, IRGraph } from '../../ir/types.js';
+import { IRNode } from '../../ir/types.js';
 import { CodeFragment, GenerationContext } from '../../ir/types.js';
 import { BaseConverter } from '../registry.js';
 
@@ -36,10 +36,14 @@ export abstract class BaseAgentConverter extends BaseConverter {
     return undefined;
   }
 
-  protected getInputVariableName(inputName: string, node: IRNode, context?: GenerationContext): string {
+  protected getInputVariableName(
+    inputName: string,
+    _node: IRNode,
+    _context?: GenerationContext
+  ): string {
     // Since we don't have direct graph access in the new interface,
     // we'll use intelligent fallback naming based on the input type
-    
+
     // Fallback to intelligent naming
     switch (inputName) {
       case 'llm':
@@ -62,19 +66,19 @@ export abstract class BaseAgentConverter extends BaseConverter {
 
   protected extractAgentConfiguration(node: IRNode): Record<string, any> {
     const config: Record<string, any> = {};
-    
+
     for (const param of node.parameters) {
       if (param.value !== undefined && param.value !== null) {
         config[param.name] = param.value;
       }
     }
-    
+
     return config;
   }
 
   protected generateConfigurationString(config: Record<string, any>): string {
     const entries: string[] = [];
-    
+
     for (const [key, value] of Object.entries(config)) {
       if (value !== undefined && value !== null) {
         if (typeof value === 'string') {
@@ -82,22 +86,29 @@ export abstract class BaseAgentConverter extends BaseConverter {
         } else if (typeof value === 'boolean' || typeof value === 'number') {
           entries.push(`${key}: ${value}`);
         } else if (Array.isArray(value)) {
-          entries.push(`${key}: [${value.map(v => typeof v === 'string' ? `"${v}"` : v).join(', ')}]`);
+          entries.push(
+            `${key}: [${value.map((v) => (typeof v === 'string' ? `"${v}"` : v)).join(', ')}]`
+          );
         } else {
           entries.push(`${key}: ${JSON.stringify(value)}`);
         }
       }
     }
-    
+
     return entries.join(',\n  ');
   }
 
-  protected generateAgentConfigurationString(config: Record<string, any>): string {
+  protected generateAgentConfigurationString(
+    config: Record<string, any>
+  ): string {
     const entries: string[] = [];
-    
+
     for (const [key, value] of Object.entries(config)) {
       if (value !== undefined && value !== null) {
-        if (typeof value === 'string' && (key === 'agent' || key.includes('Var') || key === 'tools')) {
+        if (
+          typeof value === 'string' &&
+          (key === 'agent' || key.includes('Var') || key === 'tools')
+        ) {
           // Don't quote variable references
           entries.push(`${key}: ${value}`);
         } else if (typeof value === 'string') {
@@ -105,29 +116,34 @@ export abstract class BaseAgentConverter extends BaseConverter {
         } else if (typeof value === 'boolean' || typeof value === 'number') {
           entries.push(`${key}: ${value}`);
         } else if (Array.isArray(value)) {
-          entries.push(`${key}: [${value.map(v => typeof v === 'string' ? `"${v}"` : v).join(', ')}]`);
+          entries.push(
+            `${key}: [${value.map((v) => (typeof v === 'string' ? `"${v}"` : v)).join(', ')}]`
+          );
         } else {
           entries.push(`${key}: ${JSON.stringify(value)}`);
         }
       }
     }
-    
+
     return entries.join(',\n  ');
   }
 
-  override getDependencies(node: IRNode, context?: GenerationContext): string[] {
+  override getDependencies(
+    node: IRNode,
+    _context?: GenerationContext
+  ): string[] {
     const dependencies = [this.langchainModule];
-    
+
     // Add common agent dependencies
     dependencies.push('langchain/hub');
     dependencies.push('@langchain/core/prompts');
     dependencies.push('@langchain/openai'); // Most agents use OpenAI models
-    
-    // Add context-based dependencies if available
-    if (context?.targetLanguage === 'typescript') {
+
+    // Add _context-based dependencies if available
+    if (_context?.targetLanguage === 'typescript') {
       dependencies.push('@types/node');
     }
-    
+
     return [...new Set(dependencies)];
   }
 }
@@ -145,19 +161,20 @@ export class OpenAIFunctionsAgentConverter extends BaseAgentConverter {
     return node.type === this.flowiseType;
   }
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.getVariableName(node);
     // Use actual node variable names based on the sample flow
     const llmVar = 'openAI_openai_model';
     const toolsVar = '[serpAPI_search_tool]'; // Tools should be an array
-    const promptVar = this.getInputVariableName('prompt', node, context);
+    // Using default prompt from hub instead of variable
+    // const promptVar = this.getInputVariableName('prompt', node, _context);
     const config = this.extractAgentConfiguration(node);
-    
+
     const imports = [
       `import { ${this.langchainClass}, AgentExecutor } from "${this.langchainModule}";`,
-      `import { pull } from "langchain/hub";`
+      `import { pull } from "langchain/hub";`,
     ];
-    
+
     // Generate async setup function
     const setupFunction = `
 // Setup Agent (async initialization)
@@ -186,9 +203,9 @@ async function setupAgent() {
 
 // Initialize agent (will be called in runFlow)
 let ${variableName}: AgentExecutor | null = null;`;
-    
+
     const fragments: CodeFragment[] = [];
-    
+
     // Create import fragments
     imports.forEach((importStatement, index) => {
       fragments.push({
@@ -196,30 +213,30 @@ let ${variableName}: AgentExecutor | null = null;`;
         type: 'import',
         content: importStatement,
         dependencies: [],
-        language: context.targetLanguage || 'typescript',
+        language: _context.targetLanguage || 'typescript',
         metadata: {
           nodeId: node.id,
           order: 1 + index,
-          category: 'import'
-        }
+          category: 'import',
+        },
       });
     });
-    
+
     // Create initialization fragment
     fragments.push({
       id: `agent-${node.id}`,
       type: 'initialization',
       content: setupFunction,
-      dependencies: this.getDependencies(node, context),
-      language: context.targetLanguage || 'typescript',
+      dependencies: this.getDependencies(node, _context),
+      language: _context.targetLanguage || 'typescript',
       metadata: {
         nodeId: node.id,
         order: 400,
         category: 'agent',
-        exports: [variableName, 'setupAgent']
-      }
+        exports: [variableName, 'setupAgent'],
+      },
     });
-    
+
     return fragments;
   }
 }
@@ -237,23 +254,23 @@ export class ConversationalAgentConverter extends BaseAgentConverter {
     return node.type === this.flowiseType;
   }
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.getVariableName(node);
-    const llmVar = this.getInputVariableName('llm', node, context);
-    const toolsVar = this.getInputVariableName('tools', node, context);
-    const memoryVar = this.getInputVariableName('memory', node, context);
+    const llmVar = this.getInputVariableName('llm', node, _context);
+    const toolsVar = this.getInputVariableName('tools', node, _context);
+    const memoryVar = this.getInputVariableName('memory', node, _context);
     const config = this.extractAgentConfiguration(node);
-    
+
     const imports = [
       `import { ${this.langchainClass}, AgentExecutor } from "${this.langchainModule}";`,
       `import { pull } from "langchain/hub";`,
-      `import { ChatPromptTemplate } from "@langchain/core/prompts";`
+      `import { ChatPromptTemplate } from "@langchain/core/prompts";`,
     ];
-    
+
     const promptSetup = `
 // Get the prompt from LangSmith Hub
 const prompt = await pull<ChatPromptTemplate>("hwchase17/react-chat");`;
-    
+
     const agentCreation = `
 // Create React Agent (replacement for deprecated ConversationalAgent)
 const agent = await ${this.langchainClass}({
@@ -261,47 +278,51 @@ const agent = await ${this.langchainClass}({
   tools: ${toolsVar},
   prompt
 });`;
-    
+
     const executorConfigEntries = [
       'agent: agent',
       `tools: ${toolsVar}`,
       `maxIterations: ${config['maxIterations'] || 15}`,
       `verbose: ${config['verbose'] || false}`,
-      `returnIntermediateSteps: ${config['returnIntermediateSteps'] || false}`
+      `returnIntermediateSteps: ${config['returnIntermediateSteps'] || false}`,
     ];
-    
+
     if (memoryVar !== 'memory') {
       executorConfigEntries.push(`memory: ${memoryVar}`);
     }
-    
+
     if (config['maxExecutionTime']) {
-      executorConfigEntries.push(`maxExecutionTime: ${config['maxExecutionTime']}`);
+      executorConfigEntries.push(
+        `maxExecutionTime: ${config['maxExecutionTime']}`
+      );
     }
-    
+
     const executorConfig = executorConfigEntries.join(',\n  ');
-    
+
     const executorCreation = `
 // Create Agent Executor with memory support
 const ${variableName} = new AgentExecutor({
   ${executorConfig}
 });`;
-    
+
     const declaration = promptSetup + agentCreation + executorCreation;
-    
-    return [{
-      id: `agent-${node.id}`,
-      type: 'initialization',
-      content: declaration,
-      dependencies: this.getDependencies(node, context),
-      language: context.targetLanguage || 'typescript',
-      metadata: {
-        nodeId: node.id,
-        order: 400,
-        category: 'agent',
-        exports: [variableName],
-        imports: imports
-      }
-    }];
+
+    return [
+      {
+        id: `agent-${node.id}`,
+        type: 'initialization',
+        content: declaration,
+        dependencies: this.getDependencies(node, _context),
+        language: _context.targetLanguage || 'typescript',
+        metadata: {
+          nodeId: node.id,
+          order: 400,
+          category: 'agent',
+          exports: [variableName],
+          imports: imports,
+        },
+      },
+    ];
   }
 }
 
@@ -318,31 +339,26 @@ export class ToolCallingAgentConverter extends BaseAgentConverter {
     return node.type === this.flowiseType;
   }
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.getVariableName(node);
-    const llmVar = this.getInputVariableName('llm', node, context);
-    const toolsVar = this.getInputVariableName('tools', node, context);
-    const promptVar = this.getInputVariableName('prompt', node, context);
+    const llmVar = this.getInputVariableName('llm', node, _context);
+    const toolsVar = this.getInputVariableName('tools', node, _context);
+    // Using default prompt from hub instead of variable
+    // const promptVar = this.getInputVariableName('prompt', node, _context);
     const config = this.extractAgentConfiguration(node);
-    
+
     const imports = [
       `import { ${this.langchainClass}, AgentExecutor } from "${this.langchainModule}";`,
       `import { pull } from "langchain/hub";`,
-      `import { ChatPromptTemplate } from "@langchain/core/prompts";`
+      `import { ChatPromptTemplate } from "@langchain/core/prompts";`,
     ];
-    
+
     let promptSetup = '';
-    if (promptVar === 'prompt') {
-      // Use default prompt from hub
-      promptSetup = `
+    // Always use default prompt from hub
+    promptSetup = `
 // Get the prompt from LangSmith Hub
 const prompt = await pull<ChatPromptTemplate>("hwchase17/openai-tools-agent");`;
-    } else {
-      promptSetup = `
-// Use provided prompt
-const prompt = ${promptVar};`;
-    }
-    
+
     const agentCreation = `
 // Create OpenAI Tools Agent
 const agent = await ${this.langchainClass}({
@@ -350,38 +366,40 @@ const agent = await ${this.langchainClass}({
   tools: ${toolsVar},
   prompt
 });`;
-    
+
     const executorConfig = this.generateConfigurationString({
       agent: 'agent',
       tools: toolsVar,
       maxIterations: config['maxIterations'] || 15,
       maxExecutionTime: config['maxExecutionTime'],
       verbose: config['verbose'] || false,
-      returnIntermediateSteps: config['returnIntermediateSteps'] || false
+      returnIntermediateSteps: config['returnIntermediateSteps'] || false,
     });
-    
+
     const executorCreation = `
 // Create Agent Executor
 const ${variableName} = new AgentExecutor({
   ${executorConfig}
 });`;
-    
+
     const declaration = promptSetup + agentCreation + executorCreation;
-    
-    return [{
-      id: `agent-${node.id}`,
-      type: 'initialization',
-      content: declaration,
-      dependencies: this.getDependencies(node, context),
-      language: context.targetLanguage || 'typescript',
-      metadata: {
-        nodeId: node.id,
-        order: 400,
-        category: 'agent',
-        exports: [variableName],
-        imports: imports
-      }
-    }];
+
+    return [
+      {
+        id: `agent-${node.id}`,
+        type: 'initialization',
+        content: declaration,
+        dependencies: this.getDependencies(node, _context),
+        language: _context.targetLanguage || 'typescript',
+        metadata: {
+          nodeId: node.id,
+          order: 400,
+          category: 'agent',
+          exports: [variableName],
+          imports: imports,
+        },
+      },
+    ];
   }
 }
 
@@ -398,31 +416,25 @@ export class StructuredChatAgentConverter extends BaseAgentConverter {
     return node.type === this.flowiseType;
   }
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.getVariableName(node);
-    const llmVar = this.getInputVariableName('llm', node, context);
-    const toolsVar = this.getInputVariableName('tools', node, context);
-    const promptVar = this.getInputVariableName('prompt', node, context);
+    const llmVar = this.getInputVariableName('llm', node, _context);
+    const toolsVar = this.getInputVariableName('tools', node, _context);
+    // Using default prompt from hub instead of variable
+    // const promptVar = this.getInputVariableName('prompt', node, _context);
     const config = this.extractAgentConfiguration(node);
-    
+
     const imports = [
       `import { ${this.langchainClass}, AgentExecutor } from "${this.langchainModule}";`,
       `import { pull } from "langchain/hub";`,
-      `import { ChatPromptTemplate } from "@langchain/core/prompts";`
+      `import { ChatPromptTemplate } from "@langchain/core/prompts";`,
     ];
-    
-    let promptSetup = '';
-    if (promptVar === 'prompt') {
-      // Use default prompt from hub
-      promptSetup = `
+
+    // Always use default prompt from hub
+    const promptSetup = `
 // Get the prompt from LangSmith Hub
 const prompt = await pull<ChatPromptTemplate>("hwchase17/structured-chat-agent");`;
-    } else {
-      promptSetup = `
-// Use provided prompt
-const prompt = ${promptVar};`;
-    }
-    
+
     const agentCreation = `
 // Create Structured Chat Agent
 const agent = await ${this.langchainClass}({
@@ -430,38 +442,40 @@ const agent = await ${this.langchainClass}({
   tools: ${toolsVar},
   prompt
 });`;
-    
+
     const executorConfig = this.generateConfigurationString({
       agent: 'agent',
       tools: toolsVar,
       maxIterations: config['maxIterations'] || 15,
       maxExecutionTime: config['maxExecutionTime'],
       verbose: config['verbose'] || false,
-      returnIntermediateSteps: config['returnIntermediateSteps'] || false
+      returnIntermediateSteps: config['returnIntermediateSteps'] || false,
     });
-    
+
     const executorCreation = `
 // Create Agent Executor
 const ${variableName} = new AgentExecutor({
   ${executorConfig}
 });`;
-    
+
     const declaration = promptSetup + agentCreation + executorCreation;
-    
-    return [{
-      id: `agent-${node.id}`,
-      type: 'initialization',
-      content: declaration,
-      dependencies: this.getDependencies(node, context),
-      language: context.targetLanguage || 'typescript',
-      metadata: {
-        nodeId: node.id,
-        order: 400,
-        category: 'agent',
-        exports: [variableName],
-        imports: imports
-      }
-    }];
+
+    return [
+      {
+        id: `agent-${node.id}`,
+        type: 'initialization',
+        content: declaration,
+        dependencies: this.getDependencies(node, _context),
+        language: _context.targetLanguage || 'typescript',
+        metadata: {
+          nodeId: node.id,
+          order: 400,
+          category: 'agent',
+          exports: [variableName],
+          imports: imports,
+        },
+      },
+    ];
   }
 }
 
@@ -478,55 +492,57 @@ export class AgentExecutorConverter extends BaseAgentConverter {
     return node.type === this.flowiseType;
   }
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.getVariableName(node);
-    const agentVar = this.getInputVariableName('agent', node, context);
-    const toolsVar = this.getInputVariableName('tools', node, context);
-    const memoryVar = this.getInputVariableName('memory', node, context);
+    const agentVar = this.getInputVariableName('agent', node, _context);
+    const toolsVar = this.getInputVariableName('tools', node, _context);
+    const memoryVar = this.getInputVariableName('memory', node, _context);
     const config = this.extractAgentConfiguration(node);
-    
+
     const imports = [
-      `import { ${this.langchainClass} } from "${this.langchainModule}";`
+      `import { ${this.langchainClass} } from "${this.langchainModule}";`,
     ];
-    
+
     const configEntries = [
       `agent: ${agentVar}`,
       `tools: ${toolsVar}`,
       `maxIterations: ${config['maxIterations'] || 15}`,
       `verbose: ${config['verbose'] || false}`,
-      `returnIntermediateSteps: ${config['returnIntermediateSteps'] || false}`
+      `returnIntermediateSteps: ${config['returnIntermediateSteps'] || false}`,
     ];
-    
+
     if (memoryVar !== 'memory') {
       configEntries.push(`memory: ${memoryVar}`);
     }
-    
+
     if (config['maxExecutionTime']) {
       configEntries.push(`maxExecutionTime: ${config['maxExecutionTime']}`);
     }
-    
+
     const executorConfig = configEntries.join(',\n  ');
-    
+
     const declaration = `
 // Create Agent Executor
 const ${variableName} = new ${this.langchainClass}({
   ${executorConfig}
 });`;
-    
-    return [{
-      id: `agent-${node.id}`,
-      type: 'initialization',
-      content: declaration,
-      dependencies: this.getDependencies(node, context),
-      language: context.targetLanguage || 'typescript',
-      metadata: {
-        nodeId: node.id,
-        order: 400,
-        category: 'agent',
-        exports: [variableName],
-        imports: imports
-      }
-    }];
+
+    return [
+      {
+        id: `agent-${node.id}`,
+        type: 'initialization',
+        content: declaration,
+        dependencies: this.getDependencies(node, _context),
+        language: _context.targetLanguage || 'typescript',
+        metadata: {
+          nodeId: node.id,
+          order: 400,
+          category: 'agent',
+          exports: [variableName],
+          imports: imports,
+        },
+      },
+    ];
   }
 }
 
@@ -543,22 +559,22 @@ export class ZeroShotReactDescriptionAgentConverter extends BaseAgentConverter {
     return node.type === this.flowiseType;
   }
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.getVariableName(node);
-    const llmVar = this.getInputVariableName('llm', node, context);
-    const toolsVar = this.getInputVariableName('tools', node, context);
+    const llmVar = this.getInputVariableName('llm', node, _context);
+    const toolsVar = this.getInputVariableName('tools', node, _context);
     const config = this.extractAgentConfiguration(node);
-    
+
     const imports = [
       `import { ${this.langchainClass}, AgentExecutor } from "${this.langchainModule}";`,
       `import { pull } from "langchain/hub";`,
-      `import { ChatPromptTemplate } from "@langchain/core/prompts";`
+      `import { ChatPromptTemplate } from "@langchain/core/prompts";`,
     ];
-    
+
     const promptSetup = `
 // Get the prompt from LangSmith Hub
 const prompt = await pull<ChatPromptTemplate>("hwchase17/react");`;
-    
+
     const agentCreation = `
 // Create React Agent
 const agent = await ${this.langchainClass}({
@@ -566,38 +582,40 @@ const agent = await ${this.langchainClass}({
   tools: ${toolsVar},
   prompt
 });`;
-    
+
     const executorConfig = this.generateConfigurationString({
       agent: 'agent',
       tools: toolsVar,
       maxIterations: config['maxIterations'] || 15,
       maxExecutionTime: config['maxExecutionTime'],
       verbose: config['verbose'] || false,
-      returnIntermediateSteps: config['returnIntermediateSteps'] || false
+      returnIntermediateSteps: config['returnIntermediateSteps'] || false,
     });
-    
+
     const executorCreation = `
 // Create Agent Executor
 const ${variableName} = new AgentExecutor({
   ${executorConfig}
 });`;
-    
+
     const declaration = promptSetup + agentCreation + executorCreation;
-    
-    return [{
-      id: `agent-${node.id}`,
-      type: 'initialization',
-      content: declaration,
-      dependencies: this.getDependencies(node, context),
-      language: context.targetLanguage || 'typescript',
-      metadata: {
-        nodeId: node.id,
-        order: 400,
-        category: 'agent',
-        exports: [variableName],
-        imports: imports
-      }
-    }];
+
+    return [
+      {
+        id: `agent-${node.id}`,
+        type: 'initialization',
+        content: declaration,
+        dependencies: this.getDependencies(node, _context),
+        language: _context.targetLanguage || 'typescript',
+        metadata: {
+          nodeId: node.id,
+          order: 400,
+          category: 'agent',
+          exports: [variableName],
+          imports: imports,
+        },
+      },
+    ];
   }
 }
 
@@ -614,22 +632,22 @@ export class ReactDocstoreAgentConverter extends BaseAgentConverter {
     return node.type === this.flowiseType;
   }
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.getVariableName(node);
-    const llmVar = this.getInputVariableName('llm', node, context);
-    const toolsVar = this.getInputVariableName('tools', node, context);
+    const llmVar = this.getInputVariableName('llm', node, _context);
+    const toolsVar = this.getInputVariableName('tools', node, _context);
     const config = this.extractAgentConfiguration(node);
-    
+
     const imports = [
       `import { ${this.langchainClass}, AgentExecutor } from "${this.langchainModule}";`,
       `import { pull } from "langchain/hub";`,
-      `import { ChatPromptTemplate } from "@langchain/core/prompts";`
+      `import { ChatPromptTemplate } from "@langchain/core/prompts";`,
     ];
-    
+
     const promptSetup = `
 // Get the prompt from LangSmith Hub
 const prompt = await pull<ChatPromptTemplate>("hwchase17/react-docstore");`;
-    
+
     const agentCreation = `
 // Create React Docstore Agent
 const agent = await ${this.langchainClass}({
@@ -637,38 +655,40 @@ const agent = await ${this.langchainClass}({
   tools: ${toolsVar},
   prompt
 });`;
-    
+
     const executorConfig = this.generateConfigurationString({
       agent: 'agent',
       tools: toolsVar,
       maxIterations: config['maxIterations'] || 15,
       maxExecutionTime: config['maxExecutionTime'],
       verbose: config['verbose'] || false,
-      returnIntermediateSteps: config['returnIntermediateSteps'] || false
+      returnIntermediateSteps: config['returnIntermediateSteps'] || false,
     });
-    
+
     const executorCreation = `
 // Create Agent Executor
 const ${variableName} = new AgentExecutor({
   ${executorConfig}
 });`;
-    
+
     const declaration = promptSetup + agentCreation + executorCreation;
-    
-    return [{
-      id: `agent-${node.id}`,
-      type: 'initialization',
-      content: declaration,
-      dependencies: this.getDependencies(node, context),
-      language: context.targetLanguage || 'typescript',
-      metadata: {
-        nodeId: node.id,
-        order: 400,
-        category: 'agent',
-        exports: [variableName],
-        imports: imports
-      }
-    }];
+
+    return [
+      {
+        id: `agent-${node.id}`,
+        type: 'initialization',
+        content: declaration,
+        dependencies: this.getDependencies(node, _context),
+        language: _context.targetLanguage || 'typescript',
+        metadata: {
+          nodeId: node.id,
+          order: 400,
+          category: 'agent',
+          exports: [variableName],
+          imports: imports,
+        },
+      },
+    ];
   }
 }
 
@@ -685,23 +705,23 @@ export class ConversationalReactDescriptionAgentConverter extends BaseAgentConve
     return node.type === this.flowiseType;
   }
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.getVariableName(node);
-    const llmVar = this.getInputVariableName('llm', node, context);
-    const toolsVar = this.getInputVariableName('tools', node, context);
-    const memoryVar = this.getInputVariableName('memory', node, context);
+    const llmVar = this.getInputVariableName('llm', node, _context);
+    const toolsVar = this.getInputVariableName('tools', node, _context);
+    const memoryVar = this.getInputVariableName('memory', node, _context);
     const config = this.extractAgentConfiguration(node);
-    
+
     const imports = [
       `import { ${this.langchainClass}, AgentExecutor } from "${this.langchainModule}";`,
       `import { pull } from "langchain/hub";`,
-      `import { ChatPromptTemplate } from "@langchain/core/prompts";`
+      `import { ChatPromptTemplate } from "@langchain/core/prompts";`,
     ];
-    
+
     const promptSetup = `
 // Get the prompt from LangSmith Hub
 const prompt = await pull<ChatPromptTemplate>("hwchase17/react-chat");`;
-    
+
     const agentCreation = `
 // Create Conversational React Agent
 const agent = await ${this.langchainClass}({
@@ -709,47 +729,51 @@ const agent = await ${this.langchainClass}({
   tools: ${toolsVar},
   prompt
 });`;
-    
+
     const executorConfigEntries = [
       'agent: agent',
       `tools: ${toolsVar}`,
       `maxIterations: ${config['maxIterations'] || 15}`,
       `verbose: ${config['verbose'] || false}`,
-      `returnIntermediateSteps: ${config['returnIntermediateSteps'] || false}`
+      `returnIntermediateSteps: ${config['returnIntermediateSteps'] || false}`,
     ];
-    
+
     if (memoryVar !== 'memory') {
       executorConfigEntries.push(`memory: ${memoryVar}`);
     }
-    
+
     if (config['maxExecutionTime']) {
-      executorConfigEntries.push(`maxExecutionTime: ${config['maxExecutionTime']}`);
+      executorConfigEntries.push(
+        `maxExecutionTime: ${config['maxExecutionTime']}`
+      );
     }
-    
+
     const executorConfig = executorConfigEntries.join(',\n  ');
-    
+
     const executorCreation = `
 // Create Agent Executor with memory support
 const ${variableName} = new AgentExecutor({
   ${executorConfig}
 });`;
-    
+
     const declaration = promptSetup + agentCreation + executorCreation;
-    
-    return [{
-      id: `agent-${node.id}`,
-      type: 'initialization',
-      content: declaration,
-      dependencies: this.getDependencies(node, context),
-      language: context.targetLanguage || 'typescript',
-      metadata: {
-        nodeId: node.id,
-        order: 400,
-        category: 'agent',
-        exports: [variableName],
-        imports: imports
-      }
-    }];
+
+    return [
+      {
+        id: `agent-${node.id}`,
+        type: 'initialization',
+        content: declaration,
+        dependencies: this.getDependencies(node, _context),
+        language: _context.targetLanguage || 'typescript',
+        metadata: {
+          nodeId: node.id,
+          order: 400,
+          category: 'agent',
+          exports: [variableName],
+          imports: imports,
+        },
+      },
+    ];
   }
 }
 
@@ -766,31 +790,26 @@ export class ChatAgentConverter extends BaseAgentConverter {
     return node.type === this.flowiseType;
   }
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.getVariableName(node);
-    const llmVar = this.getInputVariableName('llm', node, context);
-    const toolsVar = this.getInputVariableName('tools', node, context);
-    const promptVar = this.getInputVariableName('prompt', node, context);
+    const llmVar = this.getInputVariableName('llm', node, _context);
+    const toolsVar = this.getInputVariableName('tools', node, _context);
+    // Using default prompt from hub instead of variable
+    // const promptVar = this.getInputVariableName('prompt', node, _context);
     const config = this.extractAgentConfiguration(node);
-    
+
     const imports = [
       `import { ${this.langchainClass}, AgentExecutor } from "${this.langchainModule}";`,
       `import { pull } from "langchain/hub";`,
-      `import { ChatPromptTemplate } from "@langchain/core/prompts";`
+      `import { ChatPromptTemplate } from "@langchain/core/prompts";`,
     ];
-    
+
     let promptSetup = '';
-    if (promptVar === 'prompt') {
-      // Use default prompt from hub
-      promptSetup = `
+    // Always use default prompt from hub
+    promptSetup = `
 // Get the prompt from LangSmith Hub
 const prompt = await pull<ChatPromptTemplate>("hwchase17/openai-tools-agent");`;
-    } else {
-      promptSetup = `
-// Use provided prompt
-const prompt = ${promptVar};`;
-    }
-    
+
     const agentCreation = `
 // Create Chat Agent (using OpenAI Tools Agent)
 const agent = await ${this.langchainClass}({
@@ -798,37 +817,39 @@ const agent = await ${this.langchainClass}({
   tools: ${toolsVar},
   prompt
 });`;
-    
+
     const executorConfig = this.generateConfigurationString({
       agent: 'agent',
       tools: toolsVar,
       maxIterations: config['maxIterations'] || 15,
       maxExecutionTime: config['maxExecutionTime'],
       verbose: config['verbose'] || false,
-      returnIntermediateSteps: config['returnIntermediateSteps'] || false
+      returnIntermediateSteps: config['returnIntermediateSteps'] || false,
     });
-    
+
     const executorCreation = `
 // Create Agent Executor
 const ${variableName} = new AgentExecutor({
   ${executorConfig}
 });`;
-    
+
     const declaration = promptSetup + agentCreation + executorCreation;
-    
-    return [{
-      id: `agent-${node.id}`,
-      type: 'initialization',
-      content: declaration,
-      dependencies: this.getDependencies(node, context),
-      language: context.targetLanguage || 'typescript',
-      metadata: {
-        nodeId: node.id,
-        order: 400,
-        category: 'agent',
-        exports: [variableName],
-        imports: imports
-      }
-    }];
+
+    return [
+      {
+        id: `agent-${node.id}`,
+        type: 'initialization',
+        content: declaration,
+        dependencies: this.getDependencies(node, _context),
+        language: _context.targetLanguage || 'typescript',
+        metadata: {
+          nodeId: node.id,
+          order: 400,
+          category: 'agent',
+          exports: [variableName],
+          imports: imports,
+        },
+      },
+    ];
   }
 }

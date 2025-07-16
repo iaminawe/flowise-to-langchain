@@ -1,29 +1,33 @@
 /**
  * Chain Node Converter for TypeScript Code Generation
- * 
+ *
  * Converts chain nodes (LLMChain, ConversationChain, etc.) to TypeScript code.
  */
 
-import { IRNode, CodeFragment, GenerationContext, IRConnection } from '../../../ir/types.js';
+import {
+  IRNode,
+  CodeFragment,
+  GenerationContext,
+  IRConnection,
+} from '../../../ir/types.js';
 import { NodeConverter } from '../emitter.js';
 
 export class ChainConverter implements NodeConverter {
-  
   /**
    * Convert chain node to code fragments
    */
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
-    
+
     // Generate import fragment
     fragments.push(this.generateImportFragment(node));
-    
+
     // Generate declaration fragment
     fragments.push(this.generateDeclarationFragment(node, context));
-    
+
     // Generate execution fragment
     fragments.push(this.generateExecutionFragment(node, context));
-    
+
     return fragments;
   }
 
@@ -32,7 +36,7 @@ export class ChainConverter implements NodeConverter {
    */
   getDependencies(node: IRNode, context?: GenerationContext): string[] {
     const dependencies = ['@langchain/core'];
-    
+
     switch (node.type) {
       case 'llmChain':
         dependencies.push('@langchain/core');
@@ -50,7 +54,7 @@ export class ChainConverter implements NodeConverter {
         dependencies.push('@langchain/community');
         break;
     }
-    
+
     return dependencies;
   }
 
@@ -59,7 +63,7 @@ export class ChainConverter implements NodeConverter {
    */
   getImports(node: IRNode): string[] {
     const imports: string[] = [];
-    
+
     switch (node.type) {
       case 'llmChain':
         imports.push('LLMChain');
@@ -80,7 +84,7 @@ export class ChainConverter implements NodeConverter {
         imports.push('TransformChain');
         break;
     }
-    
+
     return imports;
   }
 
@@ -89,8 +93,13 @@ export class ChainConverter implements NodeConverter {
    */
   canConvert(node: IRNode): boolean {
     const supportedTypes = [
-      'llmChain', 'conversationChain', 'retrievalQAChain',
-      'multiPromptChain', 'sequentialChain', 'transformChain', 'mapReduceChain'
+      'llmChain',
+      'conversationChain',
+      'retrievalQAChain',
+      'multiPromptChain',
+      'sequentialChain',
+      'transformChain',
+      'mapReduceChain',
     ];
     return supportedTypes.includes(node.type);
   }
@@ -101,7 +110,7 @@ export class ChainConverter implements NodeConverter {
   private generateImportFragment(node: IRNode): CodeFragment {
     const className = this.getClassName(node.type);
     const packageName = this.getPackageName(node.type);
-    
+
     return {
       id: `import_${node.id}`,
       type: 'import',
@@ -112,19 +121,22 @@ export class ChainConverter implements NodeConverter {
         nodeId: node.id,
         order: 12,
         description: `Import for ${node.label}`,
-        imports: [className]
-      }
+        imports: [className],
+      },
     };
   }
 
   /**
    * Generate declaration fragment
    */
-  private generateDeclarationFragment(node: IRNode, context: GenerationContext): CodeFragment {
+  private generateDeclarationFragment(
+    node: IRNode,
+    context: GenerationContext
+  ): CodeFragment {
     const variableName = this.sanitizeVariableName(node.label);
-    
+
     let content: string;
-    
+
     switch (node.type) {
       case 'llmChain':
         content = this.generateLLMChain(node, variableName, context);
@@ -155,19 +167,30 @@ export class ChainConverter implements NodeConverter {
         description: `Declaration for ${node.label}`,
         category: node.category,
         async: true,
-        exports: [variableName]
-      }
+        exports: [variableName],
+      },
     };
   }
 
   /**
    * Generate execution fragment
    */
-  private generateExecutionFragment(node: IRNode, context: GenerationContext): CodeFragment {
+  private generateExecutionFragment(
+    node: IRNode,
+    context: GenerationContext
+  ): CodeFragment {
     const variableName = this.sanitizeVariableName(node.label);
-    const inputKey = this.getParameterValue(node, 'inputKey', 'input') as string;
-    const outputKey = this.getParameterValue(node, 'outputKey', 'text') as string;
-    
+    const inputKey = this.getParameterValue(
+      node,
+      'inputKey',
+      'input'
+    ) as string;
+    const outputKey = this.getParameterValue(
+      node,
+      'outputKey',
+      'text'
+    ) as string;
+
     const content = `// Execute ${node.label}
 const ${variableName}Result = await ${variableName}.call({
   ${inputKey}: input,
@@ -187,44 +210,56 @@ const result = ${variableName}Result.${outputKey} || ${variableName}Result.text 
         order: 3000,
         description: `Execution for ${node.label}`,
         category: node.category,
-        async: true
-      }
+        async: true,
+      },
     };
   }
 
   /**
    * Generate LLMChain
    */
-  private generateLLMChain(node: IRNode, variableName: string, context: GenerationContext): string {
+  private generateLLMChain(
+    node: IRNode,
+    variableName: string,
+    context: GenerationContext
+  ): string {
     const config: string[] = [];
-    
+
     // LLM dependency (should be connected via input)
     config.push('  llm: llm'); // This will need to be resolved from connections
-    
+
     // Prompt dependency (should be connected via input)
     config.push('  prompt: prompt'); // This will need to be resolved from connections
-    
+
     // Memory (optional)
-    const memoryInput = node.inputs.find(input => input.dataType === 'memory');
+    const memoryInput = node.inputs.find(
+      (input) => input.dataType === 'memory'
+    );
     if (memoryInput) {
       config.push('  memory: memory'); // This will need to be resolved from connections
     }
-    
+
     // Output key
     const outputKey = this.getParameterValue(node, 'outputKey');
     if (outputKey) {
       config.push(`  outputKey: '${outputKey}'`);
     }
-    
+
     // Return values
     const returnValues = this.getParameterValue(node, 'returnValues');
-    if (returnValues && Array.isArray(returnValues) && returnValues.length > 0) {
+    if (
+      returnValues &&
+      Array.isArray(returnValues) &&
+      returnValues.length > 0
+    ) {
       config.push(`  returnValues: ${JSON.stringify(returnValues)}`);
     }
-    
+
     // LangFuse callback integration
     if (context.includeLangfuse) {
-      config.push(`  callbacks: [${this.sanitizeVariableName(node.id)}Callback].filter(Boolean)`);
+      config.push(
+        `  callbacks: [${this.sanitizeVariableName(node.id)}Callback].filter(Boolean)`
+      );
     }
 
     return `// ${node.label} - ${node.type}
@@ -236,26 +271,36 @@ ${config.join(',\n')}
   /**
    * Generate ConversationChain
    */
-  private generateConversationChain(node: IRNode, variableName: string, context: GenerationContext): string {
+  private generateConversationChain(
+    node: IRNode,
+    variableName: string,
+    context: GenerationContext
+  ): string {
     const config: string[] = [];
-    
+
     config.push('  llm: llm');
-    
+
     // Memory
-    const memoryInput = node.inputs.find(input => input.dataType === 'memory');
+    const memoryInput = node.inputs.find(
+      (input) => input.dataType === 'memory'
+    );
     if (memoryInput) {
       config.push('  memory: memory');
     }
-    
+
     // Prompt (optional for conversation chain)
-    const promptInput = node.inputs.find(input => input.dataType === 'prompt');
+    const promptInput = node.inputs.find(
+      (input) => input.dataType === 'prompt'
+    );
     if (promptInput) {
       config.push('  prompt: prompt');
     }
-    
+
     // LangFuse callback integration
     if (context.includeLangfuse) {
-      config.push(`  callbacks: [${this.sanitizeVariableName(node.id)}Callback].filter(Boolean)`);
+      config.push(
+        `  callbacks: [${this.sanitizeVariableName(node.id)}Callback].filter(Boolean)`
+      );
     }
 
     return `// ${node.label} - ${node.type}
@@ -267,23 +312,33 @@ ${config.join(',\n')}
   /**
    * Generate RetrievalQAChain
    */
-  private generateRetrievalQAChain(node: IRNode, variableName: string, context: GenerationContext): string {
+  private generateRetrievalQAChain(
+    node: IRNode,
+    variableName: string,
+    context: GenerationContext
+  ): string {
     const config: string[] = [];
-    
+
     config.push('  llm: llm');
     config.push('  retriever: retriever'); // This will need to be resolved from connections
-    
+
     // Chain type
     const chainType = this.getParameterValue(node, 'chainType', 'stuff');
     config.push(`  chainType: '${chainType}'`);
-    
+
     // Return source documents
-    const returnSourceDocuments = this.getParameterValue(node, 'returnSourceDocuments', false);
+    const returnSourceDocuments = this.getParameterValue(
+      node,
+      'returnSourceDocuments',
+      false
+    );
     config.push(`  returnSourceDocuments: ${returnSourceDocuments}`);
-    
+
     // LangFuse callback integration
     if (context.includeLangfuse) {
-      config.push(`  callbacks: [${this.sanitizeVariableName(node.id)}Callback].filter(Boolean)`);
+      config.push(
+        `  callbacks: [${this.sanitizeVariableName(node.id)}Callback].filter(Boolean)`
+      );
     }
 
     return `// ${node.label} - ${node.type}
@@ -295,25 +350,33 @@ ${config.join(',\n')}
   /**
    * Generate SequentialChain
    */
-  private generateSequentialChain(node: IRNode, variableName: string, context: GenerationContext): string {
+  private generateSequentialChain(
+    node: IRNode,
+    variableName: string,
+    context: GenerationContext
+  ): string {
     const config: string[] = [];
-    
+
     // Chains (will need to be resolved from connections)
     config.push('  chains: [/* chains will be resolved from connections */]');
-    
+
     // Input variables
-    const inputVariables = this.getParameterValue(node, 'inputVariables', ['input']);
+    const inputVariables = this.getParameterValue(node, 'inputVariables', [
+      'input',
+    ]);
     config.push(`  inputVariables: ${JSON.stringify(inputVariables)}`);
-    
+
     // Output variables
     const outputVariables = this.getParameterValue(node, 'outputVariables');
     if (outputVariables) {
       config.push(`  outputVariables: ${JSON.stringify(outputVariables)}`);
     }
-    
+
     // LangFuse callback integration
     if (context.includeLangfuse) {
-      config.push(`  callbacks: [${this.sanitizeVariableName(node.id)}Callback].filter(Boolean)`);
+      config.push(
+        `  callbacks: [${this.sanitizeVariableName(node.id)}Callback].filter(Boolean)`
+      );
     }
 
     return `// ${node.label} - ${node.type}
@@ -325,13 +388,17 @@ ${config.join(',\n')}
   /**
    * Generate generic chain
    */
-  private generateGenericChain(node: IRNode, variableName: string, context: GenerationContext): string {
+  private generateGenericChain(
+    node: IRNode,
+    variableName: string,
+    context: GenerationContext
+  ): string {
     const className = this.getClassName(node.type);
     const config: string[] = [];
-    
+
     // Add common configuration
     config.push('  llm: llm');
-    
+
     // Add any parameters as configuration
     for (const param of node.parameters) {
       if (param.value !== undefined && param.value !== null) {
@@ -342,10 +409,12 @@ ${config.join(',\n')}
         }
       }
     }
-    
+
     // LangFuse callback integration
     if (context.includeLangfuse) {
-      config.push(`  callbacks: [${this.sanitizeVariableName(node.id)}Callback].filter(Boolean)`);
+      config.push(
+        `  callbacks: [${this.sanitizeVariableName(node.id)}Callback].filter(Boolean)`
+      );
     }
 
     return `// ${node.label} - ${node.type}
@@ -359,15 +428,15 @@ ${config.join(',\n')}
    */
   private getClassName(nodeType: string): string {
     const classMap: Record<string, string> = {
-      'llmChain': 'LLMChain',
-      'conversationChain': 'ConversationChain',
-      'retrievalQAChain': 'RetrievalQAChain',
-      'multiPromptChain': 'MultiPromptChain',
-      'sequentialChain': 'SequentialChain',
-      'transformChain': 'TransformChain',
-      'mapReduceChain': 'MapReduceQAChain'
+      llmChain: 'LLMChain',
+      conversationChain: 'ConversationChain',
+      retrievalQAChain: 'RetrievalQAChain',
+      multiPromptChain: 'MultiPromptChain',
+      sequentialChain: 'SequentialChain',
+      transformChain: 'TransformChain',
+      mapReduceChain: 'MapReduceQAChain',
     };
-    
+
     return classMap[nodeType] || 'BaseChain';
   }
 
@@ -384,8 +453,12 @@ ${config.join(',\n')}
   /**
    * Get parameter value from node
    */
-  private getParameterValue(node: IRNode, paramName: string, defaultValue?: unknown): unknown {
-    const param = node.parameters.find(p => p.name === paramName);
+  private getParameterValue(
+    node: IRNode,
+    paramName: string,
+    defaultValue?: unknown
+  ): unknown {
+    const param = node.parameters.find((p) => p.name === paramName);
     return param?.value ?? defaultValue;
   }
 

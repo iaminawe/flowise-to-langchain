@@ -1,6 +1,6 @@
 /**
  * Template Engine for TypeScript Code Generation
- * 
+ *
  * Provides templating capabilities for generating consistent, well-structured TypeScript code.
  */
 
@@ -38,7 +38,10 @@ export class TemplateEngine {
   /**
    * Render a template with the given context
    */
-  renderTemplate(templateName: string, templateContext: TemplateContext = {}): string {
+  renderTemplate(
+    templateName: string,
+    templateContext: TemplateContext = {}
+  ): string {
     const template = this.templates.get(templateName);
     if (!template) {
       throw new Error(`Template '${templateName}' not found`);
@@ -46,8 +49,13 @@ export class TemplateEngine {
 
     // Validate required context
     for (const required of template.requiredContext) {
-      if (!(required in templateContext) && !(this.context && required in this.context)) {
-        throw new Error(`Required context '${required}' missing for template '${templateName}'`);
+      if (
+        !(required in templateContext) &&
+        !(this.context && required in this.context)
+      ) {
+        throw new Error(
+          `Required context '${required}' missing for template '${templateName}'`
+        );
       }
     }
 
@@ -56,7 +64,7 @@ export class TemplateEngine {
       ...this.context,
       ...templateContext,
       // Helper functions
-      helpers: this.getTemplateHelpers()
+      helpers: this.getTemplateHelpers(),
     };
 
     return this.processTemplate(template.template, fullContext);
@@ -65,12 +73,17 @@ export class TemplateEngine {
   /**
    * Add a custom template
    */
-  addTemplate(name: string, template: string, description: string, requiredContext: string[] = []): void {
+  addTemplate(
+    name: string,
+    template: string,
+    description: string,
+    requiredContext: string[] = []
+  ): void {
     this.templates.set(name, {
       name,
       template,
       description,
-      requiredContext
+      requiredContext,
     });
   }
 
@@ -101,41 +114,54 @@ export class TemplateEngine {
    */
   private getValueFromPath(obj: TemplateContext, path: string): unknown {
     return path.split('.').reduce((current, key) => {
-      return current && typeof current === 'object' ? (current as any)[key] : undefined;
+      return current && typeof current === 'object'
+        ? (current as any)[key]
+        : undefined;
     }, obj);
   }
 
   /**
    * Process conditional blocks
    */
-  private processConditionals(template: string, context: TemplateContext): string {
-    return template.replace(/\{\{#if\s+([^}]+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, condition, content) => {
-      const value = this.getValueFromPath(context, condition.trim());
-      return this.isTruthy(value) ? content : '';
-    });
+  private processConditionals(
+    template: string,
+    context: TemplateContext
+  ): string {
+    return template.replace(
+      /\{\{#if\s+([^}]+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
+      (match, condition, content) => {
+        const value = this.getValueFromPath(context, condition.trim());
+        return this.isTruthy(value) ? content : '';
+      }
+    );
   }
 
   /**
    * Process loop blocks
    */
   private processLoops(template: string, context: TemplateContext): string {
-    return template.replace(/\{\{#each\s+([^}]+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (match, arrayPath, content) => {
-      const array = this.getValueFromPath(context, arrayPath.trim());
-      if (!Array.isArray(array)) {
-        return '';
-      }
+    return template.replace(
+      /\{\{#each\s+([^}]+)\}\}([\s\S]*?)\{\{\/each\}\}/g,
+      (match, arrayPath, content) => {
+        const array = this.getValueFromPath(context, arrayPath.trim());
+        if (!Array.isArray(array)) {
+          return '';
+        }
 
-      return array.map((item, index) => {
-        const itemContext = {
-          ...context,
-          this: item,
-          '@index': index,
-          '@first': index === 0,
-          '@last': index === array.length - 1
-        };
-        return this.processTemplate(content, itemContext);
-      }).join('');
-    });
+        return array
+          .map((item, index) => {
+            const itemContext = {
+              ...context,
+              this: item,
+              '@index': index,
+              '@first': index === 0,
+              '@last': index === array.length - 1,
+            };
+            return this.processTemplate(content, itemContext);
+          })
+          .join('');
+      }
+    );
   }
 
   /**
@@ -159,24 +185,34 @@ export class TemplateEngine {
    */
   private getTemplateHelpers(): Record<string, Function> {
     return {
-      camelCase: (str: string) => str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : ''),
+      camelCase: (str: string) =>
+        str.replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : '')),
       pascalCase: (str: string) => {
-        const camel = str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : '');
+        const camel = str.replace(/[-_\s]+(.)?/g, (_, c) =>
+          c ? c.toUpperCase() : ''
+        );
         return camel.charAt(0).toUpperCase() + camel.slice(1);
       },
-      kebabCase: (str: string) => str.replace(/[A-Z]/g, '-$&').toLowerCase().replace(/^-/, ''),
-      snakeCase: (str: string) => str.replace(/[A-Z]/g, '_$&').toLowerCase().replace(/^_/, ''),
+      kebabCase: (str: string) =>
+        str.replace(/[A-Z]/g, '-$&').toLowerCase().replace(/^-/, ''),
+      snakeCase: (str: string) =>
+        str.replace(/[A-Z]/g, '_$&').toLowerCase().replace(/^_/, ''),
       upperCase: (str: string) => str.toUpperCase(),
       lowerCase: (str: string) => str.toLowerCase(),
       capitalize: (str: string) => str.charAt(0).toUpperCase() + str.slice(1),
       indent: (str: string, spaces: number = 2) => {
         const indent = ' '.repeat(spaces);
-        return str.split('\n').map(line => line.trim() ? indent + line : line).join('\n');
+        return str
+          .split('\n')
+          .map((line) => (line.trim() ? indent + line : line))
+          .join('\n');
       },
-      join: (arr: unknown[], separator: string = ', ') => Array.isArray(arr) ? arr.join(separator) : '',
+      join: (arr: unknown[], separator: string = ', ') =>
+        Array.isArray(arr) ? arr.join(separator) : '',
       quote: (str: string) => `"${str}"`,
       singleQuote: (str: string) => `'${str}'`,
-      sanitizeVariableName: (str: string) => str.replace(/[^a-zA-Z0-9]/g, '').replace(/^[0-9]/, '_$&')
+      sanitizeVariableName: (str: string) =>
+        str.replace(/[^a-zA-Z0-9]/g, '').replace(/^[0-9]/, '_$&'),
     };
   }
 
@@ -185,7 +221,9 @@ export class TemplateEngine {
    */
   private initializeDefaultTemplates(): void {
     // Main file template
-    this.addTemplate('mainFile', `/**
+    this.addTemplate(
+      'mainFile',
+      `/**
  * {{description}}
  * Generated by flowise-to-langchain
  */
@@ -197,10 +235,15 @@ export class TemplateEngine {
 {{mainFunction}}
 
 {{exports}}
-`, 'Main application file', ['description', 'imports', 'mainFunction']);
+`,
+      'Main application file',
+      ['description', 'imports', 'mainFunction']
+    );
 
     // Main function template
-    this.addTemplate('mainFunction', `/**
+    this.addTemplate(
+      'mainFunction',
+      `/**
  * Main function for {{graphName}}
  */
 export async function main(input: string, options: Record<string, unknown> = {}): Promise<string> {
@@ -263,10 +306,15 @@ if (import.meta.url === \`file://\${process.argv[1]}\`) {
     });
 }
 {{/if}}
-`, 'Main function template', ['graphName']);
+`,
+      'Main function template',
+      ['graphName']
+    );
 
     // Types file template
-    this.addTemplate('typesFile', `/**
+    this.addTemplate(
+      'typesFile',
+      `/**
  * Type definitions for {{projectName}}
  * Generated by flowise-to-langchain
  */
@@ -274,10 +322,15 @@ if (import.meta.url === \`file://\${process.argv[1]}\`) {
 {{types}}
 
 {{interfaces}}
-`, 'Types file template', ['projectName']);
+`,
+      'Types file template',
+      ['projectName']
+    );
 
     // Config file template
-    this.addTemplate('configFile', `/**
+    this.addTemplate(
+      'configFile',
+      `/**
  * Configuration for the application
  * Generated by flowise-to-langchain
  */
@@ -303,24 +356,39 @@ export const environment = {
   {{@key}}: process.env.{{helpers.snakeCase @key | helpers.upperCase}} || '{{this}}',
   {{/each}}
 };
-`, 'Configuration file template', ['config']);
+`,
+      'Configuration file template',
+      ['config']
+    );
 
     // LLM node template
-    this.addTemplate('llmNode', `// {{label}} - {{type}}
+    this.addTemplate(
+      'llmNode',
+      `// {{label}} - {{type}}
 const {{variableName}} = new {{className}}({
   {{#each parameters}}
   {{name}}: {{#if isEnvVar}}process.env.{{envName}}{{else}}{{value}}{{/if}},
   {{/each}}
 });
-`, 'LLM node template', ['label', 'type', 'variableName', 'className', 'parameters']);
+`,
+      'LLM node template',
+      ['label', 'type', 'variableName', 'className', 'parameters']
+    );
 
     // Prompt template
-    this.addTemplate('promptNode', `// {{label}} - {{type}}
+    this.addTemplate(
+      'promptNode',
+      `// {{label}} - {{type}}
 const {{variableName}} = {{className}}.fromTemplate(\`{{template}}\`);
-`, 'Prompt node template', ['label', 'type', 'variableName', 'className', 'template']);
+`,
+      'Prompt node template',
+      ['label', 'type', 'variableName', 'className', 'template']
+    );
 
     // Chain template
-    this.addTemplate('chainNode', `// {{label}} - {{type}}
+    this.addTemplate(
+      'chainNode',
+      `// {{label}} - {{type}}
 const {{variableName}} = new {{className}}({
   llm: {{llmVariable}},
   prompt: {{promptVariable}},
@@ -331,38 +399,58 @@ const {{variableName}} = new {{className}}({
   {{name}}: {{value}},
   {{/each}}
 });
-`, 'Chain node template', ['label', 'type', 'variableName', 'className']);
+`,
+      'Chain node template',
+      ['label', 'type', 'variableName', 'className']
+    );
 
     // Memory template
-    this.addTemplate('memoryNode', `// {{label}} - {{type}}
+    this.addTemplate(
+      'memoryNode',
+      `// {{label}} - {{type}}
 const {{variableName}} = new {{className}}({
   {{#each parameters}}
   {{name}}: {{value}},
   {{/each}}
 });
-`, 'Memory node template', ['label', 'type', 'variableName', 'className']);
+`,
+      'Memory node template',
+      ['label', 'type', 'variableName', 'className']
+    );
 
     // Tool template
-    this.addTemplate('toolNode', `// {{label}} - {{type}}
+    this.addTemplate(
+      'toolNode',
+      `// {{label}} - {{type}}
 const {{variableName}} = new {{className}}({{#if hasConfig}}{
   {{#each parameters}}
   {{name}}: {{#if isEnvVar}}process.env.{{envName}}{{else}}{{value}}{{/if}},
   {{/each}}
 }{{/if}});
-`, 'Tool node template', ['label', 'type', 'variableName', 'className']);
+`,
+      'Tool node template',
+      ['label', 'type', 'variableName', 'className']
+    );
 
     // Execution template
-    this.addTemplate('execution', `// Execute the chain
+    this.addTemplate(
+      'execution',
+      `// Execute the chain
 const result = await {{chainVariable}}.call({
   {{inputKey}}: input,
   ...options
 });
 
 return result.{{outputKey}} || result.text || String(result);
-`, 'Execution template', ['chainVariable']);
+`,
+      'Execution template',
+      ['chainVariable']
+    );
 
     // Test file template
-    this.addTemplate('mainTest', `/**
+    this.addTemplate(
+      'mainTest',
+      `/**
  * Tests for {{projectName}}
  * Generated by flowise-to-langchain
  */
@@ -407,10 +495,15 @@ describe('{{graphName}}', () => {
   });
   {{/if}}
 });
-`, 'Test file template', ['projectName', 'graphName']);
+`,
+      'Test file template',
+      ['projectName', 'graphName']
+    );
 
     // Error handling template
-    this.addTemplate('errorHandling', `try {
+    this.addTemplate(
+      'errorHandling',
+      `try {
   {{content}}
 } catch (error) {
   console.error('Error in {{context}}:', error);
@@ -421,12 +514,19 @@ describe('{{graphName}}', () => {
   {{/if}}
   throw error;
 }
-`, 'Error handling template', ['content', 'context']);
+`,
+      'Error handling template',
+      ['content', 'context']
+    );
 
     // Import template
-    this.addTemplate('imports', `{{#each imports}}
+    this.addTemplate(
+      'imports',
+      `{{#each imports}}
 import {{#if default}}{{default}}{{#if named}}, {{/if}}{{/if}}{{#if named}}{ {{join named ', '}} }{{/if}}{{#if namespace}} * as {{namespace}}{{/if}} from '{{from}}';
 {{/each}}
-`, 'Import statements template');
+`,
+      'Import statements template'
+    );
   }
 }

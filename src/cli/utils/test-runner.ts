@@ -22,7 +22,7 @@ export class TestRunner {
 
     // Setup test environment file
     await this.setupTestEnvironment();
-    
+
     // Install test dependencies if needed
     await this.ensureTestDependencies();
   }
@@ -43,7 +43,7 @@ export class TestRunner {
 
       // Check if there are existing test files
       const hasExistingTests = await this.checkExistingTests('unit');
-      
+
       if (!hasExistingTests) {
         // Generate unit tests dynamically
         await this.generateUnitTests();
@@ -51,20 +51,23 @@ export class TestRunner {
 
       // Run tests using Jest or similar
       const testResult = await this.executeTests('unit');
-      
+
       result.success = testResult.success;
       result.totalTests = testResult.totalTests;
       result.passedTests = testResult.passedTests;
       result.failedTests = testResult.failedTests || [];
       result.coverage = testResult.coverage;
-
     } catch (error) {
-      logger.error('Unit tests failed to run:', { error: (error as Error).message });
-      result.failedTests = [{
-        name: 'Unit Test Setup',
+      logger.error('Unit tests failed to run:', {
         error: (error as Error).message,
-        suggestion: 'Check test configuration and dependencies'
-      }];
+      });
+      result.failedTests = [
+        {
+          name: 'Unit Test Setup',
+          error: (error as Error).message,
+          suggestion: 'Check test configuration and dependencies',
+        },
+      ];
     }
 
     result.duration = Date.now() - startTime;
@@ -89,25 +92,28 @@ export class TestRunner {
       await this.setupIntegrationEnvironment();
 
       const hasExistingTests = await this.checkExistingTests('integration');
-      
+
       if (!hasExistingTests) {
         await this.generateIntegrationTests();
       }
 
       const testResult = await this.executeTests('integration');
-      
+
       result.success = testResult.success;
       result.totalTests = testResult.totalTests;
       result.passedTests = testResult.passedTests;
       result.failedTests = testResult.failedTests || [];
-
     } catch (error) {
-      logger.error('Integration tests failed to run:', { error: (error as Error).message });
-      result.failedTests = [{
-        name: 'Integration Test Setup',
+      logger.error('Integration tests failed to run:', {
         error: (error as Error).message,
-        suggestion: 'Check API keys and external service connectivity'
-      }];
+      });
+      result.failedTests = [
+        {
+          name: 'Integration Test Setup',
+          error: (error as Error).message,
+          suggestion: 'Check API keys and external service connectivity',
+        },
+      ];
     }
 
     result.duration = Date.now() - startTime;
@@ -130,37 +136,43 @@ export class TestRunner {
 
       // Load original Flowise data for comparison
       const originalData = await this.loadOriginalFlowiseData();
-      
+
       // Setup E2E test environment
       await this.setupE2EEnvironment();
 
       const hasExistingTests = await this.checkExistingTests('e2e');
-      
+
       if (!hasExistingTests) {
         await this.generateE2ETests(originalData);
       }
 
       const testResult = await this.executeTests('e2e');
-      
+
       result.success = testResult.success;
       result.totalTests = testResult.totalTests;
       result.passedTests = testResult.passedTests;
       result.failedTests = testResult.failedTests || [];
-
     } catch (error) {
-      logger.error('E2E tests failed to run:', { error: (error as Error).message });
-      result.failedTests = [{
-        name: 'E2E Test Setup',
+      logger.error('E2E tests failed to run:', {
         error: (error as Error).message,
-        suggestion: 'Check complete system configuration and external dependencies'
-      }];
+      });
+      result.failedTests = [
+        {
+          name: 'E2E Test Setup',
+          error: (error as Error).message,
+          suggestion:
+            'Check complete system configuration and external dependencies',
+        },
+      ];
     }
 
     result.duration = Date.now() - startTime;
     return result;
   }
 
-  async fixFailingTests(testResult: TestResult): Promise<{ success: boolean; fixes: string[] }> {
+  async fixFailingTests(
+    testResult: TestResult
+  ): Promise<{ success: boolean; fixes: string[] }> {
     const fixes: string[] = [];
 
     if (!testResult.failedTests || testResult.failedTests.length === 0) {
@@ -189,13 +201,15 @@ export class TestRunner {
       const { rimraf } = await import('rimraf');
       await rimraf(this.tempDir);
     } catch (error) {
-      logger.warn('Failed to cleanup test environment:', { error: (error as Error).message });
+      logger.warn('Failed to cleanup test environment:', {
+        error: (error as Error).message,
+      });
     }
   }
 
   private async setupTestEnvironment(): Promise<void> {
     const envPath = join(this.config.outputPath, this.config.envFile);
-    
+
     if (!existsSync(envPath)) {
       // Create a basic test environment file
       const testEnv = `
@@ -220,16 +234,22 @@ MOCK_EXTERNAL_APIS=${this.config.mockExternal}
 
   private async ensureTestDependencies(): Promise<void> {
     const packageJsonPath = join(this.config.outputPath, 'package.json');
-    
+
     if (existsSync(packageJsonPath)) {
       const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
-      
+
       // Check if Jest is installed
-      const hasJest = packageJson.devDependencies?.jest || packageJson.dependencies?.jest;
-      
+      const hasJest =
+        packageJson.devDependencies?.jest || packageJson.dependencies?.jest;
+
       if (!hasJest) {
-        logger.warn('Jest not found in dependencies. Tests may not run properly.', {});
-        logger.tip('Consider adding Jest to your project: npm install --save-dev jest @types/jest');
+        logger.warn(
+          'Jest not found in dependencies. Tests may not run properly.',
+          {}
+        );
+        logger.tip(
+          'Consider adding Jest to your project: npm install --save-dev jest @types/jest'
+        );
       }
     }
   }
@@ -244,7 +264,9 @@ MOCK_EXTERNAL_APIS=${this.config.mockExternal}
     for (const dir of testDirs) {
       if (existsSync(dir)) {
         const { glob } = await import('glob');
-        const testFiles = await glob('**/*.{test,spec}.{js,ts,tsx,jsx}', { cwd: dir });
+        const testFiles = await glob('**/*.{test,spec}.{js,ts,tsx,jsx}', {
+          cwd: dir,
+        });
         if (testFiles.length > 0) {
           return true;
         }
@@ -346,7 +368,7 @@ describe('Generated E2E Tests', () => {
     return new Promise((resolve) => {
       const command = 'npm';
       const args = ['test', '--', `--testPathPattern=${testType}`];
-      
+
       const child = spawn(command, args, {
         cwd: this.config.outputPath,
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -374,11 +396,14 @@ describe('Generated E2E Tests', () => {
           success: false,
           totalTests: 0,
           passedTests: 0,
-          failedTests: [{
-            name: 'Test Execution',
-            error: error.message,
-            suggestion: 'Check that npm and test dependencies are properly installed'
-          }],
+          failedTests: [
+            {
+              name: 'Test Execution',
+              error: error.message,
+              suggestion:
+                'Check that npm and test dependencies are properly installed',
+            },
+          ],
           duration: 0,
           coverage: undefined,
         });
@@ -391,11 +416,14 @@ describe('Generated E2E Tests', () => {
           success: false,
           totalTests: 0,
           passedTests: 0,
-          failedTests: [{
-            name: 'Test Timeout',
-            error: `Tests exceeded timeout of ${this.config.timeout}ms`,
-            suggestion: 'Consider increasing timeout or optimizing test performance'
-          }],
+          failedTests: [
+            {
+              name: 'Test Timeout',
+              error: `Tests exceeded timeout of ${this.config.timeout}ms`,
+              suggestion:
+                'Consider increasing timeout or optimizing test performance',
+            },
+          ],
           duration: this.config.timeout,
           coverage: undefined,
         });
@@ -403,22 +431,29 @@ describe('Generated E2E Tests', () => {
     });
   }
 
-  private parseTestOutput(stdout: string, stderr: string, success: boolean): TestResult {
+  private parseTestOutput(
+    stdout: string,
+    stderr: string,
+    success: boolean
+  ): TestResult {
     // Basic parsing of Jest output
     const totalMatch = stdout.match(/Tests:\s+(\d+) total/);
     const passedMatch = stdout.match(/(\d+) passed/);
     const failedMatch = stdout.match(/(\d+) failed/);
 
-    const totalTests = (totalMatch && totalMatch[1]) ? parseInt(totalMatch[1], 10) : 0;
-    const passedTests = (passedMatch && passedMatch[1]) ? parseInt(passedMatch[1], 10) : 0;
-    const failedCount = (failedMatch && failedMatch[1]) ? parseInt(failedMatch[1], 10) : 0;
+    const totalTests =
+      totalMatch && totalMatch[1] ? parseInt(totalMatch[1], 10) : 0;
+    const passedTests =
+      passedMatch && passedMatch[1] ? parseInt(passedMatch[1], 10) : 0;
+    const failedCount =
+      failedMatch && failedMatch[1] ? parseInt(failedMatch[1], 10) : 0;
 
     const failedTests = [];
     if (!success && stderr) {
       failedTests.push({
         name: 'Test Execution Error',
         error: stderr,
-        suggestion: 'Check test configuration and dependencies'
+        suggestion: 'Check test configuration and dependencies',
       });
     }
 
@@ -447,25 +482,30 @@ describe('Generated E2E Tests', () => {
       const content = await readFile(this.config.inputPath, 'utf-8');
       return JSON.parse(content);
     } catch (error) {
-      logger.warn('Could not load original Flowise data:', { error: (error as Error).message });
+      logger.warn('Could not load original Flowise data:', {
+        error: (error as Error).message,
+      });
       return null;
     }
   }
 
-  private async attemptTestFix(failedTest: { name: string; error: string }): Promise<string | null> {
+  private async attemptTestFix(failedTest: {
+    name: string;
+    error: string;
+  }): Promise<string | null> {
     // Attempt common fixes based on error patterns
     if (failedTest.error.includes('MODULE_NOT_FOUND')) {
       return 'Added missing module import';
     }
-    
+
     if (failedTest.error.includes('API_KEY')) {
       return 'Updated environment configuration for API keys';
     }
-    
+
     if (failedTest.error.includes('timeout')) {
       return 'Increased test timeout configuration';
     }
-    
+
     return null;
   }
 }

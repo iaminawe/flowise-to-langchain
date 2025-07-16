@@ -1,38 +1,44 @@
 import { access, constants, stat } from 'fs/promises';
 import { extname } from 'path';
-import { ValidationResult, ValidationError, ValidationWarning, ValidationSuggestion } from '../types.js';
+import {
+  ValidationResult,
+  ValidationError,
+  ValidationWarning,
+  ValidationSuggestion,
+} from '../types.js';
 
 export async function validateInputFile(filePath: string): Promise<void> {
   try {
     // Check if file exists and is readable
     await access(filePath, constants.R_OK);
-    
+
     // Check if it's a file (not a directory)
     const stats = await stat(filePath);
     if (!stats.isFile()) {
       throw new Error(`Path '${filePath}' is not a file`);
     }
-    
+
     // Check file extension
     const ext = extname(filePath).toLowerCase();
     if (ext !== '.json') {
       throw new Error(`File must have .json extension, got '${ext}'`);
     }
-    
+
     // Check file size (warn if > 10MB)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (stats.size > maxSize) {
-      console.warn(`Warning: File is large (${(stats.size / 1024 / 1024).toFixed(2)} MB). Processing may take longer.`);
+      console.warn(
+        `Warning: File is large (${(stats.size / 1024 / 1024).toFixed(2)} MB). Processing may take longer.`
+      );
     }
-    
+
     // Check if file is empty
     if (stats.size === 0) {
       throw new Error('File is empty');
     }
-    
   } catch (error) {
     const err = error as NodeJS.ErrnoException;
-    
+
     if (err.code === 'ENOENT') {
       throw new Error(`File not found: ${filePath}`);
     } else if (err.code === 'EACCES') {
@@ -55,7 +61,11 @@ export async function validateFlowiseExport(
   let edgeCount = 0;
   const nodeTypes: string[] = [];
   const supportedFeatures: string[] = [];
-  const unsupportedFeatures: Array<{ name: string; reason: string; workaround?: string }> = [];
+  const unsupportedFeatures: Array<{
+    name: string;
+    reason: string;
+    workaround?: string;
+  }> = [];
 
   try {
     // Basic structure validation
@@ -63,15 +73,16 @@ export async function validateFlowiseExport(
       errors.push({
         message: 'Invalid data structure: Expected JSON object',
         code: 'INVALID_STRUCTURE',
-        suggestion: 'Ensure the file contains a valid JSON object exported from Flowise',
+        suggestion:
+          'Ensure the file contains a valid JSON object exported from Flowise',
       });
       return { isValid: false, errors, warnings: [], suggestions: [] };
     }
 
     // Check for required top-level properties
     const requiredProps = ['nodes', 'edges'];
-    const optionalProps = ['version', 'metadata', 'settings'];
-    
+    // const optionalProps = ['version', 'metadata', 'settings']; // Future validation use
+
     for (const prop of requiredProps) {
       if (!(prop in data)) {
         errors.push({
@@ -90,7 +101,8 @@ export async function validateFlowiseExport(
       detectedVersion = data.metadata.version;
     } else {
       warnings.push({
-        message: 'No version information found, assuming latest compatible format',
+        message:
+          'No version information found, assuming latest compatible format',
         code: 'NO_VERSION',
       });
       detectedVersion = 'unknown';
@@ -106,7 +118,7 @@ export async function validateFlowiseExport(
         });
       } else {
         nodeCount = data.nodes.length;
-        
+
         if (nodeCount === 0) {
           warnings.push({
             message: 'No nodes found in the flow',
@@ -117,7 +129,7 @@ export async function validateFlowiseExport(
         // Validate individual nodes
         data.nodes.forEach((node: any, index: number) => {
           const nodePath = `$.nodes[${index}]`;
-          
+
           // Required node properties
           const requiredNodeProps = ['id', 'type', 'data'];
           for (const prop of requiredNodeProps) {
@@ -158,12 +170,15 @@ export async function validateFlowiseExport(
                 supportedFeatures.push(node.type);
               }
             } else {
-              const existing = unsupportedFeatures.find(f => f.name === node.type);
+              const existing = unsupportedFeatures.find(
+                (f) => f.name === node.type
+              );
               if (!existing) {
                 unsupportedFeatures.push({
                   name: node.type,
                   reason: 'Node type not yet supported in converter',
-                  workaround: 'Check for updates or consider using a supported alternative',
+                  workaround:
+                    'Check for updates or consider using a supported alternative',
                 });
               }
             }
@@ -208,7 +223,7 @@ export async function validateFlowiseExport(
         // Validate individual edges
         data.edges.forEach((edge: any, index: number) => {
           const edgePath = `$.edges[${index}]`;
-          
+
           // Required edge properties
           const requiredEdgeProps = ['source', 'target'];
           for (const prop of requiredEdgeProps) {
@@ -224,7 +239,7 @@ export async function validateFlowiseExport(
           // Validate that source and target reference existing nodes
           if (data.nodes && Array.isArray(data.nodes)) {
             const nodeIds = data.nodes.map((n: any) => n.id);
-            
+
             if (edge.source && !nodeIds.includes(edge.source)) {
               errors.push({
                 message: `Edge source references non-existent node: ${edge.source}`,
@@ -232,7 +247,7 @@ export async function validateFlowiseExport(
                 code: 'INVALID_EDGE_REFERENCE',
               });
             }
-            
+
             if (edge.target && !nodeIds.includes(edge.target)) {
               errors.push({
                 message: `Edge target references non-existent node: ${edge.target}`,
@@ -246,9 +261,14 @@ export async function validateFlowiseExport(
     }
 
     // Check for circular dependencies (basic check)
-    if (data.nodes && data.edges && Array.isArray(data.nodes) && Array.isArray(data.edges)) {
+    if (
+      data.nodes &&
+      data.edges &&
+      Array.isArray(data.nodes) &&
+      Array.isArray(data.edges)
+    ) {
       const graph = new Map<string, string[]>();
-      
+
       // Build adjacency list
       data.edges.forEach((edge: any) => {
         if (edge.source && edge.target) {
@@ -262,7 +282,8 @@ export async function validateFlowiseExport(
       // Simple cycle detection using DFS
       const visited = new Set<string>();
       const recStack = new Set<string>();
-      
+
+      // eslint-disable-next-line no-inner-declarations
       function hasCycle(node: string): boolean {
         if (recStack.has(node)) {
           return true;
@@ -270,21 +291,21 @@ export async function validateFlowiseExport(
         if (visited.has(node)) {
           return false;
         }
-        
+
         visited.add(node);
         recStack.add(node);
-        
+
         const neighbors = graph.get(node) || [];
         for (const neighbor of neighbors) {
           if (hasCycle(neighbor)) {
             return true;
           }
         }
-        
+
         recStack.delete(node);
         return false;
       }
-      
+
       for (const nodeId of graph.keys()) {
         if (hasCycle(nodeId)) {
           errors.push({
@@ -310,7 +331,8 @@ export async function validateFlowiseExport(
       // Check for recommended properties
       if (!data.metadata) {
         warnings.push({
-          message: 'No metadata found - recommended for better conversion results',
+          message:
+            'No metadata found - recommended for better conversion results',
           code: 'NO_METADATA',
         });
       }
@@ -330,8 +352,10 @@ export async function validateFlowiseExport(
     }
 
     // Check if issues are fixable
-    const fixable = errors.some(error => 
-      ['MISSING_PROPERTY', 'EMPTY_NODE_DATA', 'INVALID_NODE_ID'].includes(error.code || '')
+    const fixable = errors.some((error) =>
+      ['MISSING_PROPERTY', 'EMPTY_NODE_DATA', 'INVALID_NODE_ID'].includes(
+        error.code || ''
+      )
     );
 
     return {
@@ -348,7 +372,6 @@ export async function validateFlowiseExport(
       unsupportedFeatures,
       fixable,
     };
-
   } catch (error) {
     errors.push({
       message: `Validation error: ${(error as Error).message}`,

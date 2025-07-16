@@ -1,6 +1,6 @@
 /**
  * Code Formatter for TypeScript Code Generation
- * 
+ *
  * Provides code formatting and beautification for generated TypeScript code.
  */
 
@@ -28,7 +28,7 @@ export const defaultFormattingOptions: FormattingOptions = {
   trailingCommas: true,
   printWidth: 80,
   tabWidth: 2,
-  insertFinalNewline: true
+  insertFinalNewline: true,
 };
 
 /**
@@ -44,7 +44,10 @@ export class CodeFormatter {
   /**
    * Format TypeScript code
    */
-  async format(code: string, language: 'typescript' | 'javascript' = 'typescript'): Promise<string> {
+  async format(
+    code: string,
+    _language: 'typescript' | 'javascript' = 'typescript'
+  ): Promise<string> {
     // Basic formatting - in a real implementation, you might use prettier
     let formatted = code;
 
@@ -91,7 +94,7 @@ export class CodeFormatter {
         useSpaces: context.codeStyle.useSpaces,
         semicolons: context.codeStyle.semicolons,
         singleQuotes: context.codeStyle.singleQuotes,
-        trailingCommas: context.codeStyle.trailingCommas
+        trailingCommas: context.codeStyle.trailingCommas,
       };
     }
   }
@@ -103,17 +106,19 @@ export class CodeFormatter {
     const indent = this.getIndentString(indentLevel);
     return code
       .split('\n')
-      .map(line => line.trim() ? indent + line.trim() : '')
+      .map((line) => (line.trim() ? indent + line.trim() : ''))
       .join('\n');
   }
 
   /**
    * Format function parameters
    */
-  formatParameters(params: Array<{ name: string; type?: string; defaultValue?: string }>): string {
+  formatParameters(
+    params: Array<{ name: string; type?: string; defaultValue?: string }>
+  ): string {
     if (params.length === 0) return '()';
 
-    const formatted = params.map(param => {
+    const formatted = params.map((param) => {
       let result = param.name;
       if (param.type) {
         result += `: ${param.type}`;
@@ -132,7 +137,7 @@ export class CodeFormatter {
 
     // Multi-line for longer parameter lists
     const indent = this.getIndentString(1);
-    return `(\n${formatted.map(p => indent + p).join(',\n')}\n)`;
+    return `(\n${formatted.map((p) => indent + p).join(',\n')}\n)`;
   }
 
   /**
@@ -150,7 +155,7 @@ export class CodeFormatter {
       return `${indent}${formattedKey}: ${formattedValue}`;
     });
 
-    const trailingComma = this.options.trailingCommas ? ',' : '';
+    // const trailingComma = this.options.trailingCommas ? ',' : ''; // Used in future logic
     const lastEntry = entries[entries.length - 1];
     if (lastEntry && this.options.trailingCommas) {
       entries[entries.length - 1] = lastEntry + ',';
@@ -165,8 +170,8 @@ export class CodeFormatter {
   formatArray(arr: unknown[], indentLevel: number = 0): string {
     if (arr.length === 0) return '[]';
 
-    const formatted = arr.map(item => this.formatValue(item, indentLevel));
-    
+    const formatted = arr.map((item) => this.formatValue(item, indentLevel));
+
     // Single line if short enough
     const singleLine = `[${formatted.join(', ')}]`;
     if (singleLine.length <= this.options.printWidth) {
@@ -178,7 +183,7 @@ export class CodeFormatter {
     const closeIndent = this.getIndentString(indentLevel);
     const trailingComma = this.options.trailingCommas ? ',' : '';
 
-    return `[\n${formatted.map(v => indent + v).join(',\n')}${trailingComma}\n${closeIndent}]`;
+    return `[\n${formatted.map((v) => indent + v).join(',\n')}${trailingComma}\n${closeIndent}]`;
   }
 
   /**
@@ -191,7 +196,8 @@ export class CodeFormatter {
     if (typeof value === 'number') return String(value);
     if (typeof value === 'string') return this.quote(value);
     if (Array.isArray(value)) return this.formatArray(value, indentLevel);
-    if (typeof value === 'object') return this.formatObject(value as Record<string, unknown>, indentLevel);
+    if (typeof value === 'object')
+      return this.formatObject(value as Record<string, unknown>, indentLevel);
     return String(value);
   }
 
@@ -203,19 +209,24 @@ export class CodeFormatter {
     const indentChar = this.options.useSpaces ? ' ' : '\t';
     const indentSize = this.options.useSpaces ? this.options.indentSize : 1;
     let indentLevel = 0;
-    
+
     const result: string[] = [];
 
     for (let line of lines) {
       const trimmed = line.trim();
-      
+
       if (!trimmed) {
         result.push('');
         continue;
       }
 
       // Decrease indent for closing brackets
-      if (trimmed.match(/^[}\])]/) || trimmed.startsWith('} else') || trimmed.startsWith('} catch') || trimmed.startsWith('} finally')) {
+      if (
+        trimmed.match(/^[}\])]/) ||
+        trimmed.startsWith('} else') ||
+        trimmed.startsWith('} catch') ||
+        trimmed.startsWith('} finally')
+      ) {
         indentLevel = Math.max(0, indentLevel - 1);
       }
 
@@ -224,7 +235,11 @@ export class CodeFormatter {
       result.push(indent + trimmed);
 
       // Increase indent for opening brackets
-      if (trimmed.match(/[{\[(]\s*$/) || trimmed.endsWith(' {') || trimmed.endsWith(' => {')) {
+      if (
+        trimmed.match(/[{[(]\s*$/) ||
+        trimmed.endsWith(' {') ||
+        trimmed.endsWith(' => {')
+      ) {
         indentLevel++;
       }
 
@@ -234,7 +249,8 @@ export class CodeFormatter {
       if (trimmed.includes('try {')) indentLevel++;
       if (trimmed.includes('catch (') && trimmed.endsWith(') {')) indentLevel++;
       if (trimmed.includes('finally {')) indentLevel++;
-      if (trimmed.includes('function') && trimmed.endsWith(') {')) indentLevel++;
+      if (trimmed.includes('function') && trimmed.endsWith(') {'))
+        indentLevel++;
       if (trimmed.match(/^\w+\s*\([^)]*\)\s*\{$/)) indentLevel++;
     }
 
@@ -246,32 +262,57 @@ export class CodeFormatter {
    */
   private addMissingSemicolons(code: string): string {
     const lines = code.split('\n');
-    return lines.map(line => {
-      const trimmed = line.trim();
-      
-      // Skip empty lines, comments, and lines that already end with semicolon
-      if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.endsWith(';')) {
+    return lines
+      .map((line) => {
+        const trimmed = line.trim();
+
+        // Skip empty lines, comments, and lines that already end with semicolon
+        if (
+          !trimmed ||
+          trimmed.startsWith('//') ||
+          trimmed.startsWith('/*') ||
+          trimmed.endsWith(';')
+        ) {
+          return line;
+        }
+
+        // Skip lines that shouldn't have semicolons
+        if (
+          trimmed.endsWith('{') ||
+          trimmed.endsWith('}') ||
+          trimmed.includes('if (') ||
+          trimmed.includes('else') ||
+          trimmed.includes('try') ||
+          trimmed.includes('catch') ||
+          trimmed.includes('finally') ||
+          trimmed.includes('function') ||
+          trimmed.includes('class') ||
+          trimmed.includes('interface') ||
+          trimmed.includes('type ') ||
+          trimmed.includes('enum ')
+        ) {
+          return line;
+        }
+
+        // Add semicolon to statements
+        if (
+          trimmed.includes('import ') ||
+          trimmed.includes('export ') ||
+          trimmed.includes('const ') ||
+          trimmed.includes('let ') ||
+          trimmed.includes('var ') ||
+          trimmed.includes('return ') ||
+          trimmed.includes('throw ') ||
+          trimmed.includes('break') ||
+          trimmed.includes('continue') ||
+          trimmed.match(/^\w+\s*\(/)
+        ) {
+          return line + ';';
+        }
+
         return line;
-      }
-
-      // Skip lines that shouldn't have semicolons
-      if (trimmed.endsWith('{') || trimmed.endsWith('}') || trimmed.includes('if (') || 
-          trimmed.includes('else') || trimmed.includes('try') || trimmed.includes('catch') ||
-          trimmed.includes('finally') || trimmed.includes('function') || trimmed.includes('class') ||
-          trimmed.includes('interface') || trimmed.includes('type ') || trimmed.includes('enum ')) {
-        return line;
-      }
-
-      // Add semicolon to statements
-      if (trimmed.includes('import ') || trimmed.includes('export ') || 
-          trimmed.includes('const ') || trimmed.includes('let ') || trimmed.includes('var ') ||
-          trimmed.includes('return ') || trimmed.includes('throw ') || trimmed.includes('break') ||
-          trimmed.includes('continue') || trimmed.match(/^\w+\s*\(/)) {
-        return line + ';';
-      }
-
-      return line;
-    }).join('\n');
+      })
+      .join('\n');
   }
 
   /**
@@ -287,7 +328,7 @@ export class CodeFormatter {
   private normalizeQuotes(code: string): string {
     const targetQuote = this.options.singleQuotes ? "'" : '"';
     const sourceQuote = this.options.singleQuotes ? '"' : "'";
-    
+
     // Simple replacement - in a real implementation, you'd need to handle escaped quotes
     return code.replace(new RegExp(sourceQuote, 'g'), targetQuote);
   }
@@ -331,9 +372,13 @@ export class CodeFormatter {
   /**
    * Format TypeScript interface
    */
-  formatInterface(name: string, properties: Record<string, string>, exported: boolean = true): string {
+  formatInterface(
+    name: string,
+    properties: Record<string, string>,
+    exported: boolean = true
+  ): string {
     const exportKeyword = exported ? 'export ' : '';
-    
+
     if (Object.keys(properties).length === 0) {
       return `${exportKeyword}interface ${name} {}`;
     }
@@ -350,7 +395,11 @@ export class CodeFormatter {
   /**
    * Format TypeScript type alias
    */
-  formatTypeAlias(name: string, type: string, exported: boolean = true): string {
+  formatTypeAlias(
+    name: string,
+    type: string,
+    exported: boolean = true
+  ): string {
     const exportKeyword = exported ? 'export ' : '';
     return `${exportKeyword}type ${name} = ${type};`;
   }

@@ -1,10 +1,16 @@
 /**
  * Python Code Emitter
- * 
+ *
  * Generates Python LangChain code from intermediate representation
  */
 
-import { CodeFragment, CodeGenerationResult, GeneratedFile, GenerationContext, IRGraph } from '../../ir/types.js';
+import {
+  CodeFragment,
+  CodeGenerationResult,
+  GeneratedFile,
+  GenerationContext,
+  IRGraph,
+} from '../../ir/types.js';
 
 export interface PythonEmitterOptions {
   indentSize?: number;
@@ -26,7 +32,7 @@ export class PythonEmitter {
       asyncAwait: true,
       typeHints: true,
       packageManager: 'pip',
-      ...options
+      ...options,
     };
   }
 
@@ -35,14 +41,16 @@ export class PythonEmitter {
     context: GenerationContext,
     fragments: CodeFragment[]
   ): Promise<CodeGenerationResult> {
-    const startTime = Date.now();
-    
+    // const startTime = Date.now(); // Future performance tracking
+
     // Group fragments by type
-    const importFragments = fragments.filter(f => f.type === 'import');
-    const declarationFragments = fragments.filter(f => f.type === 'declaration');
-    const initFragments = fragments.filter(f => f.type === 'initialization');
-    const executionFragments = fragments.filter(f => f.type === 'execution');
-    
+    const importFragments = fragments.filter((f) => f.type === 'import');
+    const declarationFragments = fragments.filter(
+      (f) => f.type === 'declaration'
+    );
+    const initFragments = fragments.filter((f) => f.type === 'initialization');
+    const executionFragments = fragments.filter((f) => f.type === 'execution');
+
     // Generate Python code
     const pythonCode = this.assemblePythonCode(
       importFragments,
@@ -51,13 +59,13 @@ export class PythonEmitter {
       executionFragments,
       context
     );
-    
+
     // Generate requirements.txt
     const requirements = this.generateRequirements(fragments);
-    
+
     // Generate package files based on package manager
     const packageFiles = this.generatePackageFiles(fragments, context);
-    
+
     const files: GeneratedFile[] = [
       {
         path: 'main.py',
@@ -65,7 +73,7 @@ export class PythonEmitter {
         type: 'main',
         dependencies: this.extractPythonDependencies(fragments),
         exports: ['run_workflow'],
-        size: pythonCode.length
+        size: pythonCode.length,
       },
       {
         path: 'requirements.txt',
@@ -73,11 +81,11 @@ export class PythonEmitter {
         type: 'config',
         dependencies: [],
         exports: [],
-        size: requirements.length
+        size: requirements.length,
       },
-      ...packageFiles
+      ...packageFiles,
     ];
-    
+
     return {
       files,
       dependencies: this.extractPythonDependenciesAsRecord(fragments),
@@ -90,13 +98,13 @@ export class PythonEmitter {
         totalConnections: 0, // This should be populated from the IR graph
         estimatedComplexity: 'medium',
         features: ['async', 'cli', 'error-handling'],
-        warnings: []
+        warnings: [],
       },
       scripts: {
         start: 'python main.py',
         test: 'pytest',
         lint: 'flake8 .',
-        format: 'black .'
+        format: 'black .',
       },
       packageInfo: {
         name: context.projectName || 'langchain-workflow',
@@ -107,16 +115,16 @@ export class PythonEmitter {
           start: 'python main.py',
           test: 'pytest',
           lint: 'flake8 .',
-          format: 'black .'
+          format: 'black .',
         },
         dependencies: this.extractPythonDependenciesAsRecord(fragments),
         devDependencies: {
-          'pytest': '^7.0.0',
-          'black': '^23.0.0',
-          'flake8': '^6.0.0',
-          'mypy': '^1.0.0'
-        }
-      }
+          pytest: '^7.0.0',
+          black: '^23.0.0',
+          flake8: '^6.0.0',
+          mypy: '^1.0.0',
+        },
+      },
     };
   }
 
@@ -125,11 +133,11 @@ export class PythonEmitter {
     declarations: CodeFragment[],
     initializations: CodeFragment[],
     executions: CodeFragment[],
-    context: GenerationContext
+    _context: GenerationContext
   ): string {
     const indent = this.getIndent();
     const lines: string[] = [];
-    
+
     // Header comment
     lines.push('"""');
     lines.push('Generated LangChain Python Code');
@@ -138,7 +146,7 @@ export class PythonEmitter {
     lines.push('This file contains the complete workflow implementation.');
     lines.push('"""');
     lines.push('');
-    
+
     // Standard imports
     lines.push('import os');
     lines.push('import asyncio');
@@ -147,12 +155,12 @@ export class PythonEmitter {
     }
     lines.push('from dotenv import load_dotenv');
     lines.push('');
-    
+
     // Load environment variables
     lines.push('# Load environment variables');
     lines.push('load_dotenv()');
     lines.push('');
-    
+
     // LangChain imports
     const langchainImports = this.generateLangChainImports(imports);
     if (langchainImports.length > 0) {
@@ -160,7 +168,7 @@ export class PythonEmitter {
       lines.push(...langchainImports);
       lines.push('');
     }
-    
+
     // Component declarations
     if (declarations.length > 0) {
       lines.push('# Component declarations');
@@ -170,7 +178,7 @@ export class PythonEmitter {
         lines.push('');
       }
     }
-    
+
     // Component executions
     if (executions.length > 0) {
       lines.push('# Component executions');
@@ -180,7 +188,7 @@ export class PythonEmitter {
         lines.push('');
       }
     }
-    
+
     // Main workflow function
     lines.push('# Main workflow function');
     if (this.options.asyncAwait) {
@@ -198,47 +206,53 @@ export class PythonEmitter {
     }
     lines.push(`${indent}"""Execute the LangChain workflow."""`);
     lines.push(`${indent}try:`);
-    
+
     // Initialize components
     if (initializations.length > 0) {
       lines.push(`${indent}${indent}# Initialize components`);
       for (const init of initializations) {
         const pythonInit = this.convertToPythonImplementation(init);
-        pythonInit.forEach(line => {
+        pythonInit.forEach((line) => {
           lines.push(`${indent}${indent}${line}`);
         });
       }
       lines.push('');
     }
-    
+
     // Execute workflow
     lines.push(`${indent}${indent}# Execute workflow`);
     if (this.options.asyncAwait) {
-      lines.push(`${indent}${indent}result = await workflow_executor.ainvoke({"input": input_text})`);
+      lines.push(
+        `${indent}${indent}result = await workflow_executor.ainvoke({"input": input_text})`
+      );
     } else {
-      lines.push(`${indent}${indent}result = workflow_executor.invoke({"input": input_text})`);
+      lines.push(
+        `${indent}${indent}result = workflow_executor.invoke({"input": input_text})`
+      );
     }
     lines.push(`${indent}${indent}return result.get("output", str(result))`);
     lines.push('');
-    
+
     // Error handling
     lines.push(`${indent}except Exception as e:`);
     lines.push(`${indent}${indent}print(f"Workflow execution failed: {e}")`);
     lines.push(`${indent}${indent}raise`);
     lines.push('');
-    
+
     // CLI interface
     lines.push('# CLI interface');
     lines.push('if __name__ == "__main__":');
     lines.push(`${indent}import sys`);
     lines.push(`${indent}if len(sys.argv) < 2:`);
-    lines.push(`${indent}${indent}print("Usage: python main.py '<input_text>'")`);
+    lines.push(
+      `${indent}${indent}print("Usage: python main.py '<input_text>'")`
+    );
     lines.push(`${indent}${indent}sys.exit(1)`);
     lines.push('');
     lines.push(`${indent}input_text = sys.argv[1]`);
     lines.push(`${indent}print(f"Input: {input_text}")`);
     lines.push('');
-    
+
     if (this.options.asyncAwait) {
       lines.push(`${indent}# Run async workflow`);
       lines.push(`${indent}result = asyncio.run(run_workflow(input_text))`);
@@ -246,16 +260,16 @@ export class PythonEmitter {
       lines.push(`${indent}# Run workflow`);
       lines.push(`${indent}result = run_workflow(input_text)`);
     }
-    
+
     lines.push(`${indent}print(f"Output: {result}")`);
-    
+
     return lines.join('\n');
   }
 
   private generateLangChainImports(importFragments: CodeFragment[]): string[] {
     const imports: string[] = [];
     const importMap = new Map<string, Set<string>>();
-    
+
     // Parse TypeScript imports and convert to Python
     for (const fragment of importFragments) {
       const tsImports = this.parseTsImports(fragment.content);
@@ -264,13 +278,13 @@ export class PythonEmitter {
         if (!importMap.has(pythonModule)) {
           importMap.set(pythonModule, new Set());
         }
-        moduleImports.forEach(imp => {
+        moduleImports.forEach((imp) => {
           const pythonImport = this.convertImportNameToPython(imp);
           importMap.get(pythonModule)!.add(pythonImport);
         });
       }
     }
-    
+
     // Generate Python import statements
     for (const [module, moduleImports] of importMap.entries()) {
       const importList = Array.from(moduleImports).sort();
@@ -278,35 +292,38 @@ export class PythonEmitter {
         imports.push(`from ${module} import ${importList.join(', ')}`);
       } else {
         imports.push(`import ${module}`);
-        importList.forEach(imp => {
+        importList.forEach((imp) => {
           imports.push(`from ${module} import ${imp}`);
         });
       }
     }
-    
+
     return imports;
   }
 
-  private parseTsImports(content: string): Array<{ module: string; imports: string[] }> {
+  private parseTsImports(
+    content: string
+  ): Array<{ module: string; imports: string[] }> {
     const results: Array<{ module: string; imports: string[] }> = [];
-    const importRegex = /import\s+(?:\{([^}]+)\}|\*\s+as\s+(\w+)|(\w+))\s+from\s+['"]([^'"]+)['"]/g;
-    
+    const importRegex =
+      /import\s+(?:\{([^}]+)\}|\*\s+as\s+(\w+)|(\w+))\s+from\s+['"]([^'"]+)['"]/g;
+
     let match;
     while ((match = importRegex.exec(content)) !== null) {
       const [, namedImports, namespaceImport, defaultImport, module] = match;
       const imports: string[] = [];
-      
+
       if (namedImports) {
-        imports.push(...namedImports.split(',').map(imp => imp.trim()));
+        imports.push(...namedImports.split(',').map((imp) => imp.trim()));
       } else if (namespaceImport) {
         imports.push(namespaceImport);
       } else if (defaultImport) {
         imports.push(defaultImport);
       }
-      
+
       results.push({ module, imports });
     }
-    
+
     return results;
   }
 
@@ -324,34 +341,36 @@ export class PythonEmitter {
       'langchain/embeddings': 'langchain.embeddings',
       'langchain/vectorstores': 'langchain.vectorstores',
       'langchain/document_loaders': 'langchain.document_loaders',
-      'langchain/text_splitter': 'langchain.text_splitter'
+      'langchain/text_splitter': 'langchain.text_splitter',
     };
-    
-    return moduleMap[tsModule] || tsModule.replace(/[@/]/g, '_').replace(/-/g, '_');
+
+    return (
+      moduleMap[tsModule] || tsModule.replace(/[@/]/g, '_').replace(/-/g, '_')
+    );
   }
 
   private convertImportNameToPython(tsImport: string): string {
     const importMap: Record<string, string> = {
-      'ChatOpenAI': 'ChatOpenAI',
-      'OpenAI': 'OpenAI',
-      'LLMChain': 'LLMChain',
-      'ConversationChain': 'ConversationChain',
-      'PromptTemplate': 'PromptTemplate',
-      'ChatPromptTemplate': 'ChatPromptTemplate',
-      'BufferMemory': 'ConversationBufferMemory',
-      'BufferWindowMemory': 'ConversationBufferWindowMemory',
-      'RecursiveCharacterTextSplitter': 'RecursiveCharacterTextSplitter',
-      'SerpAPI': 'SerpAPIWrapper',
-      'Calculator': 'LLMMathChain'
+      ChatOpenAI: 'ChatOpenAI',
+      OpenAI: 'OpenAI',
+      LLMChain: 'LLMChain',
+      ConversationChain: 'ConversationChain',
+      PromptTemplate: 'PromptTemplate',
+      ChatPromptTemplate: 'ChatPromptTemplate',
+      BufferMemory: 'ConversationBufferMemory',
+      BufferWindowMemory: 'ConversationBufferWindowMemory',
+      RecursiveCharacterTextSplitter: 'RecursiveCharacterTextSplitter',
+      SerpAPI: 'SerpAPIWrapper',
+      Calculator: 'LLMMathChain',
     };
-    
+
     return importMap[tsImport] || tsImport;
   }
 
   private convertToPythonImplementation(fragment: CodeFragment): string[] {
     const lines: string[] = [];
     const tsCode = fragment.content;
-    
+
     // Convert TypeScript to Python syntax
     let pythonCode = tsCode
       // Convert const/let/var to variable assignment
@@ -387,7 +406,7 @@ export class PythonEmitter {
       .replace(/await\s+/g, 'await ')
       // Convert semicolons to nothing
       .replace(/;$/gm, '');
-    
+
     // Split into lines and adjust indentation
     const codeLines = pythonCode.split('\n');
     for (let line of codeLines) {
@@ -396,7 +415,7 @@ export class PythonEmitter {
         lines.push(line);
       }
     }
-    
+
     return lines;
   }
 
@@ -405,9 +424,9 @@ export class PythonEmitter {
       'langchain>=0.1.0',
       'langchain-openai>=0.1.0',
       'langchain-community>=0.0.20',
-      'python-dotenv>=1.0.0'
+      'python-dotenv>=1.0.0',
     ]);
-    
+
     // Add dependencies based on converters used
     for (const fragment of fragments) {
       if (fragment.dependencies) {
@@ -419,7 +438,7 @@ export class PythonEmitter {
         }
       }
     }
-    
+
     return Array.from(dependencies).sort().join('\n');
   }
 
@@ -429,17 +448,20 @@ export class PythonEmitter {
       '@langchain/community': 'langchain-community>=0.0.20',
       '@langchain/core': 'langchain-core>=0.1.0',
       '@langchain/textsplitters': 'langchain-text-splitters>=0.0.1',
-      'ws': 'websockets>=11.0.0',
-      'express': 'fastapi>=0.104.0',
-      'validator': 'validators>=0.22.0'
+      ws: 'websockets>=11.0.0',
+      express: 'fastapi>=0.104.0',
+      validator: 'validators>=0.22.0',
     };
-    
+
     return depMap[tsDependency] || null;
   }
 
-  private generatePackageFiles(fragments: CodeFragment[], context: GenerationContext): GeneratedFile[] {
+  private generatePackageFiles(
+    fragments: CodeFragment[],
+    context: GenerationContext
+  ): GeneratedFile[] {
     const files: GeneratedFile[] = [];
-    
+
     if (this.options.packageManager === 'poetry') {
       const pyprojectToml = this.generatePyprojectToml(fragments, context);
       files.push({
@@ -448,10 +470,10 @@ export class PythonEmitter {
         type: 'config',
         dependencies: [],
         exports: [],
-        size: pyprojectToml.length
+        size: pyprojectToml.length,
       });
     }
-    
+
     // Generate setup.py for pip
     const setupPy = this.generateSetupPy(context);
     files.push({
@@ -460,9 +482,9 @@ export class PythonEmitter {
       type: 'config',
       dependencies: [],
       exports: [],
-      size: setupPy.length
+      size: setupPy.length,
     });
-    
+
     // Generate README
     const readme = this.generatePythonReadme(context);
     files.push({
@@ -471,20 +493,25 @@ export class PythonEmitter {
       type: 'config',
       dependencies: [],
       exports: [],
-      size: readme.length
+      size: readme.length,
     });
-    
+
     return files;
   }
 
-  private generatePyprojectToml(fragments: CodeFragment[], context: GenerationContext): string {
+  private generatePyprojectToml(
+    fragments: CodeFragment[],
+    context: GenerationContext
+  ): string {
     const dependencies = this.extractPythonDependenciesAsRecord(fragments);
-    
-    const depLines = Object.entries(dependencies).map(([name, version]) => {
-      const poetryVersion = version.replace('>=', '^');
-      return `${name} = "${poetryVersion}"`;
-    }).join('\n');
-    
+
+    const depLines = Object.entries(dependencies)
+      .map(([name, version]) => {
+        const poetryVersion = version.replace('>=', '^');
+        return `${name} = "${poetryVersion}"`;
+      })
+      .join('\n');
+
     return `[tool.poetry]
 name = "${context.projectName || 'langchain-workflow'}"
 version = "1.0.0"
@@ -583,7 +610,7 @@ pytest
 
   private extractPythonDependencies(fragments: CodeFragment[]): string[] {
     const deps = new Set<string>();
-    
+
     for (const fragment of fragments) {
       if (fragment.dependencies) {
         for (const dep of fragment.dependencies) {
@@ -594,19 +621,21 @@ pytest
         }
       }
     }
-    
+
     return Array.from(deps).sort();
   }
 
-  private extractPythonDependenciesAsRecord(fragments: CodeFragment[]): Record<string, string> {
+  private extractPythonDependenciesAsRecord(
+    fragments: CodeFragment[]
+  ): Record<string, string> {
     const depsRecord: Record<string, string> = {};
-    
+
     // Default dependencies
     depsRecord['langchain'] = '>=0.1.0';
     depsRecord['langchain-openai'] = '>=0.1.0';
     depsRecord['langchain-community'] = '>=0.0.20';
     depsRecord['python-dotenv'] = '>=1.0.0';
-    
+
     for (const fragment of fragments) {
       if (fragment.dependencies) {
         for (const dep of fragment.dependencies) {
@@ -620,17 +649,17 @@ pytest
         }
       }
     }
-    
+
     return depsRecord;
   }
 
   private getIndent(): string {
-    return this.options.useSpaces 
-      ? ' '.repeat(this.options.indentSize)
-      : '\t';
+    return this.options.useSpaces ? ' '.repeat(this.options.indentSize) : '\t';
   }
 }
 
-export function createPythonEmitter(options?: PythonEmitterOptions): PythonEmitter {
+export function createPythonEmitter(
+  options?: PythonEmitterOptions
+): PythonEmitter {
   return new PythonEmitter(options);
 }

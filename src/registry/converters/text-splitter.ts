@@ -1,6 +1,6 @@
 /**
  * Text Splitter Converters
- * 
+ *
  * Converts Flowise text splitter nodes into LangChain text splitter implementations
  */
 
@@ -15,17 +15,21 @@ export class RecursiveCharacterTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'recursiveCharacterTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
-    const separators = this.getParameterValue(node, 'separators', ["\n\n", "\n", " ", ""]);
+    const separators = this.getParameterValue(node, 'separators', [
+      '\n\n',
+      '\n',
+      ' ',
+      '',
+    ]);
     const keepSeparator = this.getParameterValue(node, 'keepSeparator', false);
 
-    const imports = this.generateImport(
-      '@langchain/textsplitters',
-      ['RecursiveCharacterTextSplitter']
-    );
+    const imports = this.generateImport('@langchain/textsplitters', [
+      'RecursiveCharacterTextSplitter',
+    ]);
 
     const implementation = `const ${variableName} = new RecursiveCharacterTextSplitter({
   chunkSize: ${chunkSize},
@@ -50,7 +54,7 @@ export class RecursiveCharacterTextSplitterConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -67,16 +71,15 @@ export class CharacterTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'characterTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
     const separator = this.getParameterValue(node, 'separator', '\n\n');
 
-    const imports = this.generateImport(
-      '@langchain/textsplitters',
-      ['CharacterTextSplitter']
-    );
+    const imports = this.generateImport('@langchain/textsplitters', [
+      'CharacterTextSplitter',
+    ]);
 
     const implementation = `const ${variableName} = new CharacterTextSplitter({
   chunkSize: ${chunkSize},
@@ -100,7 +103,7 @@ export class CharacterTextSplitterConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -117,16 +120,15 @@ export class TokenTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'tokenTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
     const encodingName = this.getParameterValue(node, 'encodingName', 'gpt2');
 
-    const imports = this.generateImport(
-      '@langchain/textsplitters',
-      ['TokenTextSplitter']
-    );
+    const imports = this.generateImport('@langchain/textsplitters', [
+      'TokenTextSplitter',
+    ]);
 
     const implementation = `const ${variableName} = new TokenTextSplitter({
   chunkSize: ${chunkSize},
@@ -150,7 +152,7 @@ export class TokenTextSplitterConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -167,15 +169,14 @@ export class MarkdownTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'markdownTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
 
-    const imports = this.generateImport(
-      '@langchain/textsplitters',
-      ['MarkdownTextSplitter']
-    );
+    const imports = this.generateImport('@langchain/textsplitters', [
+      'MarkdownTextSplitter',
+    ]);
 
     const implementation = `const ${variableName} = new MarkdownTextSplitter({
   chunkSize: ${chunkSize},
@@ -198,7 +199,7 @@ export class MarkdownTextSplitterConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -215,15 +216,14 @@ export class LatexTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'latexTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
 
-    const imports = this.generateImport(
-      '@langchain/textsplitters',
-      ['LatexTextSplitter']
-    );
+    const imports = this.generateImport('@langchain/textsplitters', [
+      'LatexTextSplitter',
+    ]);
 
     const implementation = `const ${variableName} = new LatexTextSplitter({
   chunkSize: ${chunkSize},
@@ -246,7 +246,7 @@ export class LatexTextSplitterConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -263,15 +263,14 @@ export class HtmlTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'htmlTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
 
-    const imports = this.generateImport(
-      '@langchain/textsplitters',
-      ['HtmlTextSplitter']
-    );
+    const imports = this.generateImport('@langchain/textsplitters', [
+      'HtmlTextSplitter',
+    ]);
 
     const implementation = `const ${variableName} = new HtmlTextSplitter({
   chunkSize: ${chunkSize},
@@ -294,7 +293,7 @@ export class HtmlTextSplitterConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -311,15 +310,14 @@ export class PythonCodeTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'pythonCodeTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
 
-    const imports = this.generateImport(
-      '@langchain/textsplitters',
-      ['RecursiveCharacterTextSplitter']
-    );
+    const imports = this.generateImport('@langchain/textsplitters', [
+      'RecursiveCharacterTextSplitter',
+    ]);
 
     const implementation = `const ${variableName} = RecursiveCharacterTextSplitter.fromLanguage('python', {
   chunkSize: ${chunkSize},
@@ -342,7 +340,7 @@ export class PythonCodeTextSplitterConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -359,15 +357,14 @@ export class JavaScriptCodeTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'javascriptCodeTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
 
-    const imports = this.generateImport(
-      '@langchain/textsplitters',
-      ['RecursiveCharacterTextSplitter']
-    );
+    const imports = this.generateImport('@langchain/textsplitters', [
+      'RecursiveCharacterTextSplitter',
+    ]);
 
     const implementation = `const ${variableName} = RecursiveCharacterTextSplitter.fromLanguage('js', {
   chunkSize: ${chunkSize},
@@ -390,7 +387,7 @@ export class JavaScriptCodeTextSplitterConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -407,15 +404,14 @@ export class SemanticTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'semanticTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
 
-    const imports = this.generateImport(
-      '@langchain/textsplitters',
-      ['SemanticTextSplitter']
-    );
+    const imports = this.generateImport('@langchain/textsplitters', [
+      'SemanticTextSplitter',
+    ]);
 
     const implementation = `const ${variableName} = new SemanticTextSplitter({
   chunkSize: ${chunkSize},
@@ -438,7 +434,7 @@ export class SemanticTextSplitterConverter extends BaseConverter {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 

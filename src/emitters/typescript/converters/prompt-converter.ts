@@ -1,6 +1,6 @@
 /**
  * Prompt Node Converter for TypeScript Code Generation
- * 
+ *
  * Converts prompt nodes (ChatPromptTemplate, PromptTemplate, etc.) to TypeScript code.
  */
 
@@ -8,19 +8,18 @@ import { IRNode, CodeFragment, GenerationContext } from '../../../ir/types.js';
 import { NodeConverter } from '../emitter.js';
 
 export class PromptConverter implements NodeConverter {
-  
   /**
    * Convert prompt node to code fragments
    */
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
-    
+
     // Generate import fragment
     fragments.push(this.generateImportFragment(node));
-    
+
     // Generate declaration fragment
     fragments.push(this.generateDeclarationFragment(node, context));
-    
+
     return fragments;
   }
 
@@ -36,7 +35,7 @@ export class PromptConverter implements NodeConverter {
    */
   getImports(node: IRNode): string[] {
     const imports: string[] = [];
-    
+
     switch (node.type) {
       case 'chatPromptTemplate':
         imports.push('ChatPromptTemplate');
@@ -57,7 +56,7 @@ export class PromptConverter implements NodeConverter {
         imports.push('AIMessage');
         break;
     }
-    
+
     return imports;
   }
 
@@ -66,8 +65,12 @@ export class PromptConverter implements NodeConverter {
    */
   canConvert(node: IRNode): boolean {
     const supportedTypes = [
-      'chatPromptTemplate', 'promptTemplate', 'fewShotPromptTemplate',
-      'systemMessage', 'humanMessage', 'aiMessage'
+      'chatPromptTemplate',
+      'promptTemplate',
+      'fewShotPromptTemplate',
+      'systemMessage',
+      'humanMessage',
+      'aiMessage',
     ];
     return supportedTypes.includes(node.type);
   }
@@ -78,7 +81,7 @@ export class PromptConverter implements NodeConverter {
   private generateImportFragment(node: IRNode): CodeFragment {
     const className = this.getClassName(node.type);
     const packageName = this.getPackageName(node.type);
-    
+
     return {
       id: `import_${node.id}`,
       type: 'import',
@@ -89,19 +92,22 @@ export class PromptConverter implements NodeConverter {
         nodeId: node.id,
         order: 11,
         description: `Import for ${node.label}`,
-        imports: [className]
-      }
+        imports: [className],
+      },
     };
   }
 
   /**
    * Generate declaration fragment
    */
-  private generateDeclarationFragment(node: IRNode, context: GenerationContext): CodeFragment {
+  private generateDeclarationFragment(
+    node: IRNode,
+    context: GenerationContext
+  ): CodeFragment {
     const variableName = this.sanitizeVariableName(node.label);
-    
+
     let content: string;
-    
+
     if (node.type === 'chatPromptTemplate') {
       content = this.generateChatPromptTemplate(node, variableName);
     } else if (node.type === 'promptTemplate') {
@@ -124,29 +130,37 @@ export class PromptConverter implements NodeConverter {
         description: `Declaration for ${node.label}`,
         category: node.category,
         async: false,
-        exports: [variableName]
-      }
+        exports: [variableName],
+      },
     };
   }
 
   /**
    * Generate ChatPromptTemplate
    */
-  private generateChatPromptTemplate(node: IRNode, variableName: string): string {
-    const systemMessage = this.getParameterValue(node, 'systemMessage') as string || '';
-    const humanMessage = this.getParameterValue(node, 'humanMessage') as string || '{input}';
-    const formatInstructions = this.getParameterValue(node, 'formatInstructions') as string || '';
-    
+  private generateChatPromptTemplate(
+    node: IRNode,
+    variableName: string
+  ): string {
+    const systemMessage =
+      (this.getParameterValue(node, 'systemMessage') as string) || '';
+    const humanMessage =
+      (this.getParameterValue(node, 'humanMessage') as string) || '{input}';
+    const formatInstructions =
+      (this.getParameterValue(node, 'formatInstructions') as string) || '';
+
     const messages: string[] = [];
-    
+
     if (systemMessage) {
       messages.push(`  ['system', \`${this.escapeTemplate(systemMessage)}\`]`);
     }
-    
+
     messages.push(`  ['human', \`${this.escapeTemplate(humanMessage)}\`]`);
-    
+
     if (formatInstructions) {
-      messages.push(`  ['system', \`${this.escapeTemplate(formatInstructions)}\`]`);
+      messages.push(
+        `  ['system', \`${this.escapeTemplate(formatInstructions)}\`]`
+      );
     }
 
     return `// ${node.label} - ${node.type}
@@ -159,9 +173,10 @@ ${messages.join(',\n')}
    * Generate PromptTemplate
    */
   private generatePromptTemplate(node: IRNode, variableName: string): string {
-    const template = this.getParameterValue(node, 'template') as string || '{input}';
+    const template =
+      (this.getParameterValue(node, 'template') as string) || '{input}';
     const inputVariables = this.extractInputVariables(template);
-    
+
     return `// ${node.label} - ${node.type}
 const ${variableName} = PromptTemplate.fromTemplate(\`${this.escapeTemplate(template)}\`);`;
   }
@@ -169,16 +184,22 @@ const ${variableName} = PromptTemplate.fromTemplate(\`${this.escapeTemplate(temp
   /**
    * Generate FewShotPromptTemplate
    */
-  private generateFewShotPromptTemplate(node: IRNode, variableName: string): string {
-    const examplePrompt = this.getParameterValue(node, 'examplePrompt') as string || '';
-    const examples = this.getParameterValue(node, 'examples') as unknown[] || [];
-    const prefix = this.getParameterValue(node, 'prefix') as string || '';
-    const suffix = this.getParameterValue(node, 'suffix') as string || '{input}';
-    
+  private generateFewShotPromptTemplate(
+    node: IRNode,
+    variableName: string
+  ): string {
+    const examplePrompt =
+      (this.getParameterValue(node, 'examplePrompt') as string) || '';
+    const examples =
+      (this.getParameterValue(node, 'examples') as unknown[]) || [];
+    const prefix = (this.getParameterValue(node, 'prefix') as string) || '';
+    const suffix =
+      (this.getParameterValue(node, 'suffix') as string) || '{input}';
+
     const exampleArray = Array.isArray(examples) ? examples : [];
-    const formattedExamples = exampleArray.map(example => 
-      JSON.stringify(example, null, 2).replace(/\n/g, '\n  ')
-    ).join(',\n  ');
+    const formattedExamples = exampleArray
+      .map((example) => JSON.stringify(example, null, 2).replace(/\n/g, '\n  '))
+      .join(',\n  ');
 
     return `// ${node.label} - ${node.type}
 const ${variableName}ExamplePrompt = PromptTemplate.fromTemplate(\`${this.escapeTemplate(examplePrompt)}\`);
@@ -199,8 +220,11 @@ const ${variableName} = new FewShotPromptTemplate({
    */
   private generateMessageTemplate(node: IRNode, variableName: string): string {
     const className = this.getClassName(node.type);
-    const content = (this.getParameterValue(node, 'content') as string) || (this.getParameterValue(node, 'text') as string) || '';
-    
+    const content =
+      (this.getParameterValue(node, 'content') as string) ||
+      (this.getParameterValue(node, 'text') as string) ||
+      '';
+
     return `// ${node.label} - ${node.type}
 const ${variableName} = new ${className}(\`${this.escapeTemplate(content)}\`);`;
   }
@@ -210,14 +234,14 @@ const ${variableName} = new ${className}(\`${this.escapeTemplate(content)}\`);`;
    */
   private getClassName(nodeType: string): string {
     const classMap: Record<string, string> = {
-      'chatPromptTemplate': 'ChatPromptTemplate',
-      'promptTemplate': 'PromptTemplate',
-      'fewShotPromptTemplate': 'FewShotPromptTemplate',
-      'systemMessage': 'SystemMessage',
-      'humanMessage': 'HumanMessage',
-      'aiMessage': 'AIMessage'
+      chatPromptTemplate: 'ChatPromptTemplate',
+      promptTemplate: 'PromptTemplate',
+      fewShotPromptTemplate: 'FewShotPromptTemplate',
+      systemMessage: 'SystemMessage',
+      humanMessage: 'HumanMessage',
+      aiMessage: 'AIMessage',
     };
-    
+
     return classMap[nodeType] || 'BasePromptTemplate';
   }
 
@@ -236,7 +260,7 @@ const ${variableName} = new ${className}(\`${this.escapeTemplate(content)}\`);`;
    */
   private extractInputVariables(template: string): string[] {
     const variables = new Set<string>();
-    
+
     // Match {variable} patterns
     const matches = template.match(/\{([^}]+)\}/g);
     if (matches) {
@@ -247,7 +271,7 @@ const ${variableName} = new ${className}(\`${this.escapeTemplate(content)}\`);`;
         }
       }
     }
-    
+
     return Array.from(variables).sort();
   }
 
@@ -256,8 +280,8 @@ const ${variableName} = new ${className}(\`${this.escapeTemplate(content)}\`);`;
    */
   private escapeTemplate(template: string): string {
     return template
-      .replace(/\\/g, '\\\\')  // Escape backslashes
-      .replace(/`/g, '\\`')    // Escape backticks
+      .replace(/\\/g, '\\\\') // Escape backslashes
+      .replace(/`/g, '\\`') // Escape backticks
       .replace(/\${/g, '\\${'); // Escape template literals
   }
 
@@ -265,7 +289,7 @@ const ${variableName} = new ${className}(\`${this.escapeTemplate(content)}\`);`;
    * Get parameter value from node
    */
   private getParameterValue(node: IRNode, paramName: string): unknown {
-    const param = node.parameters.find(p => p.name === paramName);
+    const param = node.parameters.find((p) => p.name === paramName);
     return param?.value;
   }
 

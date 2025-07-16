@@ -1,11 +1,16 @@
 /**
  * Memory Converter for Flowise Memory Nodes
- * 
+ *
  * Converts Flowise memory nodes (like BufferMemory, ConversationSummaryMemory, etc.)
  * to LangChain memory implementations.
  */
 
-import type { IRNode, IRConnection, CodeFragment, GenerationContext } from '../../../ir/types.js';
+import type {
+  IRNode,
+  IRConnection,
+  CodeFragment,
+  GenerationContext,
+} from '../../../ir/types.js';
 import { BaseConverter } from './base-converter.js';
 
 import type { NodeConverter } from '../emitter.js';
@@ -13,20 +18,29 @@ import type { NodeConverter } from '../emitter.js';
 /**
  * Buffer Memory Converter
  */
-export class BufferMemoryConverter extends BaseConverter implements NodeConverter {
+export class BufferMemoryConverter
+  extends BaseConverter
+  implements NodeConverter
+{
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragment
-    fragments.push(this.createImportFragment(
-      'langchain-memory-import',
-      ['BufferMemory'],
-      'langchain/memory'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-memory-import',
+        ['BufferMemory'],
+        'langchain/memory'
+      )
+    );
 
     // Configuration parameters
     const memoryKey = this.getParameterValue(node, 'memoryKey', 'history');
-    const returnMessages = this.getParameterValue(node, 'returnMessages', false);
+    const returnMessages = this.getParameterValue(
+      node,
+      'returnMessages',
+      false
+    );
     const humanPrefix = this.getParameterValue(node, 'humanPrefix', 'Human');
     const aiPrefix = this.getParameterValue(node, 'aiPrefix', 'AI');
 
@@ -38,12 +52,14 @@ export class BufferMemoryConverter extends BaseConverter implements NodeConverte
   aiPrefix: "${aiPrefix}"
 });`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      ['BufferMemory'],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        ['BufferMemory'],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -60,31 +76,42 @@ export class BufferMemoryConverter extends BaseConverter implements NodeConverte
 /**
  * Conversation Summary Memory Converter
  */
-export class ConversationSummaryMemoryConverter extends BaseConverter implements NodeConverter {
+export class ConversationSummaryMemoryConverter
+  extends BaseConverter
+  implements NodeConverter
+{
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     // Get connections from context or graph if available
     const connections: IRConnection[] = (context as any).connections || [];
     const fragments: CodeFragment[] = [];
 
     // Import fragments
-    fragments.push(this.createImportFragment(
-      'langchain-memory-summary-import',
-      ['ConversationSummaryMemory'],
-      'langchain/memory'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-memory-summary-import',
+        ['ConversationSummaryMemory'],
+        'langchain/memory'
+      )
+    );
 
     // Get connected LLM
-    const llmConnection = connections.find(conn => 
-      conn.target === node.id && conn.targetHandle === 'llm'
+    const llmConnection = connections.find(
+      (conn) => conn.target === node.id && conn.targetHandle === 'llm'
     );
 
     if (!llmConnection) {
-      throw new Error(`ConversationSummaryMemory node ${node.id} requires an LLM connection`);
+      throw new Error(
+        `ConversationSummaryMemory node ${node.id} requires an LLM connection`
+      );
     }
 
     // Configuration parameters
     const memoryKey = this.getParameterValue(node, 'memoryKey', 'history');
-    const returnMessages = this.getParameterValue(node, 'returnMessages', false);
+    const returnMessages = this.getParameterValue(
+      node,
+      'returnMessages',
+      false
+    );
     const maxTokenLimit = this.getParameterValue(node, 'maxTokenLimit', 2000);
 
     // Memory initialization
@@ -96,12 +123,14 @@ export class ConversationSummaryMemoryConverter extends BaseConverter implements
   maxTokenLimit: ${maxTokenLimit}
 });`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      ['ConversationSummaryMemory'],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        ['ConversationSummaryMemory'],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -111,27 +140,39 @@ export class ConversationSummaryMemoryConverter extends BaseConverter implements
   }
 
   canConvert(node: IRNode): boolean {
-    return node.type === 'conversationSummaryMemory' || node.type === 'ConversationSummaryMemory';
+    return (
+      node.type === 'conversationSummaryMemory' ||
+      node.type === 'ConversationSummaryMemory'
+    );
   }
 }
 
 /**
  * Buffer Window Memory Converter
  */
-export class BufferWindowMemoryConverter extends BaseConverter implements NodeConverter {
+export class BufferWindowMemoryConverter
+  extends BaseConverter
+  implements NodeConverter
+{
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragment
-    fragments.push(this.createImportFragment(
-      'langchain-memory-window-import',
-      ['BufferWindowMemory'],
-      'langchain/memory'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-memory-window-import',
+        ['BufferWindowMemory'],
+        'langchain/memory'
+      )
+    );
 
     // Configuration parameters
     const memoryKey = this.getParameterValue(node, 'memoryKey', 'history');
-    const returnMessages = this.getParameterValue(node, 'returnMessages', false);
+    const returnMessages = this.getParameterValue(
+      node,
+      'returnMessages',
+      false
+    );
     const humanPrefix = this.getParameterValue(node, 'humanPrefix', 'Human');
     const aiPrefix = this.getParameterValue(node, 'aiPrefix', 'AI');
     const k = this.getParameterValue(node, 'k', 5);
@@ -145,12 +186,14 @@ export class BufferWindowMemoryConverter extends BaseConverter implements NodeCo
   k: ${k}
 });`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      ['BufferWindowMemory'],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        ['BufferWindowMemory'],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -160,38 +203,51 @@ export class BufferWindowMemoryConverter extends BaseConverter implements NodeCo
   }
 
   canConvert(node: IRNode): boolean {
-    return node.type === 'bufferWindowMemory' || node.type === 'BufferWindowMemory';
+    return (
+      node.type === 'bufferWindowMemory' || node.type === 'BufferWindowMemory'
+    );
   }
 }
 
 /**
  * Conversation Summary Buffer Memory Converter
  */
-export class ConversationSummaryBufferMemoryConverter extends BaseConverter implements NodeConverter {
+export class ConversationSummaryBufferMemoryConverter
+  extends BaseConverter
+  implements NodeConverter
+{
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     // Get connections from context or graph if available
     const connections: IRConnection[] = (context as any).connections || [];
     const fragments: CodeFragment[] = [];
 
     // Import fragments
-    fragments.push(this.createImportFragment(
-      'langchain-memory-summary-buffer-import',
-      ['ConversationSummaryBufferMemory'],
-      'langchain/memory'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-memory-summary-buffer-import',
+        ['ConversationSummaryBufferMemory'],
+        'langchain/memory'
+      )
+    );
 
     // Get connected LLM
-    const llmConnection = connections.find(conn => 
-      conn.target === node.id && conn.targetHandle === 'llm'
+    const llmConnection = connections.find(
+      (conn) => conn.target === node.id && conn.targetHandle === 'llm'
     );
 
     if (!llmConnection) {
-      throw new Error(`ConversationSummaryBufferMemory node ${node.id} requires an LLM connection`);
+      throw new Error(
+        `ConversationSummaryBufferMemory node ${node.id} requires an LLM connection`
+      );
     }
 
     // Configuration parameters
     const memoryKey = this.getParameterValue(node, 'memoryKey', 'history');
-    const returnMessages = this.getParameterValue(node, 'returnMessages', false);
+    const returnMessages = this.getParameterValue(
+      node,
+      'returnMessages',
+      false
+    );
     const maxTokenLimit = this.getParameterValue(node, 'maxTokenLimit', 2000);
 
     // Memory initialization
@@ -203,12 +259,14 @@ export class ConversationSummaryBufferMemoryConverter extends BaseConverter impl
   maxTokenLimit: ${maxTokenLimit}
 });`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      ['ConversationSummaryBufferMemory'],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        ['ConversationSummaryBufferMemory'],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -218,33 +276,43 @@ export class ConversationSummaryBufferMemoryConverter extends BaseConverter impl
   }
 
   canConvert(node: IRNode): boolean {
-    return node.type === 'conversationSummaryBufferMemory' || node.type === 'ConversationSummaryBufferMemory';
+    return (
+      node.type === 'conversationSummaryBufferMemory' ||
+      node.type === 'ConversationSummaryBufferMemory'
+    );
   }
 }
 
 /**
  * Vector Store Retriever Memory Converter
  */
-export class VectorStoreRetrieverMemoryConverter extends BaseConverter implements NodeConverter {
+export class VectorStoreRetrieverMemoryConverter
+  extends BaseConverter
+  implements NodeConverter
+{
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     // Get connections from context or graph if available
     const connections: IRConnection[] = (context as any).connections || [];
     const fragments: CodeFragment[] = [];
 
     // Import fragments
-    fragments.push(this.createImportFragment(
-      'langchain-memory-vectorstore-import',
-      ['VectorStoreRetrieverMemory'],
-      'langchain/memory'
-    ));
+    fragments.push(
+      this.createImportFragment(
+        'langchain-memory-vectorstore-import',
+        ['VectorStoreRetrieverMemory'],
+        'langchain/memory'
+      )
+    );
 
     // Get connected vector store
-    const vectorStoreConnection = connections.find(conn => 
-      conn.target === node.id && conn.targetHandle === 'vectorStore'
+    const vectorStoreConnection = connections.find(
+      (conn) => conn.target === node.id && conn.targetHandle === 'vectorStore'
     );
 
     if (!vectorStoreConnection) {
-      throw new Error(`VectorStoreRetrieverMemory node ${node.id} requires a vector store connection`);
+      throw new Error(
+        `VectorStoreRetrieverMemory node ${node.id} requires a vector store connection`
+      );
     }
 
     // Configuration parameters
@@ -253,19 +321,23 @@ export class VectorStoreRetrieverMemoryConverter extends BaseConverter implement
     const k = this.getParameterValue(node, 'topK', 4);
 
     // Memory initialization
-    const vectorStoreVar = this.getVariableName({ id: vectorStoreConnection.source } as IRNode);
+    const vectorStoreVar = this.getVariableName({
+      id: vectorStoreConnection.source,
+    } as IRNode);
     const initCode = `const ${this.getVariableName(node)} = new VectorStoreRetrieverMemory({
   vectorStoreRetriever: ${vectorStoreVar}.asRetriever(${k}),
   memoryKey: "${memoryKey}",
   inputKey: "${inputKey}"
 });`;
 
-    fragments.push(this.createDeclarationFragment(
-      `${node.id}-init`,
-      initCode,
-      ['VectorStoreRetrieverMemory'],
-      node.id
-    ));
+    fragments.push(
+      this.createDeclarationFragment(
+        `${node.id}-init`,
+        initCode,
+        ['VectorStoreRetrieverMemory'],
+        node.id
+      )
+    );
 
     return fragments;
   }
@@ -275,23 +347,26 @@ export class VectorStoreRetrieverMemoryConverter extends BaseConverter implement
   }
 
   canConvert(node: IRNode): boolean {
-    return node.type === 'vectorStoreRetrieverMemory' || node.type === 'VectorStoreRetrieverMemory';
+    return (
+      node.type === 'vectorStoreRetrieverMemory' ||
+      node.type === 'VectorStoreRetrieverMemory'
+    );
   }
 }
 
 // Memory converter registry
 export const memoryConverters: Record<string, new () => NodeConverter> = {
-  'bufferMemory': BufferMemoryConverter,
-  'bufferWindowMemory': BufferWindowMemoryConverter,
-  'conversationSummaryMemory': ConversationSummaryMemoryConverter,
-  'conversationSummaryBufferMemory': ConversationSummaryBufferMemoryConverter,
-  'vectorStoreRetrieverMemory': VectorStoreRetrieverMemoryConverter,
+  bufferMemory: BufferMemoryConverter,
+  bufferWindowMemory: BufferWindowMemoryConverter,
+  conversationSummaryMemory: ConversationSummaryMemoryConverter,
+  conversationSummaryBufferMemory: ConversationSummaryBufferMemoryConverter,
+  vectorStoreRetrieverMemory: VectorStoreRetrieverMemoryConverter,
   // Aliases
-  'BufferMemory': BufferMemoryConverter,
-  'BufferWindowMemory': BufferWindowMemoryConverter,
-  'ConversationSummaryMemory': ConversationSummaryMemoryConverter,
-  'ConversationSummaryBufferMemory': ConversationSummaryBufferMemoryConverter,
-  'VectorStoreRetrieverMemory': VectorStoreRetrieverMemoryConverter
+  BufferMemory: BufferMemoryConverter,
+  BufferWindowMemory: BufferWindowMemoryConverter,
+  ConversationSummaryMemory: ConversationSummaryMemoryConverter,
+  ConversationSummaryBufferMemory: ConversationSummaryBufferMemoryConverter,
+  VectorStoreRetrieverMemory: VectorStoreRetrieverMemoryConverter,
 };
 
 /**
@@ -321,5 +396,5 @@ export default {
   getMemoryConverter,
   hasMemoryConverter,
   getSupportedMemoryTypes,
-  memoryConverters
+  memoryConverters,
 };

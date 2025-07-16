@@ -1,6 +1,6 @@
 /**
  * Base Converter Class
- * 
+ *
  * Provides common utilities and methods for all converter implementations.
  */
 
@@ -13,8 +13,12 @@ export abstract class BaseConverter {
   /**
    * Get parameter value from node with fallback
    */
-  protected getParameterValue(node: IRNode, paramName: string, defaultValue?: any): any {
-    const param = node.parameters.find(p => p.name === paramName);
+  protected getParameterValue(
+    node: IRNode,
+    paramName: string,
+    defaultValue?: any
+  ): any {
+    const param = node.parameters.find((p) => p.name === paramName);
     return param?.value ?? defaultValue;
   }
 
@@ -35,7 +39,7 @@ export abstract class BaseConverter {
     from: string
   ): CodeFragment {
     const content = `import { ${imports.join(', ')} } from '${from}';`;
-    
+
     return {
       id,
       type: 'import',
@@ -46,8 +50,8 @@ export abstract class BaseConverter {
         order: 0,
         description: `Import ${imports.join(', ')} from ${from}`,
         category: 'imports',
-        imports
-      }
+        imports,
+      },
     };
   }
 
@@ -70,8 +74,8 @@ export abstract class BaseConverter {
         ...(nodeId && { nodeId }),
         order: 50,
         description: `Declaration for ${nodeId || id}`,
-        category: 'declarations'
-      }
+        category: 'declarations',
+      },
     };
   }
 
@@ -94,8 +98,8 @@ export abstract class BaseConverter {
         ...(nodeId && { nodeId }),
         order: 75,
         description: `Initialization for ${nodeId || id}`,
-        category: 'initialization'
-      }
+        category: 'initialization',
+      },
     };
   }
 
@@ -120,8 +124,8 @@ export abstract class BaseConverter {
         order: 100,
         description: `Execution for ${nodeId || id}`,
         category: 'execution',
-        async
-      }
+        async,
+      },
     };
   }
 
@@ -134,7 +138,7 @@ export abstract class BaseConverter {
     content?: string
   ): CodeFragment {
     const exportContent = content || `export { ${exports.join(', ')} };`;
-    
+
     return {
       id,
       type: 'export',
@@ -145,19 +149,29 @@ export abstract class BaseConverter {
         order: 200,
         description: `Export ${exports.join(', ')}`,
         category: 'exports',
-        exports
-      }
+        exports,
+      },
     };
   }
 
   /**
    * Validate required parameters
    */
-  protected validateRequiredParameters(node: IRNode, requiredParams: string[]): void {
+  protected validateRequiredParameters(
+    node: IRNode,
+    requiredParams: string[]
+  ): void {
     for (const paramName of requiredParams) {
-      const param = node.parameters.find(p => p.name === paramName);
-      if (!param || param.value === undefined || param.value === null || param.value === '') {
-        throw new Error(`Required parameter '${paramName}' is missing for node ${node.id} (${node.type})`);
+      const param = node.parameters.find((p) => p.name === paramName);
+      if (
+        !param ||
+        param.value === undefined ||
+        param.value === null ||
+        param.value === ''
+      ) {
+        throw new Error(
+          `Required parameter '${paramName}' is missing for node ${node.id} (${node.type})`
+        );
       }
     }
   }
@@ -210,11 +224,11 @@ export abstract class BaseConverter {
    * Generate configuration object from node parameters
    */
   protected generateConfigObject(
-    node: IRNode, 
+    node: IRNode,
     excludeParams: string[] = [],
     includeOnly?: string[]
   ): string {
-    const relevantParams = node.parameters.filter(param => {
+    const relevantParams = node.parameters.filter((param) => {
       if (excludeParams.includes(param.name)) return false;
       if (includeOnly && !includeOnly.includes(param.name)) return false;
       return param.value !== undefined && param.value !== null;
@@ -224,7 +238,7 @@ export abstract class BaseConverter {
       return '{}';
     }
 
-    const configEntries = relevantParams.map(param => {
+    const configEntries = relevantParams.map((param) => {
       const value = this.parameterToCode(param);
       return `  ${param.name}: ${value}`;
     });
@@ -236,14 +250,17 @@ export abstract class BaseConverter {
    * Check if node has parameter
    */
   protected hasParameter(node: IRNode, paramName: string): boolean {
-    return node.parameters.some(p => p.name === paramName);
+    return node.parameters.some((p) => p.name === paramName);
   }
 
   /**
    * Get parameter by name
    */
-  protected getParameter(node: IRNode, paramName: string): IRParameter | undefined {
-    return node.parameters.find(p => p.name === paramName);
+  protected getParameter(
+    node: IRNode,
+    paramName: string
+  ): IRParameter | undefined {
+    return node.parameters.find((p) => p.name === paramName);
   }
 
   /**
@@ -260,8 +277,8 @@ export abstract class BaseConverter {
    * Generate conditional code based on parameter
    */
   protected conditionalCode(
-    condition: string, 
-    trueCode: string, 
+    condition: string,
+    trueCode: string,
     falseCode?: string
   ): string {
     if (falseCode) {
@@ -274,8 +291,8 @@ export abstract class BaseConverter {
    * Generate array from parameter
    */
   protected arrayFromParameter(
-    node: IRNode, 
-    paramName: string, 
+    node: IRNode,
+    paramName: string,
     defaultValue: any[] = []
   ): string {
     const param = this.getParameter(node, paramName);

@@ -1,6 +1,6 @@
 /**
  * Flowise JSON Parser Module
- * 
+ *
  * Complete parsing solution for Flowise chatflow exports with validation,
  * error handling, version detection, and analysis utilities.
  */
@@ -42,11 +42,11 @@ export async function quickParse(input: string | Buffer): Promise<{
     const { parseFlowiseJson } = await import('./parser.js');
     const content = Buffer.isBuffer(input) ? input.toString('utf-8') : input;
     const result = await parseFlowiseJson(content, { minimal: true });
-    
+
     return {
       success: result.success,
       data: result.data,
-      errors: result.errors.map(e => e.message),
+      errors: result.errors.map((e) => e.message),
     };
   } catch (error) {
     return {
@@ -68,11 +68,11 @@ export async function validate(input: string): Promise<{
     const { FlowiseParser } = await import('./parser.js');
     const parser = new FlowiseParser();
     const result = await parser.validate(input);
-    
+
     return {
       isValid: result.isValid,
-      errors: result.errors.map(e => e.message),
-      warnings: result.warnings.map(w => w.message),
+      errors: result.errors.map((e) => e.message),
+      warnings: result.warnings.map((w) => w.message),
     };
   } catch (error) {
     return {

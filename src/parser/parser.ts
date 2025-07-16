@@ -1,14 +1,14 @@
 /**
  * Flowise JSON Parser Implementation
- * 
+ *
  * This module provides robust parsing and validation of Flowise chatflow exports
  * with comprehensive error handling, version detection, and helpful error messages.
  */
 
 import { z } from 'zod';
 import {
-  FlowiseChatFlowSchema,
-  FlowiseChatFlowVersionedSchema,
+  // FlowiseChatFlowSchema as _FlowiseChatFlowSchema, // Unused import
+  // FlowiseChatFlowVersionedSchema as _FlowiseChatFlowVersionedSchema, // Unused import
   FlowiseChatFlowMinimalSchema,
   getValidationSchema,
   formatValidationErrors,
@@ -145,11 +145,19 @@ export class FlowiseParser {
           code: undefined,
           suggestion: 'Consider breaking down the flow into smaller components',
         });
-        return this.createFailureResult(errors, warnings, startTime, 'string', content.length);
+        return this.createFailureResult(
+          errors,
+          warnings,
+          startTime,
+          'string',
+          content.length
+        );
       }
 
       // Preprocess content if preprocessor is provided
-      const processedContent = this.options.preprocessor ? this.options.preprocessor(content) : content;
+      const processedContent = this.options.preprocessor
+        ? this.options.preprocessor(content)
+        : content;
 
       // Parse JSON
       let jsonData: unknown;
@@ -159,7 +167,9 @@ export class FlowiseParser {
         const syntaxError = error as SyntaxError;
         const match = syntaxError.message.match(/at position (\d+)/);
         const position = match ? parseInt(match[1] || '0', 10) : undefined;
-        const lineInfo = position ? this.getLineColumnFromPosition(processedContent, position) : undefined;
+        const lineInfo = position
+          ? this.getLineColumnFromPosition(processedContent, position)
+          : undefined;
 
         errors.push({
           type: 'syntax',
@@ -168,23 +178,32 @@ export class FlowiseParser {
           line: lineInfo?.line ?? 1,
           column: lineInfo?.column ?? 1,
           code: undefined,
-          suggestion: 'Ensure the JSON is properly formatted with matching brackets and quotes',
+          suggestion:
+            'Ensure the JSON is properly formatted with matching brackets and quotes',
         });
-        return this.createFailureResult(errors, warnings, startTime, 'string', content.length);
+        return this.createFailureResult(
+          errors,
+          warnings,
+          startTime,
+          'string',
+          content.length
+        );
       }
 
       // Detect version if auto-detection is enabled
       let detectedVersion = this.options.version;
       if (this.options.autoDetectVersion && this.options.version === 'auto') {
         const versionResult = this.detectFlowiseVersion(jsonData);
-        detectedVersion = versionResult.version === 'unknown' ? 'auto' : versionResult.version;
-        
+        detectedVersion =
+          versionResult.version === 'unknown' ? 'auto' : versionResult.version;
+
         if (versionResult.confidence < 0.7) {
           warnings.push({
             type: 'compatibility',
             message: `Low confidence (${Math.round(versionResult.confidence * 100)}%) in version detection. Detected: ${versionResult.version}`,
             path: undefined,
-            suggestion: 'Consider specifying the version explicitly in parser options',
+            suggestion:
+              'Consider specifying the version explicitly in parser options',
           });
         }
       }
@@ -192,26 +211,37 @@ export class FlowiseParser {
       // Get appropriate schema
       const schema = getValidationSchema({
         ...this.options,
-        version: this.options.version === 'auto' ? 'auto' : detectedVersion as '1.x' | '2.x' | 'auto',
+        version:
+          this.options.version === 'auto'
+            ? 'auto'
+            : (detectedVersion as '1.x' | '2.x' | 'auto'),
       });
 
       // Validate data
       const result = schema.safeParse(jsonData);
-      
+
       if (!result.success) {
         // Convert Zod errors to ParseErrors
-        const validationErrors = result.error.issues.map((issue): ParseError => ({
-          type: 'validation',
-          message: issue.message,
-          path: issue.path.join('.'),
-          line: undefined,
-          column: undefined,
-          code: issue.code,
-          suggestion: this.getValidationSuggestion(issue) || undefined,
-        }));
+        const validationErrors = result.error.issues.map(
+          (issue): ParseError => ({
+            type: 'validation',
+            message: issue.message,
+            path: issue.path.join('.'),
+            line: undefined,
+            column: undefined,
+            code: issue.code,
+            suggestion: this.getValidationSuggestion(issue) || undefined,
+          })
+        );
 
         errors.push(...validationErrors);
-        return this.createFailureResult(errors, warnings, startTime, 'string', content.length);
+        return this.createFailureResult(
+          errors,
+          warnings,
+          startTime,
+          'string',
+          content.length
+        );
       }
 
       // Generate warnings for best practices
@@ -235,7 +265,6 @@ export class FlowiseParser {
         warnings,
         metadata,
       };
-
     } catch (error) {
       errors.push({
         type: 'structure',
@@ -246,7 +275,13 @@ export class FlowiseParser {
         code: undefined,
         suggestion: 'Please check the input format and try again',
       });
-      return this.createFailureResult(errors, warnings, startTime, 'string', content.length);
+      return this.createFailureResult(
+        errors,
+        warnings,
+        startTime,
+        'string',
+        content.length
+      );
     }
   }
 
@@ -261,50 +296,74 @@ export class FlowiseParser {
       // Validate file extension
       const ext = path.extname(filePath).toLowerCase();
       if (!['.json', '.flowise'].includes(ext)) {
-        return this.createFailureResult([{
-          type: 'structure',
-          message: `Unsupported file extension: ${ext}`,
-          path: undefined,
-          line: undefined,
-          column: undefined,
-          code: undefined,
-          suggestion: 'Use .json or .flowise files',
-        }], [], performance.now(), 'file', 0);
+        return this.createFailureResult(
+          [
+            {
+              type: 'structure',
+              message: `Unsupported file extension: ${ext}`,
+              path: undefined,
+              line: undefined,
+              column: undefined,
+              code: undefined,
+              suggestion: 'Use .json or .flowise files',
+            },
+          ],
+          [],
+          performance.now(),
+          'file',
+          0
+        );
       }
 
       // Check file size before reading
       const stats = await fs.stat(filePath);
       if (stats.size > this.options.maxFileSize) {
-        return this.createFailureResult([{
-          type: 'structure',
-          message: `File size (${stats.size} bytes) exceeds maximum allowed size (${this.options.maxFileSize} bytes)`,
-          path: undefined,
-          line: undefined,
-          column: undefined,
-          code: undefined,
-          suggestion: 'Consider breaking down the flow into smaller components',
-        }], [], performance.now(), 'file', stats.size);
+        return this.createFailureResult(
+          [
+            {
+              type: 'structure',
+              message: `File size (${stats.size} bytes) exceeds maximum allowed size (${this.options.maxFileSize} bytes)`,
+              path: undefined,
+              line: undefined,
+              column: undefined,
+              code: undefined,
+              suggestion:
+                'Consider breaking down the flow into smaller components',
+            },
+          ],
+          [],
+          performance.now(),
+          'file',
+          stats.size
+        );
       }
 
       // Read and parse file
       const content = await fs.readFile(filePath, 'utf-8');
       const result = await this.parseString(content);
-      
+
       // Update metadata to reflect file source
       result.metadata.sourceType = 'file';
-      
-      return result;
 
+      return result;
     } catch (error) {
-      return this.createFailureResult([{
-        type: 'structure',
-        message: `Failed to read file: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        path: undefined,
-        line: undefined,
-        column: undefined,
-        code: undefined,
-        suggestion: 'Check file path and permissions',
-      }], [], performance.now(), 'file', 0);
+      return this.createFailureResult(
+        [
+          {
+            type: 'structure',
+            message: `Failed to read file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            path: undefined,
+            line: undefined,
+            column: undefined,
+            code: undefined,
+            suggestion: 'Check file path and permissions',
+          },
+        ],
+        [],
+        performance.now(),
+        'file',
+        0
+      );
     }
   }
 
@@ -314,12 +373,15 @@ export class FlowiseParser {
   async parseUrl(url: string): Promise<ParseResult> {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.options.fetchTimeout);
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        this.options.fetchTimeout
+      );
 
       const response = await fetch(url, {
         signal: controller.signal,
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
           'User-Agent': 'Flowise-to-LangChain Parser/1.0.0',
         },
       });
@@ -327,36 +389,52 @@ export class FlowiseParser {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        return this.createFailureResult([{
-          type: 'network',
-          message: `HTTP ${response.status}: ${response.statusText}`,
-          path: undefined,
-          line: undefined,
-          column: undefined,
-          code: undefined,
-          suggestion: 'Check URL and network connectivity',
-        }], [], performance.now(), 'url', 0);
+        return this.createFailureResult(
+          [
+            {
+              type: 'network',
+              message: `HTTP ${response.status}: ${response.statusText}`,
+              path: undefined,
+              line: undefined,
+              column: undefined,
+              code: undefined,
+              suggestion: 'Check URL and network connectivity',
+            },
+          ],
+          [],
+          performance.now(),
+          'url',
+          0
+        );
       }
 
       const content = await response.text();
       const result = await this.parseString(content);
-      
+
       // Update metadata to reflect URL source
       result.metadata.sourceType = 'url';
-      
-      return result;
 
+      return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      return this.createFailureResult([{
-        type: 'network',
-        message: `Failed to fetch from URL: ${errorMessage}`,
-        path: undefined,
-        line: undefined,
-        column: undefined,
-        code: undefined,
-        suggestion: 'Check URL validity and network connectivity',
-      }], [], performance.now(), 'url', 0);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      return this.createFailureResult(
+        [
+          {
+            type: 'network',
+            message: `Failed to fetch from URL: ${errorMessage}`,
+            path: undefined,
+            line: undefined,
+            column: undefined,
+            code: undefined,
+            suggestion: 'Check URL validity and network connectivity',
+          },
+        ],
+        [],
+        performance.now(),
+        'url',
+        0
+      );
     }
   }
 
@@ -367,30 +445,41 @@ export class FlowiseParser {
     try {
       const content = buffer.toString('utf-8');
       const result = await this.parseString(content);
-      
+
       // Update metadata to reflect buffer source
       result.metadata.sourceType = 'buffer';
       result.metadata.sourceSize = buffer.length;
-      
-      return result;
 
+      return result;
     } catch (error) {
-      return this.createFailureResult([{
-        type: 'structure',
-        message: `Failed to parse buffer: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        path: undefined,
-        line: undefined,
-        column: undefined,
-        code: undefined,
-        suggestion: 'Ensure buffer contains valid UTF-8 encoded JSON',
-      }], [], performance.now(), 'buffer', buffer.length);
+      return this.createFailureResult(
+        [
+          {
+            type: 'structure',
+            message: `Failed to parse buffer: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            path: undefined,
+            line: undefined,
+            column: undefined,
+            code: undefined,
+            suggestion: 'Ensure buffer contains valid UTF-8 encoded JSON',
+          },
+        ],
+        [],
+        performance.now(),
+        'buffer',
+        buffer.length
+      );
     }
   }
 
   /**
    * Validate only (without full parsing)
    */
-  async validate(content: string): Promise<{ isValid: boolean; errors: ParseError[]; warnings: ParseWarning[] }> {
+  async validate(content: string): Promise<{
+    isValid: boolean;
+    errors: ParseError[];
+    warnings: ParseWarning[];
+  }> {
     const result = await this.parseString(content);
     return {
       isValid: result.success,
@@ -402,19 +491,25 @@ export class FlowiseParser {
   /**
    * Quick validation using minimal schema
    */
-  async quickValidate(content: string): Promise<{ isValid: boolean; errors: string[] }> {
+  async quickValidate(
+    content: string
+  ): Promise<{ isValid: boolean; errors: string[] }> {
     try {
       const jsonData = JSON.parse(content);
       const result = FlowiseChatFlowMinimalSchema.safeParse(jsonData);
-      
+
       return {
         isValid: result.success,
-        errors: result.success ? [] : result.error.issues.map(issue => issue.message),
+        errors: result.success
+          ? []
+          : result.error.issues.map((issue) => issue.message),
       };
     } catch (error) {
       return {
         isValid: false,
-        errors: [`JSON parse error: ${error instanceof Error ? error.message : 'Unknown error'}`],
+        errors: [
+          `JSON parse error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        ],
       };
     }
   }
@@ -432,7 +527,7 @@ export class FlowiseParser {
         const nodes = (data as any).nodes;
         if (Array.isArray(nodes) && nodes.length > 0) {
           const firstNode = nodes[0];
-          
+
           // Check version field first - this is the most reliable indicator
           let hasExplicitVersion = false;
           if (firstNode.data?.version >= 2) {
@@ -448,7 +543,10 @@ export class FlowiseParser {
           }
 
           // Only check for v2-specific fields if no explicit version found
-          if (!hasExplicitVersion && firstNode.data?.baseClasses?.includes('BaseChain')) {
+          if (
+            !hasExplicitVersion &&
+            firstNode.data?.baseClasses?.includes('BaseChain')
+          ) {
             score += 0.2;
             indicators.push('BaseChain support');
             version = '2.x';
@@ -456,8 +554,12 @@ export class FlowiseParser {
 
           // Check for new node types
           const nodeTypes = nodes.map((n: any) => n.data?.type || n.type);
-          const v2Types = ['conversationChain', 'sqlDatabaseChain', 'vectorDBQAChain'];
-          if (v2Types.some(type => nodeTypes.includes(type))) {
+          const v2Types = [
+            'conversationChain',
+            'sqlDatabaseChain',
+            'vectorDBQAChain',
+          ];
+          if (v2Types.some((type) => nodeTypes.includes(type))) {
             score += 0.3;
             indicators.push('V2-specific node types');
             version = '2.x';
@@ -514,7 +616,9 @@ export class FlowiseParser {
     }
 
     // Check for missing descriptions
-    const nodesWithoutDescription = data.nodes.filter(node => !node.data.description);
+    const nodesWithoutDescription = data.nodes.filter(
+      (node) => !node.data.description
+    );
     if (nodesWithoutDescription.length > 0) {
       warnings.push({
         type: 'best_practice',
@@ -552,7 +656,10 @@ export class FlowiseParser {
   /**
    * Get line and column from position in text
    */
-  private getLineColumnFromPosition(text: string, position: number): { line: number; column: number } {
+  private getLineColumnFromPosition(
+    text: string,
+    position: number
+  ): { line: number; column: number } {
     const lines = text.substring(0, position).split('\n');
     const lastLine = lines[lines.length - 1];
     return {
@@ -574,7 +681,7 @@ export class FlowiseParser {
     const parseTime = performance.now() - startTime;
     const nodeCount = data.nodes.length;
     const edgeCount = data.edges.length;
-    
+
     // Calculate complexity
     let complexity: 'simple' | 'medium' | 'complex' = 'simple';
     if (nodeCount > 20 || edgeCount > 30) {

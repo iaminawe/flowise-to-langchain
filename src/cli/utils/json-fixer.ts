@@ -8,46 +8,52 @@ export async function fixJsonIssues(jsonString: string): Promise<any | null> {
     return JSON.parse(jsonString);
   } catch (initialError) {
     console.log('Attempting to fix JSON issues...');
-    
+
     let fixedJson = jsonString;
-    
+
     // Common fixes to apply
     const fixes = [
       // Fix trailing commas
       () => {
         fixedJson = fixedJson.replace(/,(\s*[}\]])/g, '$1');
       },
-      
+
       // Fix single quotes to double quotes
       () => {
         fixedJson = fixedJson.replace(/'/g, '"');
       },
-      
+
       // Fix unquoted keys
       () => {
-        fixedJson = fixedJson.replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":');
+        fixedJson = fixedJson.replace(
+          /([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g,
+          '$1"$2":'
+        );
       },
-      
+
       // Fix undefined values
       () => {
         fixedJson = fixedJson.replace(/:\s*undefined/g, ': null');
       },
-      
+
       // Fix NaN values
       () => {
         fixedJson = fixedJson.replace(/:\s*NaN/g, ': null');
       },
-      
+
       // Fix Infinity values
       () => {
         fixedJson = fixedJson.replace(/:\s*Infinity/g, ': null');
       },
-      
+
       // Fix function expressions (remove them)
       () => {
-        fixedJson = fixedJson.replace(/:\s*function\s*\([^)]*\)\s*\{[^}]*\}/g, ': null');
+        fixedJson = fixedJson.replace(
+          /:\s*function\s*\([^)]*\)\s*\{[^}]*\}/g,
+          ': null'
+        );
       },
-      
+
       // Fix comments (remove them)
       () => {
         // Remove single-line comments
@@ -55,25 +61,28 @@ export async function fixJsonIssues(jsonString: string): Promise<any | null> {
         // Remove multi-line comments
         fixedJson = fixedJson.replace(/\/\*[\s\S]*?\*\//g, '');
       },
-      
+
       // Fix missing quotes around strings that look like they should be strings
       () => {
         // This is more complex and risky, so we'll be conservative
-        fixedJson = fixedJson.replace(/:\s*([a-zA-Z][a-zA-Z0-9_]*)\s*([,}\]])/g, (match, value, suffix) => {
-          // Don't quote boolean or null values
-          if (['true', 'false', 'null'].includes(value)) {
-            return match;
+        fixedJson = fixedJson.replace(
+          /:\s*([a-zA-Z][a-zA-Z0-9_]*)\s*([,}\]])/g,
+          (match, value, suffix) => {
+            // Don't quote boolean or null values
+            if (['true', 'false', 'null'].includes(value)) {
+              return match;
+            }
+            return `: "${value}"${suffix}`;
           }
-          return `: "${value}"${suffix}`;
-        });
+        );
       },
-      
+
       // Fix extra commas at the end of arrays/objects
       () => {
         fixedJson = fixedJson.replace(/,(\s*[}\]])/g, '$1');
       },
     ];
-    
+
     // Apply fixes one by one and test parsing
     for (let i = 0; i < fixes.length; i++) {
       try {
@@ -89,7 +98,7 @@ export async function fixJsonIssues(jsonString: string): Promise<any | null> {
         continue;
       }
     }
-    
+
     // If all fixes failed, try a more aggressive approach
     try {
       console.log('Trying aggressive JSON repair...');
@@ -100,7 +109,9 @@ export async function fixJsonIssues(jsonString: string): Promise<any | null> {
     } catch (error) {
       console.log('❌ Unable to automatically fix JSON issues');
       console.log('Original error:', (initialError as Error).message);
-      console.log('Consider manually reviewing the JSON file for syntax errors');
+      console.log(
+        'Consider manually reviewing the JSON file for syntax errors'
+      );
       return null;
     }
   }
@@ -109,23 +120,26 @@ export async function fixJsonIssues(jsonString: string): Promise<any | null> {
 function aggressiveJsonFix(jsonString: string): string {
   // This function attempts more aggressive fixes that might change semantics
   let fixed = jsonString;
-  
+
   try {
     // Remove any obvious non-JSON content at the beginning or end
     fixed = fixed.trim();
-    
+
     // Ensure it starts with { or [
     if (!fixed.startsWith('{') && !fixed.startsWith('[')) {
       const firstBrace = fixed.indexOf('{');
       const firstBracket = fixed.indexOf('[');
-      
-      if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+
+      if (
+        firstBrace !== -1 &&
+        (firstBracket === -1 || firstBrace < firstBracket)
+      ) {
         fixed = fixed.substring(firstBrace);
       } else if (firstBracket !== -1) {
         fixed = fixed.substring(firstBracket);
       }
     }
-    
+
     // Ensure it ends properly
     if (fixed.startsWith('{') && !fixed.endsWith('}')) {
       // Find the last } and cut there
@@ -140,13 +154,14 @@ function aggressiveJsonFix(jsonString: string): string {
         fixed = fixed.substring(0, lastBracket + 1);
       }
     }
-    
+
     // Remove any weird characters that might have snuck in
+    // eslint-disable-next-line no-control-regex
     fixed = fixed.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
-    
+
     // Try to balance braces and brackets
     fixed = balanceBrackets(fixed);
-    
+
     return fixed;
   } catch (error) {
     throw new Error('Aggressive fix failed: ' + (error as Error).message);
@@ -157,7 +172,7 @@ function balanceBrackets(jsonString: string): string {
   let result = jsonString;
   let braceCount = 0;
   let bracketCount = 0;
-  
+
   // Count unbalanced braces and brackets
   for (const char of result) {
     if (char === '{') braceCount++;
@@ -165,30 +180,33 @@ function balanceBrackets(jsonString: string): string {
     else if (char === '[') bracketCount++;
     else if (char === ']') bracketCount--;
   }
-  
+
   // Add missing closing braces
   while (braceCount > 0) {
     result += '}';
     braceCount--;
   }
-  
+
   // Add missing closing brackets
   while (bracketCount > 0) {
     result += ']';
     bracketCount--;
   }
-  
+
   return result;
 }
 
-export function validateJsonSyntax(jsonString: string): { isValid: boolean; error?: string } {
+export function validateJsonSyntax(jsonString: string): {
+  isValid: boolean;
+  error?: string;
+} {
   try {
     JSON.parse(jsonString);
     return { isValid: true };
   } catch (error) {
-    return { 
-      isValid: false, 
-      error: (error as Error).message 
+    return {
+      isValid: false,
+      error: (error as Error).message,
     };
   }
 }

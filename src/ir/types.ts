@@ -1,6 +1,6 @@
 /**
  * Intermediate Representation (IR) Types for Flowise-to-LangChain Converter
- * 
+ *
  * This module defines the core interfaces used to represent Flowise chatflows
  * in an intermediate form that can be processed by various emitters (TypeScript, Python, etc.)
  */
@@ -39,7 +39,16 @@ export interface IRConnection {
 export interface IRParameter {
   name: string;
   value: unknown;
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'json' | 'code' | 'file' | 'credential';
+  type:
+    | 'string'
+    | 'number'
+    | 'boolean'
+    | 'object'
+    | 'array'
+    | 'json'
+    | 'code'
+    | 'file'
+    | 'credential';
   required?: boolean;
   description?: string;
   defaultValue?: unknown;
@@ -72,21 +81,35 @@ export interface IRNode {
   id: NodeId;
   type: string; // Flowise node type (e.g., 'llmChain', 'openAI', 'chatPromptTemplate')
   label: string;
-  category: 'llm' | 'chain' | 'agent' | 'tool' | 'memory' | 'vectorstore' | 'embedding' | 'prompt' | 'retriever' | 'output_parser' | 'text_splitter' | 'loader' | 'utility' | 'control_flow';
-  
+  category:
+    | 'llm'
+    | 'chain'
+    | 'agent'
+    | 'tool'
+    | 'memory'
+    | 'vectorstore'
+    | 'embedding'
+    | 'prompt'
+    | 'retriever'
+    | 'output_parser'
+    | 'text_splitter'
+    | 'loader'
+    | 'utility'
+    | 'control_flow';
+
   // Node connectivity
   inputs: IRPort[];
   outputs: IRPort[];
-  
+
   // Node configuration
   parameters: IRParameter[];
-  
+
   // Position and UI metadata
   position: {
     x: number;
     y: number;
   };
-  
+
   // Additional metadata
   metadata?: {
     version?: string;
@@ -112,7 +135,7 @@ export interface IRGraphMetadata {
   tags?: string[];
   category?: string;
   isTemplate?: boolean;
-  
+
   // Configuration settings
   settings?: {
     enableHistory?: boolean;
@@ -121,7 +144,7 @@ export interface IRGraphMetadata {
     followUpPrompts?: boolean;
     [key: string]: unknown;
   };
-  
+
   // API configuration
   apiConfig?: {
     id: string;
@@ -139,7 +162,7 @@ export interface IRGraph {
   metadata: IRGraphMetadata;
   nodes: IRNode[];
   connections: IRConnection[];
-  
+
   // Analysis results
   analysis?: {
     isValid: boolean;
@@ -275,7 +298,7 @@ export interface CodeFragment {
   content: string;
   dependencies: string[];
   language: 'typescript' | 'javascript' | 'python';
-  
+
   // Metadata for code organization
   metadata?: {
     nodeId?: NodeId;
@@ -302,7 +325,13 @@ export interface ValidationResult {
  * Validation error details
  */
 export interface ValidationError {
-  type: 'missing_node' | 'invalid_connection' | 'missing_parameter' | 'type_mismatch' | 'circular_dependency' | 'unsupported_node';
+  type:
+    | 'missing_node'
+    | 'invalid_connection'
+    | 'missing_parameter'
+    | 'type_mismatch'
+    | 'circular_dependency'
+    | 'unsupported_node';
   message: string;
   nodeId?: NodeId;
   connectionId?: string;
@@ -315,7 +344,11 @@ export interface ValidationError {
  * Validation warning details
  */
 export interface ValidationWarning {
-  type: 'deprecated_node' | 'performance_concern' | 'compatibility_issue' | 'missing_documentation';
+  type:
+    | 'deprecated_node'
+    | 'performance_concern'
+    | 'compatibility_issue'
+    | 'missing_documentation';
   message: string;
   nodeId?: NodeId;
   suggestion?: string;
@@ -342,14 +375,14 @@ export interface GenerationContext {
   includeDocs: boolean;
   includeLangfuse: boolean;
   packageManager: 'npm' | 'yarn' | 'pnpm';
-  
+
   // Environment configuration
   environment: {
     nodeVersion?: string;
     langchainVersion?: string;
     additionalDependencies?: Record<string, string>;
   };
-  
+
   // Code style preferences
   codeStyle: {
     indentSize: number;
@@ -420,13 +453,13 @@ export interface ConversionMetrics {
   startTime: number;
   endTime: number;
   duration: number;
-  
+
   // Statistics
   nodesProcessed: number;
   connectionsProcessed: number;
   codeFragmentsGenerated: number;
   filesGenerated: number;
-  
+
   // Performance breakdown
   phases: {
     parsing: number;
@@ -435,14 +468,14 @@ export interface ConversionMetrics {
     generation: number;
     writing: number;
   };
-  
+
   // Quality metrics
   coverage: {
     supportedNodes: number;
     unsupportedNodes: number;
     partiallySupported: number;
   };
-  
+
   // Memory usage
   memoryUsage: {
     peak: number;
@@ -513,16 +546,16 @@ export interface GraphStats {
   averageDegree: number;
   maxDepth: number;
   complexity: 'simple' | 'medium' | 'complex';
-  
+
   // Node type distribution
   nodeTypes: Record<string, number>;
   categories: Record<string, number>;
-  
+
   // Connectivity analysis
   entryPoints: NodeId[];
   exitPoints: NodeId[];
   isolatedNodes: NodeId[];
-  
+
   // Performance characteristics
   parallelizableChains: NodeId[][];
   bottlenecks: NodeId[];

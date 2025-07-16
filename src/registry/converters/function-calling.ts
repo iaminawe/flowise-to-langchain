@@ -1,6 +1,6 @@
 /**
  * Enhanced Function Calling Converters
- * 
+ *
  * Converts Flowise function calling nodes into advanced LangChain function calling implementations
  */
 
@@ -15,18 +15,33 @@ export class EnhancedOpenAIFunctionsAgentConverter extends BaseConverter {
   readonly flowiseType = 'enhancedOpenAIFunctionsAgent';
   readonly category = 'function-calling';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
-    const variableName = this.generateVariableName(node, 'enhanced_functions_agent');
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+    const variableName = this.generateVariableName(
+      node,
+      'enhanced_functions_agent'
+    );
     const maxIterations = this.getParameterValue(node, 'maxIterations', 15);
     const verbose = this.getParameterValue(node, 'verbose', true);
-    const returnIntermediateSteps = this.getParameterValue(node, 'returnIntermediateSteps', true);
-    const functionTimeout = this.getParameterValue(node, 'functionTimeout', 30000);
-    const enableParallelCalling = this.getParameterValue(node, 'enableParallelCalling', true);
-
-    const imports = this.generateImport(
-      'langchain/agents',
-      ['createOpenAIFunctionsAgent', 'AgentExecutor']
+    const returnIntermediateSteps = this.getParameterValue(
+      node,
+      'returnIntermediateSteps',
+      true
     );
+    const functionTimeout = this.getParameterValue(
+      node,
+      'functionTimeout',
+      30000
+    );
+    const enableParallelCalling = this.getParameterValue(
+      node,
+      'enableParallelCalling',
+      true
+    );
+
+    const imports = this.generateImport('langchain/agents', [
+      'createOpenAIFunctionsAgent',
+      'AgentExecutor',
+    ]);
 
     const implementation = `// Enhanced OpenAI Functions Agent with validation and error handling
 async function ${variableName}Setup() {
@@ -72,7 +87,9 @@ async function ${variableName}Setup() {
     verbose: ${verbose},
     returnIntermediateSteps: ${returnIntermediateSteps},
     handleParsingErrors: true,
-    ${enableParallelCalling ? `
+    ${
+      enableParallelCalling
+        ? `
     // Enable parallel function calling for OpenAI models that support it
     handleParallelToolCalls: async (toolCalls: any[]) => {
       const results = await Promise.allSettled(
@@ -88,7 +105,9 @@ async function ${variableName}Setup() {
         result: result.status === 'fulfilled' ? result.value : \`Error: \${result.reason}\`
       }));
     },
-    ` : ''}
+    `
+        : ''
+    }
     callbacks: [
       {
         handleAgentAction: (action: any) => {
@@ -131,7 +150,7 @@ const ${variableName} = await ${variableName}Setup();`;
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -148,25 +167,29 @@ export class StructuredOutputFunctionConverter extends BaseConverter {
   readonly flowiseType = 'structuredOutputFunction';
   readonly category = 'function-calling';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'structured_function');
-    const functionName = this.getParameterValue(node, 'functionName', 'processData');
-    const outputSchema = this.getParameterValue(node, 'outputSchema', {});
-    const description = this.getParameterValue(node, 'description', 'Process data with structured output');
-
-    const imports = this.generateImport(
-      'zod',
-      ['z'],
-      true
+    const functionName = this.getParameterValue(
+      node,
+      'functionName',
+      'processData'
     );
+    const outputSchema = this.getParameterValue(node, 'outputSchema', {});
+    const description = this.getParameterValue(
+      node,
+      'description',
+      'Process data with structured output'
+    );
+
+    const imports = this.generateImport('zod', ['z'], true);
 
     const implementation = `// Structured output function with Zod validation
 import { ChatOpenAI } from "@langchain/openai";
 
 const outputSchema = z.object({
-  ${Object.entries(outputSchema || {}).map(([key, type]) => 
-    `${key}: z.${type}(),`
-  ).join('\n  ')}
+  ${Object.entries(outputSchema || {})
+    .map(([key, type]) => `${key}: z.${type}(),`)
+    .join('\n  ')}
 });
 
 const ${variableName} = async (input: string) => {
@@ -181,19 +204,24 @@ const ${variableName} = async (input: string) => {
     parameters: {
       type: "object",
       properties: {
-        ${Object.entries(outputSchema || {}).map(([key, type]) => 
-          `${key}: { type: "${type}", description: "The ${key} field" }`
-        ).join(',\n        ')}
+        ${Object.entries(outputSchema || {})
+          .map(
+            ([key, type]) =>
+              `${key}: { type: "${type}", description: "The ${key} field" }`
+          )
+          .join(',\n        ')}
       },
-      required: [${Object.keys(outputSchema || {}).map(k => `"${k}"`).join(', ')}]
+      required: [${Object.keys(outputSchema || {})
+        .map((k) => `"${k}"`)
+        .join(', ')}]
     }
   };
 
   const response = await llm.call(
-    [\{
+    [{
       role: "user",
       content: input
-    \}],
+    }],
     {
       functions: [functionSchema],
       function_call: { name: "${functionName}" }
@@ -233,7 +261,7 @@ const ${variableName} = async (input: string) => {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -250,16 +278,16 @@ export class MultiStepFunctionChainConverter extends BaseConverter {
   readonly flowiseType = 'multiStepFunctionChain';
   readonly category = 'function-calling';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'multi_step_chain');
     const functions = this.getParameterValue(node, 'functions', []);
     const maxSteps = this.getParameterValue(node, 'maxSteps', 10);
-    const allowParallel = this.getParameterValue(node, 'allowParallel', true);
+    // Parallel execution support for multi-step chains
+    // const allowParallel = this.getParameterValue(node, 'allowParallel', true);
 
-    const imports = this.generateImport(
-      '@langchain/core/runnables',
-      ['RunnableSequence']
-    );
+    const imports = this.generateImport('@langchain/core/runnables', [
+      'RunnableSequence',
+    ]);
 
     const implementation = `// Multi-step function chain with dependency resolution
 const ${variableName} = RunnableSequence.from([
@@ -371,7 +399,7 @@ Final answer:\`;
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -388,10 +416,18 @@ export class FunctionCallValidatorConverter extends BaseConverter {
   readonly flowiseType = 'functionCallValidator';
   readonly category = 'function-calling';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'function_validator');
-    const allowedFunctions = this.getParameterValue(node, 'allowedFunctions', []);
-    const maxParameterLength = this.getParameterValue(node, 'maxParameterLength', 1000);
+    const allowedFunctions = this.getParameterValue(
+      node,
+      'allowedFunctions',
+      []
+    );
+    const maxParameterLength = this.getParameterValue(
+      node,
+      'maxParameterLength',
+      1000
+    );
     const sanitizeInputs = this.getParameterValue(node, 'sanitizeInputs', true);
 
     const imports = this.generateImport(
@@ -422,7 +458,9 @@ const ${variableName} = {
       }
     }
     
-    ${sanitizeInputs ? `
+    ${
+      sanitizeInputs
+        ? `
     // Sanitize string inputs
     const sanitizedArgs = {};
     for (const [key, value] of Object.entries(args)) {
@@ -434,9 +472,11 @@ const ${variableName} = {
     }
     
     return { name, arguments: sanitizedArgs };
-    ` : `
+    `
+        : `
     return { name, arguments: args };
-    `}
+    `
+    }
   },
   
   validateFunctionOutput: (output: any, expectedSchema?: any) => {
@@ -526,7 +566,7 @@ const ${variableName} = {
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 
@@ -543,19 +583,24 @@ export class FunctionCallRouterConverter extends BaseConverter {
   readonly flowiseType = 'functionCallRouter';
   readonly category = 'function-calling';
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'function_router');
     const routingRules = this.getParameterValue(node, 'routingRules', {});
-    const defaultFunction = this.getParameterValue(node, 'defaultFunction', 'general');
-
-    const imports = this.generateImport(
-      '@langchain/core/runnables',
-      ['RunnableBranch']
+    const defaultFunction = this.getParameterValue(
+      node,
+      'defaultFunction',
+      'general'
     );
+
+    const imports = this.generateImport('@langchain/core/runnables', [
+      'RunnableBranch',
+    ]);
 
     const implementation = `// Function call router with intent classification
 const ${variableName} = RunnableBranch.from([
-  ${Object.entries(routingRules || {}).map(([intent, functions]) => `
+  ${Object.entries(routingRules || {})
+    .map(
+      ([intent, functions]) => `
   [
     // Condition: Check if input matches ${intent} intent
     async (input: { query: string }) => {
@@ -603,7 +648,9 @@ Function to call:\`;
       }
     }
   ]
-  `).join(',')},
+  `
+    )
+    .join(',')},
   
   // Default case
   [
@@ -640,7 +687,7 @@ Response:\`;
         [],
         node.id,
         1
-      )
+      ),
     ];
   }
 

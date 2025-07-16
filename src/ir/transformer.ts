@@ -1,6 +1,6 @@
 /**
  * Transformation utilities for converting Flowise JSON to IR and IR to code
- * 
+ *
  * This module handles the conversion between different representations:
  * - Flowise JSON → IR
  * - IR → Code Fragments
@@ -21,9 +21,13 @@ import {
   ConversionMetrics,
   CodeGenerationResult,
   GeneratedFile,
-  NodeId
+  NodeId,
 } from './types.js';
-import { StandardNodeFactory, NodeUtils, ConnectionValidator } from './nodes.js';
+import {
+  StandardNodeFactory,
+  NodeUtils,
+  ConnectionValidator,
+} from './nodes.js';
 import { IRGraphAnalyzer } from './graph.js';
 import { ConverterFactory } from '../registry/registry.js';
 
@@ -66,7 +70,16 @@ export class FlowiseToIRTransformer {
    */
   async transform(flowiseData: FlowiseChatFlow): Promise<TransformationResult> {
     const startTime = Date.now();
-    this.metrics = { startTime, phases: { parsing: 0, validation: 0, transformation: 0, generation: 0, writing: 0 } };
+    this.metrics = {
+      startTime,
+      phases: {
+        parsing: 0,
+        validation: 0,
+        transformation: 0,
+        generation: 0,
+        writing: 0,
+      },
+    };
 
     try {
       // Parse metadata
@@ -77,14 +90,17 @@ export class FlowiseToIRTransformer {
       // Transform nodes
       const transformStart = Date.now();
       const nodes = await this.transformNodes(flowiseData.nodes || []);
-      const connections = this.transformConnections(flowiseData.edges || [], nodes);
+      const connections = this.transformConnections(
+        flowiseData.edges || [],
+        nodes
+      );
       this.metrics.phases!.transformation = Date.now() - transformStart;
 
       // Create IR graph
       const graph: IRGraph = {
         metadata,
         nodes,
-        connections
+        connections,
       };
 
       // Validate and analyze
@@ -93,13 +109,13 @@ export class FlowiseToIRTransformer {
       const analysis = IRGraphAnalyzer.analyzeGraph(graph);
       graph.analysis = {
         isValid: validation.isValid,
-        errors: validation.errors.map(e => e.message),
-        warnings: validation.warnings.map(w => w.message),
+        errors: validation.errors.map((e) => e.message),
+        warnings: validation.warnings.map((w) => w.message),
         complexity: analysis.complexity,
         entryPoints: analysis.entryPoints,
         exitPoints: analysis.exitPoints,
         cycles: IRGraphAnalyzer.findCycles(graph),
-        dependencies: new Map()
+        dependencies: new Map(),
       };
       this.metrics.phases!.validation = Date.now() - validationStart;
 
@@ -115,24 +131,23 @@ export class FlowiseToIRTransformer {
         filesGenerated: 0,
         phases: this.metrics.phases!,
         coverage: {
-          supportedNodes: nodes.filter(n => !n.metadata?.deprecated).length,
+          supportedNodes: nodes.filter((n) => !n.metadata?.deprecated).length,
           unsupportedNodes: 0,
-          partiallySupported: 0
+          partiallySupported: 0,
         },
         memoryUsage: {
           peak: process.memoryUsage().heapUsed,
           average: process.memoryUsage().heapUsed,
-          final: process.memoryUsage().heapUsed
-        }
+          final: process.memoryUsage().heapUsed,
+        },
       };
 
       return {
         graph,
         metrics: completeMetrics,
         validation,
-        warnings: this.collectWarnings(flowiseData, graph)
+        warnings: this.collectWarnings(flowiseData, graph),
       };
-
     } catch (error) {
       throw new Error(`Transformation failed: ${error}`);
     }
@@ -140,7 +155,7 @@ export class FlowiseToIRTransformer {
 
   private extractMetadata(flowiseData: FlowiseChatFlow): IRGraphMetadata {
     const chatflow = flowiseData.chatflow;
-    
+
     return {
       name: chatflow?.name || 'Untitled Flow',
       description: chatflow?.description || '',
@@ -153,25 +168,27 @@ export class FlowiseToIRTransformer {
       isTemplate: false,
       settings: {
         enableHistory: true,
-        followUpPrompts: false
+        followUpPrompts: false,
       },
-      apiConfig: chatflow ? {
-        id: chatflow.id,
-        name: chatflow.name,
-        deployed: chatflow.deployed,
-        isPublic: chatflow.isPublic,
-        apikeyid: chatflow.apikeyid
-      } : undefined
+      apiConfig: chatflow
+        ? {
+            id: chatflow.id,
+            name: chatflow.name,
+            deployed: chatflow.deployed,
+            isPublic: chatflow.isPublic,
+            apikeyid: chatflow.apikeyid,
+          }
+        : undefined,
     };
   }
 
   private detectFlowiseVersion(flowiseData: FlowiseChatFlow): string {
     // Detect version based on node structure and available fields
-    const hasNewStructure = flowiseData.nodes && Array.isArray(flowiseData.nodes) && 
-      flowiseData.nodes.some(node => 
-        node.data?.version !== undefined
-      );
-    
+    const hasNewStructure =
+      flowiseData.nodes &&
+      Array.isArray(flowiseData.nodes) &&
+      flowiseData.nodes.some((node) => node.data?.version !== undefined);
+
     return hasNewStructure ? '1.5.0' : '1.4.0';
   }
 
@@ -198,7 +215,7 @@ export class FlowiseToIRTransformer {
 
   private async transformNode(flowiseNode: FlowiseNode): Promise<IRNode> {
     const { data } = flowiseNode;
-    
+
     // Create base node using factory
     const node = this.nodeFactory.createNode(
       data.name || data.type,
@@ -209,11 +226,14 @@ export class FlowiseToIRTransformer {
     // Update position
     node.position = {
       x: flowiseNode.position.x,
-      y: flowiseNode.position.y
+      y: flowiseNode.position.y,
     };
 
     // Transform parameters
-    node.parameters = this.transformParameters(data.inputs, data.inputParams || []);
+    node.parameters = this.transformParameters(
+      data.inputs,
+      data.inputParams || []
+    );
 
     // Update metadata
     node.metadata = {
@@ -224,30 +244,33 @@ export class FlowiseToIRTransformer {
       flowiseNodeData: {
         originalType: data.type,
         originalName: data.name,
-        category: data.category
-      }
+        category: data.category,
+      },
     };
 
     return node;
   }
 
-  private transformParameters(inputs: Record<string, unknown>, inputParams: any[]): import('./types.js').IRParameter[] {
+  private transformParameters(
+    inputs: Record<string, unknown>,
+    inputParams: any[]
+  ): import('./types.js').IRParameter[] {
     const parameters: import('./types.js').IRParameter[] = [];
 
     // Transform actual input values
     for (const [name, value] of Object.entries(inputs)) {
       if (value !== undefined && value !== null && value !== '') {
-        const paramDef = inputParams.find(p => p.name === name);
-        
+        const paramDef = inputParams.find((p) => p.name === name);
+
         parameters.push({
           name,
           value,
           type: this.inferParameterType(value, paramDef?.type),
           required: !paramDef?.optional,
           description: paramDef?.description,
-          options: paramDef?.options?.map((opt: any) => 
+          options: paramDef?.options?.map((opt: any) =>
             typeof opt === 'string' ? opt : opt.name
-          )
+          ),
         });
       }
     }
@@ -255,7 +278,19 @@ export class FlowiseToIRTransformer {
     return parameters;
   }
 
-  private inferParameterType(value: unknown, flowiseType?: string): 'string' | 'number' | 'boolean' | 'object' | 'array' | 'json' | 'code' | 'file' | 'credential' {
+  private inferParameterType(
+    value: unknown,
+    flowiseType?: string
+  ):
+    | 'string'
+    | 'number'
+    | 'boolean'
+    | 'object'
+    | 'array'
+    | 'json'
+    | 'code'
+    | 'file'
+    | 'credential' {
     if (flowiseType) {
       switch (flowiseType) {
         case 'password':
@@ -275,12 +310,15 @@ export class FlowiseToIRTransformer {
     if (typeof value === 'boolean') return 'boolean';
     if (Array.isArray(value)) return 'array';
     if (typeof value === 'object') return 'object';
-    
+
     return 'string';
   }
 
-  private transformConnections(flowiseEdges: FlowiseEdge[], nodes: IRNode[]): IRConnection[] {
-    return flowiseEdges.map(edge => ({
+  private transformConnections(
+    flowiseEdges: FlowiseEdge[],
+    nodes: IRNode[]
+  ): IRConnection[] {
+    return flowiseEdges.map((edge) => ({
       id: edge.id,
       source: edge.source,
       target: edge.target,
@@ -288,8 +326,8 @@ export class FlowiseToIRTransformer {
       targetHandle: edge.targetHandle,
       label: edge.data?.label,
       metadata: {
-        originalEdge: edge
-      }
+        originalEdge: edge,
+      },
     }));
   }
 
@@ -307,23 +345,28 @@ export class FlowiseToIRTransformer {
         unsupported: true,
         originalType: flowiseNode.data.type,
         originalName: flowiseNode.data.name,
-        description: `Unsupported node type: ${flowiseNode.data.type}`
-      }
+        description: `Unsupported node type: ${flowiseNode.data.type}`,
+      },
     };
   }
 
-  private collectWarnings(flowiseData: FlowiseChatFlow, graph: IRGraph): string[] {
+  private collectWarnings(
+    flowiseData: FlowiseChatFlow,
+    graph: IRGraph
+  ): string[] {
     const warnings: string[] = [];
 
     // Check for unsupported nodes
-    const unsupportedNodes = graph.nodes.filter(n => n.metadata?.unsupported);
+    const unsupportedNodes = graph.nodes.filter((n) => n.metadata?.unsupported);
     if (unsupportedNodes.length > 0) {
       warnings.push(`Found ${unsupportedNodes.length} unsupported node types`);
     }
 
     // Check for deprecated features
-    const hasDeprecatedNodes = graph.nodes && Array.isArray(graph.nodes) && 
-      graph.nodes.some(n => n.metadata?.deprecated);
+    const hasDeprecatedNodes =
+      graph.nodes &&
+      Array.isArray(graph.nodes) &&
+      graph.nodes.some((n) => n.metadata?.deprecated);
     if (hasDeprecatedNodes) {
       warnings.push('Graph contains deprecated node types');
     }
@@ -345,25 +388,28 @@ export class IRToCodeTransformer {
   /**
    * Generate code fragments from IR graph
    */
-  async generateCode(graph: IRGraph, context: GenerationContext): Promise<CodeGenerationResult> {
+  async generateCode(
+    graph: IRGraph,
+    context: GenerationContext
+  ): Promise<CodeGenerationResult> {
     const startTime = Date.now();
     const fragments: CodeFragment[] = [];
-    
+
     try {
       // Generate imports
       fragments.push(...this.generateImports(graph, context));
-      
+
       // Generate node implementations
-      for (const node of (graph.nodes || [])) {
+      for (const node of graph.nodes || []) {
         fragments.push(...this.generateNodeCode(node, context, graph));
       }
-      
+
       // Generate flow execution code
       fragments.push(...this.generateExecutionCode(graph, context));
-      
+
       // Generate files
       const files = this.generateFiles(fragments, context);
-      
+
       const endTime = Date.now();
       const metrics: GenerationMetrics = {
         fragmentsGenerated: fragments.length,
@@ -371,7 +417,7 @@ export class IRToCodeTransformer {
         linesOfCode: this.countLines(fragments),
         dependencies: this.extractDependencies(fragments).size,
         generationTime: endTime - startTime,
-        codeSize: this.calculateCodeSize(fragments)
+        codeSize: this.calculateCodeSize(fragments),
       };
 
       return {
@@ -387,27 +433,31 @@ export class IRToCodeTransformer {
           totalConnections: graph.connections.length,
           estimatedComplexity: graph.analysis?.complexity || 'simple',
           features: this.extractFeatures(graph),
-          warnings: []
+          warnings: [],
         },
         scripts: this.generateScripts(context),
-        packageInfo: this.generatePackageJson(context)
+        packageInfo: this.generatePackageJson(context),
       };
-
     } catch (error) {
       throw new Error(`Code generation failed: ${error}`);
     }
   }
 
-  private generateImports(graph: IRGraph, context: GenerationContext): CodeFragment[] {
+  private generateImports(
+    graph: IRGraph,
+    context: GenerationContext
+  ): CodeFragment[] {
     const imports = new Set<string>();
     const fragments: CodeFragment[] = [];
 
     // Standard LangChain imports
     imports.add('import { LLMChain } from "langchain/chains";');
-    imports.add('import { PromptTemplate, ChatPromptTemplate } from "@langchain/core/prompts";');
-    
+    imports.add(
+      'import { PromptTemplate, ChatPromptTemplate } from "@langchain/core/prompts";'
+    );
+
     // Add imports based on node types
-    for (const node of (graph.nodes || [])) {
+    for (const node of graph.nodes || []) {
       switch (node.type) {
         case 'openAI':
           imports.add('import { OpenAI } from "@langchain/openai";');
@@ -422,16 +472,22 @@ export class IRToCodeTransformer {
           imports.add('import { BufferWindowMemory } from "langchain/memory";');
           break;
         case 'conversationSummaryMemory':
-          imports.add('import { ConversationSummaryMemory } from "langchain/memory";');
+          imports.add(
+            'import { ConversationSummaryMemory } from "langchain/memory";'
+          );
           break;
         case 'calculator':
-          imports.add('import { Calculator } from "langchain/tools/calculator";');
+          imports.add(
+            'import { Calculator } from "langchain/tools/calculator";'
+          );
           break;
         case 'serpAPI':
           imports.add('import { SerpAPI } from "langchain/tools";');
           break;
         case 'webBrowser':
-          imports.add('import { WebBrowser } from "langchain/tools/webbrowser";');
+          imports.add(
+            'import { WebBrowser } from "langchain/tools/webbrowser";'
+          );
           break;
         // Add more cases as needed
       }
@@ -439,7 +495,9 @@ export class IRToCodeTransformer {
 
     // LangFuse imports if enabled
     if (context.includeLangfuse) {
-      imports.add('import { LangfuseCallbackHandler } from "@langfuse/langchain";');
+      imports.add(
+        'import { LangfuseCallbackHandler } from "@langfuse/langchain";'
+      );
     }
 
     // Environment imports
@@ -456,15 +514,19 @@ export class IRToCodeTransformer {
         language: context.targetLanguage,
         metadata: {
           order: order++,
-          category: 'imports'
-        }
+          category: 'imports',
+        },
       });
     }
 
     return fragments;
   }
 
-  private generateNodeCode(node: IRNode, context: GenerationContext, graph?: IRGraph): CodeFragment[] {
+  private generateNodeCode(
+    node: IRNode,
+    context: GenerationContext,
+    graph?: IRGraph
+  ): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     switch (node.type) {
@@ -490,7 +552,9 @@ export class IRToCodeTransformer {
         fragments.push(this.generateBufferWindowMemoryNode(node, context));
         break;
       case 'conversationSummaryMemory':
-        fragments.push(this.generateConversationSummaryMemoryNode(node, context, graph));
+        fragments.push(
+          this.generateConversationSummaryMemoryNode(node, context, graph)
+        );
         break;
       case 'calculator':
         fragments.push(this.generateCalculatorNode(node, context));
@@ -519,20 +583,23 @@ export class IRToCodeTransformer {
     return fragments;
   }
 
-  private generateOpenAINode(node: IRNode, context: GenerationContext): CodeFragment {
+  private generateOpenAINode(
+    node: IRNode,
+    context: GenerationContext
+  ): CodeFragment {
     const params = this.getNodeParameters(node);
     const modelName = params.modelName || 'gpt-3.5-turbo';
     const temperature = params.temperature || 0.7;
-    
+
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new OpenAI({\n`;
     content += `  modelName: "${modelName}",\n`;
     content += `  temperature: ${temperature},\n`;
-    
+
     if (params.maxTokens) {
       content += `  maxTokens: ${params.maxTokens},\n`;
     }
-    
+
     content += `  openAIApiKey: process.env.OPENAI_API_KEY,\n`;
     content += `});`;
 
@@ -546,25 +613,28 @@ export class IRToCodeTransformer {
         nodeId: node.id,
         order: 100,
         category: 'llm',
-        exports: [this.getVariableName(node)]
-      }
+        exports: [this.getVariableName(node)],
+      },
     };
   }
 
-  private generateChatOpenAINode(node: IRNode, context: GenerationContext): CodeFragment {
+  private generateChatOpenAINode(
+    node: IRNode,
+    context: GenerationContext
+  ): CodeFragment {
     const params = this.getNodeParameters(node);
     const modelName = params.modelName || 'gpt-3.5-turbo';
     const temperature = params.temperature || 0.7;
-    
+
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new ChatOpenAI({\n`;
     content += `  modelName: "${modelName}",\n`;
     content += `  temperature: ${temperature},\n`;
-    
+
     if (params.maxTokens) {
       content += `  maxTokens: ${params.maxTokens},\n`;
     }
-    
+
     content += `  openAIApiKey: process.env.OPENAI_API_KEY,\n`;
     content += `});`;
 
@@ -578,18 +648,21 @@ export class IRToCodeTransformer {
         nodeId: node.id,
         order: 100,
         category: 'llm',
-        exports: [this.getVariableName(node)]
-      }
+        exports: [this.getVariableName(node)],
+      },
     };
   }
 
-  private generatePromptTemplateNode(node: IRNode, context: GenerationContext): CodeFragment {
+  private generatePromptTemplateNode(
+    node: IRNode,
+    context: GenerationContext
+  ): CodeFragment {
     const params = this.getNodeParameters(node);
     const systemMessage = params.systemMessage;
     const humanMessage = params.humanMessage || '{input}';
-    
+
     let content = `// ${node.label}\n`;
-    
+
     if (systemMessage) {
       content += `const ${this.getVariableName(node)} = ChatPromptTemplate.fromMessages([\n`;
       content += `  ["system", "${this.escapeString(systemMessage)}"],\n`;
@@ -611,29 +684,33 @@ export class IRToCodeTransformer {
         nodeId: node.id,
         order: 200,
         category: 'prompt',
-        exports: [this.getVariableName(node)]
-      }
+        exports: [this.getVariableName(node)],
+      },
     };
   }
 
-  private generateLLMChainNode(node: IRNode, context: GenerationContext, graph?: IRGraph): CodeFragment {
+  private generateLLMChainNode(
+    node: IRNode,
+    context: GenerationContext,
+    graph?: IRGraph
+  ): CodeFragment {
     const params = this.getNodeParameters(node);
     const outputKey = params.outputKey || 'text';
-    
+
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new LLMChain({\n`;
-    
+
     const llmInput = this.getInputVariableName(node, 'model', graph);
     const promptInput = this.getInputVariableName(node, 'prompt', graph);
-    
+
     content += `  llm: ${llmInput},\n`;
     content += `  prompt: ${promptInput},\n`;
-    
+
     const memoryInput = this.getInputVariableName(node, 'memory', graph);
     if (memoryInput && memoryInput !== `memory_${node.id}`) {
       content += `  memory: ${memoryInput},\n`;
     }
-    
+
     content += `  outputKey: "${outputKey}",\n`;
     content += `});`;
 
@@ -647,16 +724,19 @@ export class IRToCodeTransformer {
         nodeId: node.id,
         order: 300,
         category: 'chain',
-        exports: [this.getVariableName(node)]
-      }
+        exports: [this.getVariableName(node)],
+      },
     };
   }
 
-  private generateBufferMemoryNode(node: IRNode, context: GenerationContext): CodeFragment {
+  private generateBufferMemoryNode(
+    node: IRNode,
+    context: GenerationContext
+  ): CodeFragment {
     const params = this.getNodeParameters(node);
     const memoryKey = params.memoryKey || 'history';
     const returnMessages = params.returnMessages || false;
-    
+
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new BufferMemory({\n`;
     content += `  memoryKey: "${memoryKey}",\n`;
@@ -673,17 +753,20 @@ export class IRToCodeTransformer {
         nodeId: node.id,
         order: 150,
         category: 'memory',
-        exports: [this.getVariableName(node)]
-      }
+        exports: [this.getVariableName(node)],
+      },
     };
   }
 
-  private generateBufferWindowMemoryNode(node: IRNode, context: GenerationContext): CodeFragment {
+  private generateBufferWindowMemoryNode(
+    node: IRNode,
+    context: GenerationContext
+  ): CodeFragment {
     const params = this.getNodeParameters(node);
     const memoryKey = params.memoryKey || 'history';
     const returnMessages = params.returnMessages || false;
     const k = params.k || 5;
-    
+
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new BufferWindowMemory({\n`;
     content += `  memoryKey: "${memoryKey}",\n`;
@@ -701,17 +784,21 @@ export class IRToCodeTransformer {
         nodeId: node.id,
         order: 150,
         category: 'memory',
-        exports: [this.getVariableName(node)]
-      }
+        exports: [this.getVariableName(node)],
+      },
     };
   }
 
-  private generateConversationSummaryMemoryNode(node: IRNode, context: GenerationContext, graph?: IRGraph): CodeFragment {
+  private generateConversationSummaryMemoryNode(
+    node: IRNode,
+    context: GenerationContext,
+    graph?: IRGraph
+  ): CodeFragment {
     const params = this.getNodeParameters(node);
     const memoryKey = params.memoryKey || 'history';
     const returnMessages = params.returnMessages || false;
     const maxTokenLimit = params.maxTokenLimit || 2000;
-    
+
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new ConversationSummaryMemory({\n`;
     content += `  llm: ${this.getInputVariableName(node, 'llm', graph)},\n`;
@@ -730,12 +817,15 @@ export class IRToCodeTransformer {
         nodeId: node.id,
         order: 150,
         category: 'memory',
-        exports: [this.getVariableName(node)]
-      }
+        exports: [this.getVariableName(node)],
+      },
     };
   }
 
-  private generateCalculatorNode(node: IRNode, context: GenerationContext): CodeFragment {
+  private generateCalculatorNode(
+    node: IRNode,
+    context: GenerationContext
+  ): CodeFragment {
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new Calculator();`;
 
@@ -749,15 +839,18 @@ export class IRToCodeTransformer {
         nodeId: node.id,
         order: 200,
         category: 'tool',
-        exports: [this.getVariableName(node)]
-      }
+        exports: [this.getVariableName(node)],
+      },
     };
   }
 
-  private generateSerpAPINode(node: IRNode, context: GenerationContext): CodeFragment {
+  private generateSerpAPINode(
+    node: IRNode,
+    context: GenerationContext
+  ): CodeFragment {
     const params = this.getNodeParameters(node);
     const apiKey = params.apiKey || 'process.env.SERPAPI_API_KEY';
-    
+
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new SerpAPI(${this.formatParameterValue(apiKey)});`;
 
@@ -771,16 +864,20 @@ export class IRToCodeTransformer {
         nodeId: node.id,
         order: 200,
         category: 'tool',
-        exports: [this.getVariableName(node)]
-      }
+        exports: [this.getVariableName(node)],
+      },
     };
   }
 
-  private generateAgentNode(node: IRNode, context: GenerationContext, graph?: IRGraph): CodeFragment[] {
+  private generateAgentNode(
+    node: IRNode,
+    context: GenerationContext,
+    graph?: IRGraph
+  ): CodeFragment[] {
     // Try to use the registry converter first
     const registry = ConverterFactory.getRegistry();
     const converter = registry.getConverter(node.type);
-    
+
     if (converter) {
       try {
         const fragments = converter.convert(node, context);
@@ -788,40 +885,48 @@ export class IRToCodeTransformer {
           return fragments; // Return all fragments
         }
       } catch (error) {
-        console.warn(`Failed to use registry converter for ${node.type}: ${error}`);
+        console.warn(
+          `Failed to use registry converter for ${node.type}: ${error}`
+        );
       }
     }
-    
+
     // Fall back to placeholder if converter fails
     const variableName = this.getVariableName(node);
-    
+
     let content = `// ${node.label}\n`;
     content += `const ${variableName} = {\n`;
     content += `  // Agent implementation placeholder\n`;
     content += `  type: "${node.type}",\n`;
     content += `  id: "${node.id}"\n`;
     content += `};`;
-    
-    return [{
-      id: `node-${node.id}`,
-      type: 'initialization',
-      content,
-      dependencies: [],
-      language: context.targetLanguage,
-      metadata: {
-        nodeId: node.id,
-        order: 400,
-        category: 'agent',
-        exports: [variableName]
-      }
-    }];
+
+    return [
+      {
+        id: `node-${node.id}`,
+        type: 'initialization',
+        content,
+        dependencies: [],
+        language: context.targetLanguage,
+        metadata: {
+          nodeId: node.id,
+          order: 400,
+          category: 'agent',
+          exports: [variableName],
+        },
+      },
+    ];
   }
 
-  private generateWebBrowserNode(node: IRNode, context: GenerationContext, graph?: IRGraph): CodeFragment {
+  private generateWebBrowserNode(
+    node: IRNode,
+    context: GenerationContext,
+    graph?: IRGraph
+  ): CodeFragment {
     const params = this.getNodeParameters(node);
     const headless = params.headless !== undefined ? params.headless : true;
     const timeout = params.timeout || 30000;
-    
+
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new WebBrowser({\n`;
     content += `  model: ${this.getInputVariableName(node, 'llm', graph)},\n`;
@@ -840,12 +945,15 @@ export class IRToCodeTransformer {
         nodeId: node.id,
         order: 200,
         category: 'tool',
-        exports: [this.getVariableName(node)]
-      }
+        exports: [this.getVariableName(node)],
+      },
     };
   }
 
-  private generateGenericNode(node: IRNode, context: GenerationContext): CodeFragment {
+  private generateGenericNode(
+    node: IRNode,
+    context: GenerationContext
+  ): CodeFragment {
     let content = `// ${node.label} (${node.type})\n`;
     content += `// TODO: Implement ${node.type} node\n`;
     content += `const ${this.getVariableName(node)} = null; // Placeholder`;
@@ -860,18 +968,21 @@ export class IRToCodeTransformer {
         nodeId: node.id,
         order: 1000,
         category: 'placeholder',
-        exports: [this.getVariableName(node)]
-      }
+        exports: [this.getVariableName(node)],
+      },
     };
   }
 
-  private generateExecutionCode(graph: IRGraph, context: GenerationContext): CodeFragment[] {
+  private generateExecutionCode(
+    graph: IRGraph,
+    context: GenerationContext
+  ): CodeFragment[] {
     const fragments: CodeFragment[] = [];
-    
+
     // Main execution function
     let content = `\n// Main execution function\n`;
     content += `export async function runFlow(input: string): Promise<string> {\n`;
-    
+
     if (context.includeLangfuse) {
       content += `  // Initialize LangFuse callback\n`;
       content += `  const langfuseHandler = new LangfuseCallbackHandler({\n`;
@@ -880,31 +991,34 @@ export class IRToCodeTransformer {
       content += `    baseUrl: process.env.LANGFUSE_BASE_URL,\n`;
       content += `  });\n\n`;
     }
-    
+
     // Find the main chain or entry point
     const entryPoints = graph.analysis?.entryPoints || [];
     const exitPoints = graph.analysis?.exitPoints || [];
-    
+
     if (exitPoints.length > 0) {
-      const mainChain = graph.nodes.find(n => exitPoints.includes(n.id));
+      const mainChain = graph.nodes.find((n) => exitPoints.includes(n.id));
       if (mainChain) {
         const variableName = this.getVariableName(mainChain);
-        
+
         // Check if this is an agent that needs initialization
-        if (mainChain.type.includes('Agent') || mainChain.type.includes('agent')) {
+        if (
+          mainChain.type.includes('Agent') ||
+          mainChain.type.includes('agent')
+        ) {
           content += `  // Initialize agent if not already initialized\n`;
           content += `  if (!${variableName}) {\n`;
           content += `    ${variableName} = await setupAgent();\n`;
           content += `  }\n\n`;
         }
-        
+
         content += `  const result = await ${variableName}.call({\n`;
         content += `    input: input,\n`;
-        
+
         if (context.includeLangfuse) {
           content += `    callbacks: [langfuseHandler],\n`;
         }
-        
+
         content += `  });\n\n`;
         content += `  return result.text || result.output || JSON.stringify(result);\n`;
       }
@@ -912,9 +1026,9 @@ export class IRToCodeTransformer {
       content += `  // TODO: Implement flow execution logic\n`;
       content += `  return "Flow execution not implemented";\n`;
     }
-    
+
     content += `}\n\n`;
-    
+
     // CLI entry point
     content += `// CLI entry point\n`;
     content += `if (import.meta.url === \`file://\${process.argv[1]}\`) {\n`;
@@ -939,32 +1053,41 @@ export class IRToCodeTransformer {
         order: 1000,
         category: 'execution',
         async: true,
-        exports: ['runFlow']
-      }
+        exports: ['runFlow'],
+      },
     });
 
     return fragments;
   }
 
-  private generateFiles(fragments: CodeFragment[], context: GenerationContext): GeneratedFile[] {
+  private generateFiles(
+    fragments: CodeFragment[],
+    context: GenerationContext
+  ): GeneratedFile[] {
     const files: GeneratedFile[] = [];
-    
+
     // Main source file
-    const sourceFragments = fragments.filter(f => 
-      f.type === 'import' || f.type === 'initialization' || f.type === 'execution' || f.type === 'declaration'
+    const sourceFragments = fragments.filter(
+      (f) =>
+        f.type === 'import' ||
+        f.type === 'initialization' ||
+        f.type === 'execution' ||
+        f.type === 'declaration'
     );
-    
-    sourceFragments.sort((a, b) => (a.metadata?.order || 0) - (b.metadata?.order || 0));
-    
-    const sourceContent = sourceFragments.map(f => f.content).join('\n\n');
-    
+
+    sourceFragments.sort(
+      (a, b) => (a.metadata?.order || 0) - (b.metadata?.order || 0)
+    );
+
+    const sourceContent = sourceFragments.map((f) => f.content).join('\n\n');
+
     files.push({
       path: 'src/index.ts',
       content: sourceContent,
       type: 'main',
       dependencies: [],
       exports: ['default'],
-      size: sourceContent.length
+      size: sourceContent.length,
     });
 
     // Package.json
@@ -975,7 +1098,7 @@ export class IRToCodeTransformer {
       type: 'config',
       dependencies: [],
       exports: [],
-      size: JSON.stringify(packageJson).length
+      size: JSON.stringify(packageJson).length,
     });
 
     // Environment file
@@ -986,7 +1109,7 @@ export class IRToCodeTransformer {
       type: 'config',
       dependencies: [],
       exports: [],
-      size: envContent.length
+      size: envContent.length,
     });
 
     // README
@@ -998,7 +1121,7 @@ export class IRToCodeTransformer {
         type: 'utils',
         dependencies: [],
         exports: [],
-        size: readmeContent.length
+        size: readmeContent.length,
       });
     }
 
@@ -1010,89 +1133,102 @@ export class IRToCodeTransformer {
     return `${node.type}_${node.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
   }
 
-  private getInputVariableName(node: IRNode, inputName: string, graph?: IRGraph): string {
+  private getInputVariableName(
+    node: IRNode,
+    inputName: string,
+    graph?: IRGraph
+  ): string {
     // Find the source node connected to this input using improved algorithm
     if (graph) {
-      const connection = this.findConnectionWithMultipleStrategies(node, inputName, graph);
-      
+      const connection = this.findConnectionWithMultipleStrategies(
+        node,
+        inputName,
+        graph
+      );
+
       if (connection) {
-        const sourceNode = graph.nodes.find(n => n.id === connection.source);
+        const sourceNode = graph.nodes.find((n) => n.id === connection.source);
         if (sourceNode) {
           return this.getVariableName(sourceNode);
         }
       }
     }
-    
+
     // Intelligent fallback based on input type
     return this.generateIntelligentFallback(node, inputName);
   }
-  
+
   /**
    * Multi-strategy connection finder with comprehensive pattern matching
    */
-  private findConnectionWithMultipleStrategies(node: IRNode, inputName: string, graph: IRGraph): IRConnection | undefined {
+  private findConnectionWithMultipleStrategies(
+    node: IRNode,
+    inputName: string,
+    graph: IRGraph
+  ): IRConnection | undefined {
     // Strategy 1: Exact input name match
-    let connection = graph.connections.find(c => 
-      c.target === node.id && c.targetHandle === inputName
+    let connection = graph.connections.find(
+      (c) => c.target === node.id && c.targetHandle === inputName
     );
     if (connection) return connection;
-    
+
     // Strategy 2: Standard Flowise pattern: {nodeId}-input-{inputName}-{Type}
-    connection = graph.connections.find(c => 
-      c.target === node.id && 
-      c.targetHandle?.match(new RegExp(`^${node.id}-input-${inputName}-`))
+    connection = graph.connections.find(
+      (c) =>
+        c.target === node.id &&
+        c.targetHandle?.match(new RegExp(`^${node.id}-input-${inputName}-`))
     );
     if (connection) return connection;
-    
+
     // Strategy 3: Flexible pattern matching for union types
-    connection = graph.connections.find(c => 
-      c.target === node.id && 
-      c.targetHandle?.includes(`-input-${inputName}-`)
+    connection = graph.connections.find(
+      (c) =>
+        c.target === node.id && c.targetHandle?.includes(`-input-${inputName}-`)
     );
     if (connection) return connection;
-    
+
     // Strategy 4: Semantic mapping for common aliases
     const inputAliases = this.getInputAliases(inputName);
     for (const alias of inputAliases) {
-      connection = graph.connections.find(c => 
-        c.target === node.id && 
-        c.targetHandle?.includes(`-input-${alias}-`)
+      connection = graph.connections.find(
+        (c) =>
+          c.target === node.id && c.targetHandle?.includes(`-input-${alias}-`)
       );
       if (connection) return connection;
     }
-    
+
     return undefined;
   }
-  
+
   /**
    * Get common aliases for input names
    */
   private getInputAliases(inputName: string): string[] {
     const aliasMap: Record<string, string[]> = {
-      'model': ['llm', 'chatModel', 'languageModel'],
-      'llm': ['model', 'chatModel', 'languageModel'],
-      'prompt': ['promptTemplate', 'template'],
-      'memory': ['conversationMemory', 'chatMemory'],
-      'embeddings': ['embedding', 'vectorizer']
+      model: ['llm', 'chatModel', 'languageModel'],
+      llm: ['model', 'chatModel', 'languageModel'],
+      prompt: ['promptTemplate', 'template'],
+      memory: ['conversationMemory', 'chatMemory'],
+      embeddings: ['embedding', 'vectorizer'],
     };
-    
+
     return aliasMap[inputName] || [];
   }
-  
+
   /**
    * Generate intelligent fallback variable names
    */
   private generateIntelligentFallback(node: IRNode, inputName: string): string {
     // Use meaningful names based on input type
     const typeMapping: Record<string, string> = {
-      'model': 'llm',
-      'llm': 'llm', 
-      'prompt': 'prompt',
-      'memory': 'memory',
-      'embeddings': 'embeddings',
-      'tools': 'tools'
+      model: 'llm',
+      llm: 'llm',
+      prompt: 'prompt',
+      memory: 'memory',
+      embeddings: 'embeddings',
+      tools: 'tools',
     };
-    
+
     const baseName = typeMapping[inputName] || inputName;
     return `${baseName}_${node.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
   }
@@ -1131,29 +1267,36 @@ export class IRToCodeTransformer {
   }
 
   private countLines(fragments: CodeFragment[]): number {
-    return fragments.reduce((total, fragment) => 
-      total + fragment.content.split('\n').length, 0
+    return fragments.reduce(
+      (total, fragment) => total + fragment.content.split('\n').length,
+      0
     );
   }
 
   private extractDependencies(fragments: CodeFragment[]): Set<string> {
     const deps = new Set<string>();
     for (const fragment of fragments) {
-      fragment.dependencies.forEach(dep => deps.add(dep));
+      fragment.dependencies.forEach((dep) => deps.add(dep));
     }
     return deps;
   }
 
   private calculateCodeSize(fragments: CodeFragment[]): number {
-    return fragments.reduce((total, fragment) => total + fragment.content.length, 0);
+    return fragments.reduce(
+      (total, fragment) => total + fragment.content.length,
+      0
+    );
   }
 
-  private generateDependencyList(graph: IRGraph, context: GenerationContext): Record<string, string> {
+  private generateDependencyList(
+    graph: IRGraph,
+    context: GenerationContext
+  ): Record<string, string> {
     const deps: Record<string, string> = {
-      'langchain': '^0.2.17',
+      langchain: '^0.2.17',
       '@langchain/core': '^0.2.30',
       '@langchain/openai': '^0.2.7',
-      'dotenv': '^16.4.5'
+      dotenv: '^16.4.5',
     };
 
     if (context.includeLangfuse) {
@@ -1161,7 +1304,7 @@ export class IRToCodeTransformer {
     }
 
     // Add dependencies based on node types
-    for (const node of (graph.nodes || [])) {
+    for (const node of graph.nodes || []) {
       switch (node.type) {
         case 'anthropic':
           deps['@langchain/anthropic'] = '^0.2.7';
@@ -1186,21 +1329,21 @@ export class IRToCodeTransformer {
       scripts: {
         build: 'tsc',
         start: 'node dist/index.js',
-        dev: 'tsx src/index.ts'
+        dev: 'tsx src/index.ts',
       },
       dependencies: this.generateDependencyList({} as IRGraph, context),
       devDependencies: {
         typescript: '^5.5.4',
         '@types/node': '^20.14.15',
-        tsx: '^4.16.5'
-      }
+        tsx: '^4.16.5',
+      },
     };
   }
 
   private extractFeatures(graph: IRGraph): string[] {
     const features: string[] = [];
-    const nodeTypes = new Set(graph.nodes.map(n => n.type));
-    
+    const nodeTypes = new Set(graph.nodes.map((n) => n.type));
+
     if (nodeTypes.has('openAI') || nodeTypes.has('chatOpenAI')) {
       features.push('OpenAI Integration');
     }
@@ -1213,7 +1356,7 @@ export class IRToCodeTransformer {
     if (nodeTypes.has('chatPromptTemplate')) {
       features.push('Prompt Templates');
     }
-    
+
     return features;
   }
 
@@ -1222,7 +1365,7 @@ export class IRToCodeTransformer {
       build: 'tsc',
       start: 'node dist/index.js',
       dev: 'tsx src/index.ts',
-      test: 'echo "Error: no test specified" && exit 1'
+      test: 'echo "Error: no test specified" && exit 1',
     };
   }
 
@@ -1230,14 +1373,14 @@ export class IRToCodeTransformer {
     let content = '# Environment Variables\n';
     content += '# Copy this file to .env and fill in your values\n\n';
     content += 'OPENAI_API_KEY=your_openai_api_key_here\n';
-    
+
     if (context.includeLangfuse) {
       content += '\n# LangFuse Configuration\n';
       content += 'LANGFUSE_PUBLIC_KEY=your_langfuse_public_key\n';
       content += 'LANGFUSE_SECRET_KEY=your_langfuse_secret_key\n';
       content += 'LANGFUSE_BASE_URL=https://cloud.langfuse.com\n';
     }
-    
+
     return content;
   }
 

@@ -2,7 +2,12 @@
  * Example usage of the Flowise JSON Parser
  */
 
-import { FlowiseParser, parseFlowiseJson, quickParse, validate } from './index.js';
+import {
+  FlowiseParser,
+  parseFlowiseJson,
+  quickParse,
+  validate,
+} from './index.js';
 
 // Example Flowise JSON data
 const exampleFlow = {
@@ -88,10 +93,14 @@ async function demonstrateParser(): Promise<void> {
     autoDetectVersion: true,
     minimal: false,
   });
-  
-  const customResult = await customParser.parseString(JSON.stringify(exampleFlow));
+
+  const customResult = await customParser.parseString(
+    JSON.stringify(exampleFlow)
+  );
   console.log(`Success: ${customResult.success}`);
-  console.log(`Detected version: ${customResult.metadata.flowiseVersion || 'unknown'}`);
+  console.log(
+    `Detected version: ${customResult.metadata.flowiseVersion || 'unknown'}`
+  );
   console.log(`Complexity: ${customResult.metadata.complexity}`);
   console.log(`Warnings: ${customResult.warnings.length}\n`);
 

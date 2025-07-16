@@ -5,7 +5,7 @@
 import { Command } from 'commander';
 import { promises as fs } from 'fs';
 import { watch } from 'fs';
-import { join, dirname, basename, extname } from 'path';
+import { join, basename, extname } from 'path';
 import chalk from 'chalk';
 import ora from 'ora';
 import { FlowiseToLangChainConverter } from '../../index.js';
@@ -35,24 +35,32 @@ export function createWatchCommand(): Command {
 }
 
 async function watchFiles(input: string, options: WatchOptions): Promise<void> {
-  const converter = new FlowiseToLangChainConverter({ verbose: options.verbose });
+  const converter = new FlowiseToLangChainConverter({
+    verbose: options.verbose,
+  });
   const debounceMs = parseInt(options.debounce?.toString() || '500');
   const watchedFiles = new Map<string, NodeJS.Timeout>();
-  
+
   console.log(chalk.blue('🔍 Starting Flowise file watcher...'));
   console.log(chalk.gray(`   Input: ${input}`));
   console.log(chalk.gray(`   Output: ${options.output}`));
   console.log(chalk.gray(`   Debounce: ${debounceMs}ms`));
-  
+
   // Ensure output directory exists
   await fs.mkdir(options.output, { recursive: true });
-  
+
   try {
     const stats = await fs.stat(input);
-    
+
     if (stats.isFile()) {
       // Watch single file
-      await watchSingleFile(input, options, converter, debounceMs, watchedFiles);
+      await watchSingleFile(
+        input,
+        options,
+        converter,
+        debounceMs,
+        watchedFiles
+      );
     } else if (stats.isDirectory()) {
       // Watch directory
       await watchDirectory(input, options, converter, debounceMs, watchedFiles);
@@ -76,18 +84,18 @@ async function watchSingleFile(
     console.error(chalk.yellow('⚠️  File is not a Flowise JSON file'));
     return;
   }
-  
+
   console.log(chalk.green(`👀 Watching file: ${filePath}`));
-  
+
   const watcher = watch(filePath, (eventType) => {
     if (eventType === 'change') {
       handleFileChange(filePath, options, converter, debounceMs, watchedFiles);
     }
   });
-  
+
   // Handle initial conversion
   await convertFile(filePath, options, converter);
-  
+
   // Keep process running
   process.on('SIGINT', () => {
     console.log(chalk.yellow('\n🛑 Stopping watcher...'));
@@ -104,20 +112,30 @@ async function watchDirectory(
   watchedFiles: Map<string, NodeJS.Timeout>
 ): Promise<void> {
   console.log(chalk.green(`👀 Watching directory: ${dirPath}`));
-  
-  const watcher = watch(dirPath, { recursive: options.recursive }, (eventType, filename) => {
-    if (!filename) return;
-    
-    const fullPath = join(dirPath, filename);
-    
-    if (eventType === 'change' && isFlowiseFile(fullPath)) {
-      handleFileChange(fullPath, options, converter, debounceMs, watchedFiles);
+
+  const watcher = watch(
+    dirPath,
+    { recursive: options.recursive },
+    (eventType, filename) => {
+      if (!filename) return;
+
+      const fullPath = join(dirPath, filename);
+
+      if (eventType === 'change' && isFlowiseFile(fullPath)) {
+        handleFileChange(
+          fullPath,
+          options,
+          converter,
+          debounceMs,
+          watchedFiles
+        );
+      }
     }
-  });
-  
+  );
+
   // Convert existing files
   await convertExistingFiles(dirPath, options, converter);
-  
+
   // Keep process running
   process.on('SIGINT', () => {
     console.log(chalk.yellow('\n🛑 Stopping watcher...'));
@@ -138,13 +156,13 @@ function handleFileChange(
   if (existingTimeout) {
     clearTimeout(existingTimeout);
   }
-  
+
   // Set new debounced timeout
   const timeout = setTimeout(async () => {
     await convertFile(filePath, options, converter);
     watchedFiles.delete(filePath);
   }, debounceMs);
-  
+
   watchedFiles.set(filePath, timeout);
 }
 
@@ -154,46 +172,52 @@ async function convertFile(
   converter: FlowiseToLangChainConverter
 ): Promise<void> {
   const spinner = ora(`Converting ${basename(filePath)}...`).start();
-  
+
   try {
     // Read file content
     const content = await fs.readFile(filePath, 'utf-8');
-    
+
     // Convert using the converter
     const result = await converter.convert(content, {
       outputPath: options.output,
-      targetLanguage: 'typescript'
+      targetLanguage: 'typescript',
     });
-    
+
     if (!result.success) {
       spinner.fail(`Conversion failed for ${basename(filePath)}`);
       console.error(chalk.red('Errors:'));
-      result.errors.forEach(error => console.error(chalk.red(`  - ${error}`)));
+      result.errors.forEach((error) =>
+        console.error(chalk.red(`  - ${error}`))
+      );
       return;
     }
-    
+
     // Generate output filename
     const outputFileName = basename(filePath, extname(filePath)) + '.ts';
     const outputPath = join(options.output, outputFileName);
-    
+
     // Check if file exists and overwrite option
     if (!options.overwrite) {
       try {
         await fs.access(outputPath);
-        spinner.warn(`File exists: ${outputFileName} (use --overwrite to replace)`);
+        spinner.warn(
+          `File exists: ${outputFileName} (use --overwrite to replace)`
+        );
         return;
       } catch {
         // File doesn't exist, proceed
       }
     }
-    
+
     // Write converted code
     if (result.result?.files && result.result.files.length > 0) {
-      const mainFile = result.result.files.find(f => f.path.endsWith('.ts')) || result.result.files[0];
+      const mainFile =
+        result.result.files.find((f) => f.path.endsWith('.ts')) ||
+        result.result.files[0];
       await fs.writeFile(outputPath, mainFile.content, 'utf-8');
-      
+
       spinner.succeed(`Converted ${basename(filePath)} → ${outputFileName}`);
-      
+
       if (options.verbose) {
         console.log(chalk.gray(`  Nodes: ${result.metrics.nodeCount}`));
         console.log(chalk.gray(`  Duration: ${result.metrics.duration}ms`));
@@ -201,7 +225,6 @@ async function convertFile(
     } else {
       spinner.fail(`No output generated for ${basename(filePath)}`);
     }
-    
   } catch (error) {
     spinner.fail(`Error converting ${basename(filePath)}`);
     console.error(chalk.red('Error:'), error);
@@ -216,18 +239,23 @@ async function convertExistingFiles(
   try {
     const files = await fs.readdir(dirPath, { recursive: options.recursive });
     const flowiseFiles = files
-      .map(file => join(dirPath, file.toString()))
-      .filter(file => isFlowiseFile(file));
-    
+      .map((file) => join(dirPath, file.toString()))
+      .filter((file) => isFlowiseFile(file));
+
     if (flowiseFiles.length > 0) {
-      console.log(chalk.blue(`📁 Converting ${flowiseFiles.length} existing files...`));
-      
+      console.log(
+        chalk.blue(`📁 Converting ${flowiseFiles.length} existing files...`)
+      );
+
       for (const file of flowiseFiles) {
         await convertFile(file, options, converter);
       }
     }
   } catch (error) {
-    console.error(chalk.yellow('⚠️  Could not scan directory for existing files:'), error);
+    console.error(
+      chalk.yellow('⚠️  Could not scan directory for existing files:'),
+      error
+    );
   }
 }
 

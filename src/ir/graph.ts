@@ -1,19 +1,19 @@
 /**
  * Graph Representation and Analysis for Flowise-to-LangChain IR
- * 
+ *
  * This module provides utilities for working with IR graphs, including
  * analysis, transformation, and optimization operations.
  */
 
-import { 
-  IRGraph, 
-  IRNode, 
-  IRConnection, 
-  NodeId, 
+import {
+  IRGraph,
+  IRNode,
+  IRConnection,
+  NodeId,
   ValidationResult,
   ValidationError,
   ValidationWarning,
-  ValidationSuggestion
+  ValidationSuggestion,
 } from './types.js';
 
 /**
@@ -61,16 +61,16 @@ export interface GraphStats {
   averageDegree: number;
   maxDepth: number;
   complexity: 'simple' | 'medium' | 'complex';
-  
+
   // Node type distribution
   nodeTypes: Record<string, number>;
   categories: Record<string, number>;
-  
+
   // Connectivity analysis
   entryPoints: NodeId[];
   exitPoints: NodeId[];
   isolatedNodes: NodeId[];
-  
+
   // Performance characteristics
   parallelizableChains: NodeId[][];
   bottlenecks: NodeId[];
@@ -163,7 +163,6 @@ export interface PatternMatch {
  * Graph utility class for analysis and manipulation
  */
 export class IRGraphAnalyzer {
-  
   /**
    * Validate an IR graph for correctness and completeness
    */
@@ -174,26 +173,26 @@ export class IRGraphAnalyzer {
 
     // Check for missing nodes referenced in connections
     for (const connection of graph.connections) {
-      const sourceExists = graph.nodes.some(n => n.id === connection.source);
-      const targetExists = graph.nodes.some(n => n.id === connection.target);
-      
+      const sourceExists = graph.nodes.some((n) => n.id === connection.source);
+      const targetExists = graph.nodes.some((n) => n.id === connection.target);
+
       if (!sourceExists) {
         errors.push({
           type: 'missing_node',
           message: `Connection references missing source node: ${connection.source}`,
           connectionId: connection.id,
           severity: 'error',
-          fixSuggestion: 'Remove the connection or add the missing node'
+          fixSuggestion: 'Remove the connection or add the missing node',
         });
       }
-      
+
       if (!targetExists) {
         errors.push({
           type: 'missing_node',
           message: `Connection references missing target node: ${connection.target}`,
           connectionId: connection.id,
           severity: 'error',
-          fixSuggestion: 'Remove the connection or add the missing node'
+          fixSuggestion: 'Remove the connection or add the missing node',
         });
       }
     }
@@ -206,7 +205,7 @@ export class IRGraphAnalyzer {
           type: 'circular_dependency',
           message: `Circular dependency detected: ${cycle.join(' → ')}`,
           severity: 'critical',
-          fixSuggestion: 'Break the cycle by removing one of the connections'
+          fixSuggestion: 'Break the cycle by removing one of the connections',
         });
       }
     }
@@ -218,21 +217,24 @@ export class IRGraphAnalyzer {
         type: 'performance_concern',
         message: `Node ${nodeId} is isolated and may not contribute to the flow`,
         nodeId,
-        suggestion: 'Connect this node or remove it if unnecessary'
+        suggestion: 'Connect this node or remove it if unnecessary',
       });
     }
 
     // Check for missing required parameters
-    for (const node of (graph.nodes || [])) {
+    for (const node of graph.nodes || []) {
       for (const param of node.parameters) {
-        if (param.required && (param.value === undefined || param.value === null)) {
+        if (
+          param.required &&
+          (param.value === undefined || param.value === null)
+        ) {
           errors.push({
             type: 'missing_parameter',
             message: `Required parameter '${param.name}' is missing in node ${node.id}`,
             nodeId: node.id,
             parameterName: param.name,
             severity: 'error',
-            fixSuggestion: `Provide a value for parameter '${param.name}'`
+            fixSuggestion: `Provide a value for parameter '${param.name}'`,
           });
         }
       }
@@ -240,11 +242,15 @@ export class IRGraphAnalyzer {
 
     // Suggest optimizations
     const stats = this.analyzeGraph(graph);
-    if (stats.complexity === 'complex' && stats.parallelizableChains.length > 1) {
+    if (
+      stats.complexity === 'complex' &&
+      stats.parallelizableChains.length > 1
+    ) {
       suggestions.push({
         type: 'optimization',
-        message: 'Consider parallelizing independent chains for better performance',
-        impact: 'high'
+        message:
+          'Consider parallelizing independent chains for better performance',
+        impact: 'high',
       });
     }
 
@@ -252,7 +258,7 @@ export class IRGraphAnalyzer {
       isValid: errors.length === 0,
       errors,
       warnings,
-      suggestions
+      suggestions,
     };
   }
 
@@ -262,9 +268,9 @@ export class IRGraphAnalyzer {
   static analyzeGraph(graph: IRGraph): GraphStats {
     const nodeTypes: Record<string, number> = {};
     const categories: Record<string, number> = {};
-    
+
     // Count node types and categories
-    for (const node of (graph.nodes || [])) {
+    for (const node of graph.nodes || []) {
       nodeTypes[node.type] = (nodeTypes[node.type] || 0) + 1;
       categories[node.category] = (categories[node.category] || 0) + 1;
     }
@@ -276,20 +282,21 @@ export class IRGraphAnalyzer {
 
     // Calculate complexity
     const complexity = this.calculateComplexity(graph);
-    
+
     // Find parallelizable chains
     const parallelizableChains = this.findParallelizableChains(graph);
-    
+
     // Identify bottlenecks
     const bottlenecks = this.findBottlenecks(graph);
-    
+
     // Calculate critical path
     const criticalPath = this.findCriticalPath(graph);
 
     return {
       nodeCount: graph.nodes.length,
       connectionCount: graph.connections.length,
-      averageDegree: graph.connections.length * 2 / Math.max(graph.nodes.length, 1),
+      averageDegree:
+        (graph.connections.length * 2) / Math.max(graph.nodes.length, 1),
       maxDepth: this.calculateMaxDepth(graph),
       complexity,
       nodeTypes,
@@ -299,7 +306,7 @@ export class IRGraphAnalyzer {
       isolatedNodes,
       parallelizableChains,
       bottlenecks,
-      criticalPath
+      criticalPath,
     };
   }
 
@@ -317,11 +324,13 @@ export class IRGraphAnalyzer {
       recursionStack.add(nodeId);
       currentPath.push(nodeId);
 
-      const outgoingConnections = graph.connections.filter(c => c.source === nodeId);
-      
+      const outgoingConnections = graph.connections.filter(
+        (c) => c.source === nodeId
+      );
+
       for (const connection of outgoingConnections) {
         const targetId = connection.target;
-        
+
         if (recursionStack.has(targetId)) {
           // Found a cycle
           const cycleStart = currentPath.indexOf(targetId);
@@ -336,7 +345,7 @@ export class IRGraphAnalyzer {
       currentPath.pop();
     };
 
-    for (const node of (graph.nodes || [])) {
+    for (const node of graph.nodes || []) {
       if (!visited.has(node.id)) {
         dfs(node.id);
       }
@@ -350,12 +359,12 @@ export class IRGraphAnalyzer {
    */
   static topologicalSort(graph: IRGraph): TopologicalSortResult {
     const cycles = this.findCycles(graph);
-    
+
     if (cycles.length > 0) {
       return {
         sorted: [],
         cycles,
-        isAcyclic: false
+        isAcyclic: false,
       };
     }
 
@@ -364,7 +373,7 @@ export class IRGraphAnalyzer {
     const sorted: NodeId[] = [];
 
     // Initialize in-degrees
-    for (const node of (graph.nodes || [])) {
+    for (const node of graph.nodes || []) {
       inDegree.set(node.id, 0);
     }
 
@@ -387,12 +396,14 @@ export class IRGraphAnalyzer {
       sorted.push(nodeId);
 
       // Update in-degrees of adjacent nodes
-      const outgoingConnections = graph.connections.filter(c => c.source === nodeId);
+      const outgoingConnections = graph.connections.filter(
+        (c) => c.source === nodeId
+      );
       for (const connection of outgoingConnections) {
         const targetId = connection.target;
         const newDegree = (inDegree.get(targetId) || 0) - 1;
         inDegree.set(targetId, newDegree);
-        
+
         if (newDegree === 0) {
           queue.push(targetId);
         }
@@ -402,7 +413,7 @@ export class IRGraphAnalyzer {
     return {
       sorted,
       cycles: [],
-      isAcyclic: sorted.length === graph.nodes.length
+      isAcyclic: sorted.length === graph.nodes.length,
     };
   }
 
@@ -415,39 +426,42 @@ export class IRGraphAnalyzer {
         nodes: [start],
         connections: [],
         length: 0,
-        isValid: true
+        isValid: true,
       };
     }
 
     const visited = new Set<NodeId>();
-    const queue: { nodeId: NodeId; path: NodeId[]; connections: string[] }[] = [];
-    
+    const queue: { nodeId: NodeId; path: NodeId[]; connections: string[] }[] =
+      [];
+
     queue.push({ nodeId: start, path: [start], connections: [] });
     visited.add(start);
 
     while (queue.length > 0) {
       const { nodeId, path, connections } = queue.shift()!;
 
-      const outgoingConnections = graph.connections.filter(c => c.source === nodeId);
-      
+      const outgoingConnections = graph.connections.filter(
+        (c) => c.source === nodeId
+      );
+
       for (const connection of outgoingConnections) {
         const targetId = connection.target;
-        
+
         if (targetId === end) {
           return {
             nodes: [...path, targetId],
             connections: [...connections, connection.id],
             length: path.length,
-            isValid: true
+            isValid: true,
           };
         }
-        
+
         if (!visited.has(targetId)) {
           visited.add(targetId);
           queue.push({
             nodeId: targetId,
             path: [...path, targetId],
-            connections: [...connections, connection.id]
+            connections: [...connections, connection.id],
           });
         }
       }
@@ -459,21 +473,25 @@ export class IRGraphAnalyzer {
   /**
    * Extract a subgraph containing specified nodes and their connections
    */
-  static extractSubgraph(graph: IRGraph, nodeIds: NodeId[], includeDependencies = false): Subgraph {
+  static extractSubgraph(
+    graph: IRGraph,
+    nodeIds: NodeId[],
+    includeDependencies = false
+  ): Subgraph {
     const targetNodes = new Set(nodeIds);
-    
+
     if (includeDependencies) {
       // Add all dependencies recursively
       const queue = [...nodeIds];
       const visited = new Set<NodeId>();
-      
+
       while (queue.length > 0) {
         const nodeId = queue.shift()!;
         if (visited.has(nodeId)) continue;
         visited.add(nodeId);
-        
+
         // Add incoming connections
-        const incoming = graph.connections.filter(c => c.target === nodeId);
+        const incoming = graph.connections.filter((c) => c.target === nodeId);
         for (const connection of incoming) {
           if (!targetNodes.has(connection.source)) {
             targetNodes.add(connection.source);
@@ -483,14 +501,15 @@ export class IRGraphAnalyzer {
       }
     }
 
-    const nodes = graph.nodes.filter(node => targetNodes.has(node.id));
+    const nodes = graph.nodes.filter((node) => targetNodes.has(node.id));
     const connections = graph.connections.filter(
-      connection => targetNodes.has(connection.source) && targetNodes.has(connection.target)
+      (connection) =>
+        targetNodes.has(connection.source) && targetNodes.has(connection.target)
     );
 
     const dependencies = graph.connections
-      .filter(c => targetNodes.has(c.target) && !targetNodes.has(c.source))
-      .map(c => c.source);
+      .filter((c) => targetNodes.has(c.target) && !targetNodes.has(c.source))
+      .map((c) => c.source);
 
     return {
       nodes,
@@ -498,35 +517,43 @@ export class IRGraphAnalyzer {
       metadata: {
         extractedFrom: graph.metadata.name,
         purpose: 'Subgraph extraction',
-        dependencies
-      }
+        dependencies,
+      },
     };
   }
 
   // Helper methods
   private static findEntryPoints(graph: IRGraph): NodeId[] {
-    const hasIncoming = new Set(graph.connections.map(c => c.target));
-    return graph.nodes.filter(node => !hasIncoming.has(node.id)).map(node => node.id);
+    const hasIncoming = new Set(graph.connections.map((c) => c.target));
+    return graph.nodes
+      .filter((node) => !hasIncoming.has(node.id))
+      .map((node) => node.id);
   }
 
   private static findExitPoints(graph: IRGraph): NodeId[] {
-    const hasOutgoing = new Set(graph.connections.map(c => c.source));
-    return graph.nodes.filter(node => !hasOutgoing.has(node.id)).map(node => node.id);
+    const hasOutgoing = new Set(graph.connections.map((c) => c.source));
+    return graph.nodes
+      .filter((node) => !hasOutgoing.has(node.id))
+      .map((node) => node.id);
   }
 
   private static findIsolatedNodes(graph: IRGraph): NodeId[] {
     const connected = new Set([
-      ...graph.connections.map(c => c.source),
-      ...graph.connections.map(c => c.target)
+      ...graph.connections.map((c) => c.source),
+      ...graph.connections.map((c) => c.target),
     ]);
-    return graph.nodes.filter(node => !connected.has(node.id)).map(node => node.id);
+    return graph.nodes
+      .filter((node) => !connected.has(node.id))
+      .map((node) => node.id);
   }
 
-  private static calculateComplexity(graph: IRGraph): 'simple' | 'medium' | 'complex' {
+  private static calculateComplexity(
+    graph: IRGraph
+  ): 'simple' | 'medium' | 'complex' {
     const nodeCount = graph.nodes.length;
     const connectionCount = graph.connections.length;
     const cyclomaticComplexity = connectionCount - nodeCount + 2;
-    
+
     if (nodeCount <= 5 && cyclomaticComplexity <= 3) return 'simple';
     if (nodeCount <= 20 && cyclomaticComplexity <= 10) return 'medium';
     return 'complex';
@@ -539,10 +566,10 @@ export class IRGraphAnalyzer {
     const dfs = (nodeId: NodeId, depth: number, visited: Set<NodeId>): void => {
       if (visited.has(nodeId)) return;
       visited.add(nodeId);
-      
+
       maxDepth = Math.max(maxDepth, depth);
-      
-      const outgoing = graph.connections.filter(c => c.source === nodeId);
+
+      const outgoing = graph.connections.filter((c) => c.source === nodeId);
       for (const connection of outgoing) {
         dfs(connection.target, depth + 1, new Set(visited));
       }
@@ -559,8 +586,8 @@ export class IRGraphAnalyzer {
     // Find independent paths that can run in parallel
     const chains: NodeId[][] = [];
     const visited = new Set<NodeId>();
-    
-    for (const node of (graph.nodes || [])) {
+
+    for (const node of graph.nodes || []) {
       if (!visited.has(node.id)) {
         const chain = this.traceChain(graph, node.id, visited);
         if (chain.length > 1) {
@@ -568,42 +595,48 @@ export class IRGraphAnalyzer {
         }
       }
     }
-    
+
     return chains;
   }
 
-  private static traceChain(graph: IRGraph, startNode: NodeId, visited: Set<NodeId>): NodeId[] {
+  private static traceChain(
+    graph: IRGraph,
+    startNode: NodeId,
+    visited: Set<NodeId>
+  ): NodeId[] {
     const chain: NodeId[] = [];
     let currentNode = startNode;
-    
+
     while (currentNode && !visited.has(currentNode)) {
       visited.add(currentNode);
       chain.push(currentNode);
-      
-      const outgoing = graph.connections.filter(c => c.source === currentNode);
+
+      const outgoing = graph.connections.filter(
+        (c) => c.source === currentNode
+      );
       if (outgoing.length === 1) {
         currentNode = outgoing[0].target;
       } else {
         break;
       }
     }
-    
+
     return chain;
   }
 
   private static findBottlenecks(graph: IRGraph): NodeId[] {
     const bottlenecks: NodeId[] = [];
-    
-    for (const node of (graph.nodes || [])) {
-      const incoming = graph.connections.filter(c => c.target === node.id);
-      const outgoing = graph.connections.filter(c => c.source === node.id);
-      
+
+    for (const node of graph.nodes || []) {
+      const incoming = graph.connections.filter((c) => c.target === node.id);
+      const outgoing = graph.connections.filter((c) => c.source === node.id);
+
       // A node is a bottleneck if it has multiple incoming or outgoing connections
       if (incoming.length > 1 || outgoing.length > 1) {
         bottlenecks.push(node.id);
       }
     }
-    
+
     return bottlenecks;
   }
 
@@ -611,9 +644,9 @@ export class IRGraphAnalyzer {
     // Simplified critical path - find longest path from entry to exit
     const entryPoints = this.findEntryPoints(graph);
     const exitPoints = this.findExitPoints(graph);
-    
+
     let longestPath: NodeId[] = [];
-    
+
     for (const entry of entryPoints) {
       for (const exit of exitPoints) {
         const path = this.findPath(graph, entry, exit);
@@ -622,7 +655,7 @@ export class IRGraphAnalyzer {
         }
       }
     }
-    
+
     return longestPath;
   }
 }

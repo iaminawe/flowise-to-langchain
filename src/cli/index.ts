@@ -34,7 +34,11 @@ program
   .option('--no-color', 'disable colored output')
   .hook('preAction', (thisCommand) => {
     // Set up global logging based on options
-    const opts = thisCommand.opts() as { silent?: boolean; verbose?: boolean; noColor?: boolean };
+    const opts = thisCommand.opts() as {
+      silent?: boolean;
+      verbose?: boolean;
+      noColor?: boolean;
+    };
     if (opts.silent) {
       process.env['FLOWISE_LOG_LEVEL'] = 'error';
     } else if (opts.verbose) {
@@ -42,7 +46,7 @@ program
     } else {
       process.env['FLOWISE_LOG_LEVEL'] = 'info';
     }
-    
+
     // Disable chalk colors if requested
     if (opts.noColor) {
       chalk.level = 0;
@@ -58,7 +62,9 @@ program.addCommand(createBatchCommand());
 program.addCommand(createRunCommand());
 
 // Add examples to help
-program.addHelpText('after', `
+program.addHelpText(
+  'after',
+  `
 ${chalk.bold('Examples:')}
   ${chalk.cyan('# Convert a Flowise export to LangChain code')}
   $ flowise-to-lc convert my-flow.json --out ./output
@@ -86,7 +92,8 @@ ${chalk.bold('Examples:')}
 
   ${chalk.cyan('# Convert and run a workflow')}
   $ flowise-to-lc run my-flow.json "What is the weather today?"
-`);
+`
+);
 
 // Error handling
 program.exitOverride((err) => {
@@ -94,15 +101,15 @@ program.exitOverride((err) => {
     console.log(packageJson.version);
     process.exit(0);
   }
-  
+
   if (err.code === 'commander.help') {
     process.exit(0);
   }
-  
+
   if (err.code === 'commander.helpDisplayed') {
     process.exit(0);
   }
-  
+
   // For other errors, show them in red
   console.error(chalk.red(`Error: ${err.message}`));
   process.exit(err.exitCode || 1);

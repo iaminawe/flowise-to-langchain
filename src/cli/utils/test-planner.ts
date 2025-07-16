@@ -18,7 +18,7 @@ export async function planTests(config: TestConfiguration): Promise<TestPlan> {
   try {
     // Analyze the converted code structure
     const codeAnalysis = await analyzeConvertedCode(config.outputPath);
-    
+
     // Plan unit tests
     if (config.testType === 'unit' || config.testType === 'all') {
       plan.unitTests = await planUnitTests(codeAnalysis);
@@ -35,7 +35,10 @@ export async function planTests(config: TestConfiguration): Promise<TestPlan> {
     }
 
     // Calculate totals
-    plan.totalTests = plan.unitTests.length + plan.integrationTests.length + plan.e2eTests.length;
+    plan.totalTests =
+      plan.unitTests.length +
+      plan.integrationTests.length +
+      plan.e2eTests.length;
     plan.estimatedDuration = calculateEstimatedDuration(plan);
 
     return plan;
@@ -80,8 +83,11 @@ async function analyzeConvertedCode(outputPath: string): Promise<CodeAnalysis> {
     const packageJsonPath = join(outputPath, 'package.json');
     if (existsSync(packageJsonPath)) {
       const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
-      const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
-      
+      const deps = {
+        ...packageJson.dependencies,
+        ...packageJson.devDependencies,
+      };
+
       analysis.dependencies = Object.keys(deps);
       analysis.hasLangChain = 'langchain' in deps || '@langchain/core' in deps;
       analysis.hasLangFuse = 'langfuse-langchain' in deps || 'langfuse' in deps;
@@ -94,12 +100,15 @@ async function analyzeConvertedCode(outputPath: string): Promise<CodeAnalysis> {
     for (const file of codeFiles) {
       const filePath = join(outputPath, file);
       const content = await readFile(filePath, 'utf-8');
-      
+
       // Detect LangChain patterns
-      if (content.includes('from "langchain"') || content.includes('from "@langchain/')) {
+      if (
+        content.includes('from "langchain"') ||
+        content.includes('from "@langchain/')
+      ) {
         analysis.hasLangChain = true;
       }
-      
+
       // Detect specific node types
       const nodePatterns = [
         { pattern: /ChatOpenAI|OpenAI/g, type: 'llm' },
@@ -122,7 +131,10 @@ async function analyzeConvertedCode(outputPath: string): Promise<CodeAnalysis> {
       }
 
       // Detect specific features
-      if (content.includes('ChatOpenAI') || content.includes('ConversationChain')) {
+      if (
+        content.includes('ChatOpenAI') ||
+        content.includes('ConversationChain')
+      ) {
         analysis.hasChat = true;
       }
       if (content.includes('VectorStore') || content.includes('Retriever')) {
@@ -136,26 +148,36 @@ async function analyzeConvertedCode(outputPath: string): Promise<CodeAnalysis> {
       }
 
       // Look for main/index files as entry points
-      if (file.includes('index.') || file.includes('main.') || file.includes('app.')) {
+      if (
+        file.includes('index.') ||
+        file.includes('main.') ||
+        file.includes('app.')
+      ) {
         analysis.entryPoints.push(file);
       }
     }
-
   } catch (error) {
-    console.warn(`Warning: Could not fully analyze code: ${(error as Error).message}`);
+    console.warn(
+      `Warning: Could not fully analyze code: ${(error as Error).message}`
+    );
   }
 
   return analysis;
 }
 
-async function planUnitTests(analysis: CodeAnalysis): Promise<Array<{ name: string; description: string; dependencies?: string[] }>> {
+async function planUnitTests(
+  analysis: CodeAnalysis
+): Promise<
+  Array<{ name: string; description: string; dependencies?: string[] }>
+> {
   const tests = [];
 
   // Basic LangChain component tests
   if (analysis.hasLangChain) {
     tests.push({
       name: 'LangChain Import Test',
-      description: 'Verify all LangChain imports are valid and modules load correctly',
+      description:
+        'Verify all LangChain imports are valid and modules load correctly',
       dependencies: ['langchain'],
     });
   }
@@ -222,7 +244,11 @@ async function planUnitTests(analysis: CodeAnalysis): Promise<Array<{ name: stri
   return tests;
 }
 
-async function planIntegrationTests(analysis: CodeAnalysis): Promise<Array<{ name: string; description: string; requirements?: string[] }>> {
+async function planIntegrationTests(
+  analysis: CodeAnalysis
+): Promise<
+  Array<{ name: string; description: string; requirements?: string[] }>
+> {
   const tests = [];
 
   // Chain integration tests
@@ -237,13 +263,17 @@ async function planIntegrationTests(analysis: CodeAnalysis): Promise<Array<{ nam
   if (analysis.hasRetrieval) {
     tests.push({
       name: 'RAG Pipeline Integration Test',
-      description: 'Test retrieval-augmented generation with document ingestion',
+      description:
+        'Test retrieval-augmented generation with document ingestion',
       requirements: ['vector-store', 'test-documents'],
     });
   }
 
   // Multi-component tests
-  if (analysis.nodeTypes.includes('chain') && analysis.nodeTypes.includes('memory')) {
+  if (
+    analysis.nodeTypes.includes('chain') &&
+    analysis.nodeTypes.includes('memory')
+  ) {
     tests.push({
       name: 'Chain with Memory Integration Test',
       description: 'Test chain execution with persistent memory across calls',
@@ -280,19 +310,23 @@ async function planIntegrationTests(analysis: CodeAnalysis): Promise<Array<{ nam
   return tests;
 }
 
-async function planE2ETests(analysis: CodeAnalysis, inputPath: string): Promise<Array<{ name: string; description: string; scenarios?: string[] }>> {
+async function planE2ETests(
+  analysis: CodeAnalysis,
+  inputPath: string
+): Promise<Array<{ name: string; description: string; scenarios?: string[] }>> {
   const tests = [];
 
   // Load original Flowise data to understand the flow
   try {
     const flowiseData = JSON.parse(await readFile(inputPath, 'utf-8'));
     const nodeCount = flowiseData.nodes?.length || 0;
-    const edgeCount = flowiseData.edges?.length || 0;
+    // const edgeCount = flowiseData.edges?.length || 0; // Future use for edge-based tests
 
     // Basic flow execution test
     tests.push({
       name: 'Complete Flow Execution Test',
-      description: 'Execute the entire converted flow end-to-end with sample inputs',
+      description:
+        'Execute the entire converted flow end-to-end with sample inputs',
       scenarios: [
         'Execute with minimal valid input',
         'Execute with complex realistic input',
@@ -331,7 +365,8 @@ async function planE2ETests(analysis: CodeAnalysis, inputPath: string): Promise<
     if (nodeCount > 1) {
       tests.push({
         name: 'Fidelity Comparison Test',
-        description: 'Compare outputs between original Flowise and converted code',
+        description:
+          'Compare outputs between original Flowise and converted code',
         scenarios: [
           'Same input produces similar output',
           'Performance comparison',
@@ -353,7 +388,6 @@ async function planE2ETests(analysis: CodeAnalysis, inputPath: string): Promise<
         ],
       });
     }
-
   } catch (error) {
     console.warn('Could not analyze original Flowise data for E2E planning');
   }

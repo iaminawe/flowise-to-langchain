@@ -1,6 +1,6 @@
 /**
  * Registry Index - Main export for the converter registry system
- * 
+ *
  * This module provides the main entry point for the converter registry,
  * including all built-in converters and setup utilities.
  */
@@ -12,7 +12,7 @@ export {
   NodeConverter,
   ConverterFactory,
   PluginManager,
-  converterRegistry
+  converterRegistry,
 } from './registry.js';
 
 // LLM Converters
@@ -24,7 +24,7 @@ export {
   OllamaConverter,
   HuggingFaceConverter,
   CohereConverter,
-  ReplicateConverter
+  ReplicateConverter,
 } from './converters/llm.js';
 
 // Prompt Converters
@@ -34,7 +34,7 @@ export {
   FewShotPromptTemplateConverter,
   SystemMessageConverter,
   HumanMessageConverter,
-  AIMessageConverter
+  AIMessageConverter,
 } from './converters/prompt.js';
 
 // Chain Converters
@@ -45,7 +45,7 @@ export {
   MultiPromptChainConverter,
   SequentialChainConverter,
   TransformChainConverter,
-  MapReduceChainConverter
+  MapReduceChainConverter,
 } from './converters/chain.js';
 
 // Memory Converters
@@ -55,7 +55,7 @@ export {
   SummaryBufferMemoryConverter,
   VectorStoreRetrieverMemoryConverter,
   ConversationSummaryMemoryConverter,
-  EntityMemoryConverter
+  EntityMemoryConverter,
 } from './converters/memory.js';
 
 // Tool Converters
@@ -66,7 +66,7 @@ export {
   CustomToolConverter,
   ShellToolConverter,
   RequestToolConverter,
-  FileSystemConverter
+  FileSystemConverter,
 } from './converters/tool.js';
 
 // Vector Store Converters
@@ -75,7 +75,7 @@ export {
   ChromaConverter,
   FAISSConverter,
   MemoryVectorStoreConverter,
-  SupabaseConverter
+  SupabaseConverter,
 } from './converters/vectorstore.js';
 
 // Embeddings Converters
@@ -84,7 +84,7 @@ export {
   CohereEmbeddingsConverter,
   HuggingFaceEmbeddingsConverter,
   AzureOpenAIEmbeddingsConverter,
-  GoogleVertexAIEmbeddingsConverter
+  GoogleVertexAIEmbeddingsConverter,
 } from './converters/embeddings.js';
 
 // Document Loader Converters
@@ -95,7 +95,7 @@ export {
   TextLoaderConverter,
   DocxLoaderConverter,
   DirectoryLoaderConverter,
-  WebLoaderConverter
+  WebLoaderConverter,
 } from './converters/document-loader.js';
 
 // Text Splitter Converters
@@ -108,7 +108,7 @@ export {
   HtmlTextSplitterConverter,
   PythonCodeTextSplitterConverter,
   JavaScriptCodeTextSplitterConverter,
-  SemanticTextSplitterConverter
+  SemanticTextSplitterConverter,
 } from './converters/text-splitter.js';
 
 // Streaming Converters
@@ -118,7 +118,7 @@ export {
   StreamingAgentConverter,
   RealTimeStreamingConverter,
   WebSocketStreamingConverter,
-  SSEStreamingConverter
+  SSEStreamingConverter,
 } from './converters/streaming.js';
 
 // RAG Chain Converters
@@ -127,7 +127,7 @@ export {
   MultiVectorRAGChainConverter,
   ConversationalRAGChainConverter,
   GraphRAGChainConverter,
-  AdaptiveRAGChainConverter
+  AdaptiveRAGChainConverter,
 } from './converters/rag-chains.js';
 
 // Function Calling Converters
@@ -136,7 +136,7 @@ export {
   StructuredOutputFunctionConverter,
   MultiStepFunctionChainConverter,
   FunctionCallValidatorConverter,
-  FunctionCallRouterConverter
+  FunctionCallRouterConverter,
 } from './converters/function-calling.js';
 
 // Agent Converters
@@ -149,7 +149,7 @@ export {
   ZeroShotReactDescriptionAgentConverter,
   ReactDocstoreAgentConverter,
   ConversationalReactDescriptionAgentConverter,
-  ChatAgentConverter
+  ChatAgentConverter,
 } from './converters/agent.js';
 
 // Import all converter classes for registration
@@ -161,7 +161,7 @@ import {
   OllamaConverter,
   HuggingFaceConverter,
   CohereConverter,
-  ReplicateConverter
+  ReplicateConverter,
 } from './converters/llm.js';
 
 import {
@@ -170,7 +170,7 @@ import {
   FewShotPromptTemplateConverter,
   SystemMessageConverter,
   HumanMessageConverter,
-  AIMessageConverter
+  AIMessageConverter,
 } from './converters/prompt.js';
 
 import {
@@ -180,7 +180,7 @@ import {
   MultiPromptChainConverter,
   SequentialChainConverter,
   TransformChainConverter,
-  MapReduceChainConverter
+  MapReduceChainConverter,
 } from './converters/chain.js';
 
 import {
@@ -189,7 +189,7 @@ import {
   SummaryBufferMemoryConverter,
   VectorStoreRetrieverMemoryConverter,
   ConversationSummaryMemoryConverter,
-  EntityMemoryConverter
+  EntityMemoryConverter,
 } from './converters/memory.js';
 
 import {
@@ -199,7 +199,7 @@ import {
   CustomToolConverter,
   ShellToolConverter,
   RequestToolConverter,
-  FileSystemConverter
+  FileSystemConverter,
 } from './converters/tool.js';
 
 import {
@@ -207,7 +207,7 @@ import {
   ChromaConverter,
   FAISSConverter,
   MemoryVectorStoreConverter,
-  SupabaseConverter
+  SupabaseConverter,
 } from './converters/vectorstore.js';
 
 import {
@@ -215,7 +215,7 @@ import {
   CohereEmbeddingsConverter,
   HuggingFaceEmbeddingsConverter,
   AzureOpenAIEmbeddingsConverter,
-  GoogleVertexAIEmbeddingsConverter
+  GoogleVertexAIEmbeddingsConverter,
 } from './converters/embeddings.js';
 
 import {
@@ -225,7 +225,7 @@ import {
   TextLoaderConverter,
   DocxLoaderConverter,
   DirectoryLoaderConverter,
-  WebLoaderConverter
+  WebLoaderConverter,
 } from './converters/document-loader.js';
 
 import {
@@ -237,7 +237,7 @@ import {
   HtmlTextSplitterConverter,
   PythonCodeTextSplitterConverter,
   JavaScriptCodeTextSplitterConverter,
-  SemanticTextSplitterConverter
+  SemanticTextSplitterConverter,
 } from './converters/text-splitter.js';
 
 import {
@@ -246,7 +246,7 @@ import {
   StreamingAgentConverter,
   RealTimeStreamingConverter,
   WebSocketStreamingConverter,
-  SSEStreamingConverter
+  SSEStreamingConverter,
 } from './converters/streaming.js';
 
 import {
@@ -254,7 +254,7 @@ import {
   MultiVectorRAGChainConverter,
   ConversationalRAGChainConverter,
   GraphRAGChainConverter,
-  AdaptiveRAGChainConverter
+  AdaptiveRAGChainConverter,
 } from './converters/rag-chains.js';
 
 import {
@@ -262,7 +262,7 @@ import {
   StructuredOutputFunctionConverter,
   MultiStepFunctionChainConverter,
   FunctionCallValidatorConverter,
-  FunctionCallRouterConverter
+  FunctionCallRouterConverter,
 } from './converters/function-calling.js';
 
 import {
@@ -274,7 +274,7 @@ import {
   ZeroShotReactDescriptionAgentConverter,
   ReactDocstoreAgentConverter,
   ConversationalReactDescriptionAgentConverter,
-  ChatAgentConverter
+  ChatAgentConverter,
 } from './converters/agent.js';
 
 import { ConverterFactory, ConverterRegistry } from './registry.js';
@@ -292,7 +292,7 @@ export const BUILT_IN_CONVERTERS = [
   HuggingFaceConverter,
   CohereConverter,
   ReplicateConverter,
-  
+
   // Prompt Converters
   ChatPromptTemplateConverter,
   PromptTemplateConverter,
@@ -300,7 +300,7 @@ export const BUILT_IN_CONVERTERS = [
   SystemMessageConverter,
   HumanMessageConverter,
   AIMessageConverter,
-  
+
   // Chain Converters
   LLMChainConverter,
   ConversationChainConverter,
@@ -309,7 +309,7 @@ export const BUILT_IN_CONVERTERS = [
   SequentialChainConverter,
   TransformChainConverter,
   MapReduceChainConverter,
-  
+
   // Memory Converters
   BufferMemoryConverter,
   BufferWindowMemoryConverter,
@@ -317,7 +317,7 @@ export const BUILT_IN_CONVERTERS = [
   VectorStoreRetrieverMemoryConverter,
   ConversationSummaryMemoryConverter,
   EntityMemoryConverter,
-  
+
   // Tool Converters
   CalculatorConverter,
   SearchAPIConverter,
@@ -326,21 +326,21 @@ export const BUILT_IN_CONVERTERS = [
   ShellToolConverter,
   RequestToolConverter,
   FileSystemConverter,
-  
+
   // Vector Store Converters
   PineconeConverter,
   ChromaConverter,
   FAISSConverter,
   MemoryVectorStoreConverter,
   SupabaseConverter,
-  
+
   // Embeddings Converters
   OpenAIEmbeddingsConverter,
   CohereEmbeddingsConverter,
   HuggingFaceEmbeddingsConverter,
   AzureOpenAIEmbeddingsConverter,
   GoogleVertexAIEmbeddingsConverter,
-  
+
   // Document Loader Converters
   PDFLoaderConverter,
   CSVLoaderConverter,
@@ -349,7 +349,7 @@ export const BUILT_IN_CONVERTERS = [
   DocxLoaderConverter,
   DirectoryLoaderConverter,
   WebLoaderConverter,
-  
+
   // Text Splitter Converters
   RecursiveCharacterTextSplitterConverter,
   CharacterTextSplitterConverter,
@@ -360,7 +360,7 @@ export const BUILT_IN_CONVERTERS = [
   PythonCodeTextSplitterConverter,
   JavaScriptCodeTextSplitterConverter,
   SemanticTextSplitterConverter,
-  
+
   // Streaming Converters
   StreamingLLMConverter,
   StreamingChainConverter,
@@ -368,21 +368,21 @@ export const BUILT_IN_CONVERTERS = [
   RealTimeStreamingConverter,
   WebSocketStreamingConverter,
   SSEStreamingConverter,
-  
+
   // RAG Chain Converters
   AdvancedRAGChainConverter,
   MultiVectorRAGChainConverter,
   ConversationalRAGChainConverter,
   GraphRAGChainConverter,
   AdaptiveRAGChainConverter,
-  
+
   // Function Calling Converters
   EnhancedOpenAIFunctionsAgentConverter,
   StructuredOutputFunctionConverter,
   MultiStepFunctionChainConverter,
   FunctionCallValidatorConverter,
   FunctionCallRouterConverter,
-  
+
   // Agent Converters
   OpenAIFunctionsAgentConverter,
   ConversationalAgentConverter,
@@ -392,7 +392,7 @@ export const BUILT_IN_CONVERTERS = [
   ZeroShotReactDescriptionAgentConverter,
   ReactDocstoreAgentConverter,
   ConversationalReactDescriptionAgentConverter,
-  ChatAgentConverter
+  ChatAgentConverter,
 ];
 
 /**
@@ -401,34 +401,34 @@ export const BUILT_IN_CONVERTERS = [
 export function initializeRegistry(): void {
   // Reset registry first to ensure clean state
   ConverterFactory.reset();
-  
+
   // Register all built-in converters
   ConverterFactory.registerConverters(BUILT_IN_CONVERTERS);
-  
+
   // Register common aliases
   const registry = ConverterFactory.getRegistry();
-  
+
   // LLM aliases
   registry.registerAlias('openai', 'openAI');
   registry.registerAlias('gpt', 'chatOpenAI');
   registry.registerAlias('claude', 'anthropic');
   registry.registerAlias('azure', 'azureOpenAI');
-  
+
   // Prompt aliases
   registry.registerAlias('chatPrompt', 'chatPromptTemplate');
   registry.registerAlias('prompt', 'promptTemplate');
   registry.registerAlias('fewShot', 'fewShotPromptTemplate');
-  
+
   // Chain aliases
   registry.registerAlias('llm_chain', 'llmChain');
   registry.registerAlias('conversation_chain', 'conversationChain');
   registry.registerAlias('qa_chain', 'retrievalQAChain');
-  
+
   // Memory aliases
   registry.registerAlias('buffer', 'bufferMemory');
   registry.registerAlias('window', 'bufferWindowMemory');
   registry.registerAlias('summary', 'summaryBufferMemory');
-  
+
   // Tool aliases
   registry.registerAlias('calc', 'calculator');
   registry.registerAlias('search', 'serpAPI');
@@ -437,7 +437,7 @@ export function initializeRegistry(): void {
   registry.registerAlias('shell', 'shellTool');
   registry.registerAlias('request', 'requestTool');
   registry.registerAlias('fs', 'fileSystem');
-  
+
   // Vector Store aliases
   registry.registerAlias('vectorstore', 'memoryVectorStore');
   registry.registerAlias('vector', 'memoryVectorStore');
@@ -445,7 +445,7 @@ export function initializeRegistry(): void {
   registry.registerAlias('chromaVectorStore', 'chroma');
   registry.registerAlias('faissVectorStore', 'faiss');
   registry.registerAlias('supabaseVectorStore', 'supabase');
-  
+
   // Embeddings aliases
   registry.registerAlias('openaiEmbeddings', 'openAIEmbeddings');
   registry.registerAlias('embeddings', 'openAIEmbeddings');
@@ -454,7 +454,7 @@ export function initializeRegistry(): void {
   registry.registerAlias('hf', 'huggingFaceEmbeddings');
   registry.registerAlias('azure', 'azureOpenAIEmbeddings');
   registry.registerAlias('vertexai', 'googleVertexAIEmbeddings');
-  
+
   // Document Loader aliases
   registry.registerAlias('pdf', 'pdfLoader');
   registry.registerAlias('csv', 'csvLoader');
@@ -464,10 +464,13 @@ export function initializeRegistry(): void {
   registry.registerAlias('directory', 'directoryLoader');
   registry.registerAlias('web', 'webLoader');
   registry.registerAlias('url', 'webLoader');
-  
+
   // Text Splitter aliases
   registry.registerAlias('textSplitter', 'recursiveCharacterTextSplitter');
-  registry.registerAlias('recursiveTextSplitter', 'recursiveCharacterTextSplitter');
+  registry.registerAlias(
+    'recursiveTextSplitter',
+    'recursiveCharacterTextSplitter'
+  );
   registry.registerAlias('characterSplitter', 'characterTextSplitter');
   registry.registerAlias('tokenSplitter', 'tokenTextSplitter');
   registry.registerAlias('markdownSplitter', 'markdownTextSplitter');
@@ -476,7 +479,7 @@ export function initializeRegistry(): void {
   registry.registerAlias('pythonSplitter', 'pythonCodeTextSplitter');
   registry.registerAlias('jsSplitter', 'javascriptCodeTextSplitter');
   registry.registerAlias('semanticSplitter', 'semanticTextSplitter');
-  
+
   // Streaming aliases
   registry.registerAlias('streaming', 'streamingLLM');
   registry.registerAlias('streamingModel', 'streamingLLM');
@@ -485,14 +488,14 @@ export function initializeRegistry(): void {
   registry.registerAlias('realTimeStream', 'realTimeStreaming');
   registry.registerAlias('websocketStream', 'webSocketStreaming');
   registry.registerAlias('sseStream', 'sseStreaming');
-  
+
   // RAG Chain aliases
   registry.registerAlias('advancedRag', 'advancedRAGChain');
   registry.registerAlias('multiVectorRag', 'multiVectorRAGChain');
   registry.registerAlias('conversationalRag', 'conversationalRAGChain');
   registry.registerAlias('graphRag', 'graphRAGChain');
   registry.registerAlias('adaptiveRag', 'adaptiveRAGChain');
-  
+
   // Function Calling aliases
   registry.registerAlias('enhancedFunctions', 'enhancedOpenAIFunctionsAgent');
   registry.registerAlias('structuredOutput', 'structuredOutputFunction');
@@ -500,7 +503,7 @@ export function initializeRegistry(): void {
   registry.registerAlias('functionValidator', 'functionCallValidator');
   registry.registerAlias('functionRouter', 'functionCallRouter');
   registry.registerAlias('functionCalling', 'enhancedOpenAIFunctionsAgent');
-  
+
   // Agent aliases
   registry.registerAlias('openAIAgent', 'openAIFunctionsAgent');
   registry.registerAlias('conversationalAgent', 'conversationalAgent');
@@ -522,12 +525,12 @@ export function getRegistryInfo(): {
 } {
   const registry = ConverterFactory.getRegistry();
   const stats = registry.getStatistics();
-  
+
   return {
     initialized: stats.totalConverters > 0,
     totalConverters: stats.totalConverters,
     supportedTypes: registry.getRegisteredTypes().sort(),
-    statistics: stats
+    statistics: stats,
   };
 }
 
@@ -542,7 +545,7 @@ export function validateRegistrySupport(nodeTypes: string[]): {
   const registry = ConverterFactory.getRegistry();
   const supported: string[] = [];
   const unsupported: string[] = [];
-  
+
   for (const nodeType of nodeTypes) {
     if (registry.hasConverter(nodeType)) {
       supported.push(nodeType);
@@ -550,26 +553,29 @@ export function validateRegistrySupport(nodeTypes: string[]): {
       unsupported.push(nodeType);
     }
   }
-  
-  const coverage = nodeTypes.length > 0 ? (supported.length / nodeTypes.length) * 100 : 100;
-  
+
+  const coverage =
+    nodeTypes.length > 0 ? (supported.length / nodeTypes.length) * 100 : 100;
+
   return {
     supported,
     unsupported,
-    coverage: Math.round(coverage * 100) / 100
+    coverage: Math.round(coverage * 100) / 100,
   };
 }
 
 /**
  * Get recommended converters for unsupported node types
  */
-export function getConverterRecommendations(unsupportedTypes: string[]): Record<string, string[]> {
+export function getConverterRecommendations(
+  unsupportedTypes: string[]
+): Record<string, string[]> {
   const registry = ConverterFactory.getRegistry();
   const recommendations: Record<string, string[]> = {};
-  
+
   for (const type of unsupportedTypes) {
     const suggestions: string[] = [];
-    
+
     // Look for similar converter names
     const registeredTypes = registry.getRegisteredTypes();
     for (const registeredType of registeredTypes) {
@@ -581,42 +587,58 @@ export function getConverterRecommendations(unsupportedTypes: string[]): Record<
         suggestions.push(registeredType);
       }
     }
-    
+
     // Look for common patterns
-    if (type.toLowerCase().includes('llm') || type.toLowerCase().includes('model')) {
-      suggestions.push(...registeredTypes.filter(t => 
-        registry.getConverter(t)?.['category'] === 'llm'
-      ));
+    if (
+      type.toLowerCase().includes('llm') ||
+      type.toLowerCase().includes('model')
+    ) {
+      suggestions.push(
+        ...registeredTypes.filter(
+          (t) => registry.getConverter(t)?.['category'] === 'llm'
+        )
+      );
     }
-    
-    if (type.toLowerCase().includes('prompt') || type.toLowerCase().includes('template')) {
-      suggestions.push(...registeredTypes.filter(t => 
-        registry.getConverter(t)?.['category'] === 'prompt'
-      ));
+
+    if (
+      type.toLowerCase().includes('prompt') ||
+      type.toLowerCase().includes('template')
+    ) {
+      suggestions.push(
+        ...registeredTypes.filter(
+          (t) => registry.getConverter(t)?.['category'] === 'prompt'
+        )
+      );
     }
-    
+
     if (type.toLowerCase().includes('chain')) {
-      suggestions.push(...registeredTypes.filter(t => 
-        registry.getConverter(t)?.['category'] === 'chain'
-      ));
+      suggestions.push(
+        ...registeredTypes.filter(
+          (t) => registry.getConverter(t)?.['category'] === 'chain'
+        )
+      );
     }
-    
+
     if (type.toLowerCase().includes('memory')) {
-      suggestions.push(...registeredTypes.filter(t => 
-        registry.getConverter(t)?.['category'] === 'memory'
-      ));
+      suggestions.push(
+        ...registeredTypes.filter(
+          (t) => registry.getConverter(t)?.['category'] === 'memory'
+        )
+      );
     }
-    
+
     if (type.toLowerCase().includes('agent')) {
-      suggestions.push(...registeredTypes.filter(t => 
-        registry.getConverter(t)?.['category'] === 'agent'
-      ));
+      suggestions.push(
+        ...registeredTypes.filter(
+          (t) => registry.getConverter(t)?.['category'] === 'agent'
+        )
+      );
     }
-    
+
     // Remove duplicates and limit suggestions
     recommendations[type] = [...new Set(suggestions)].slice(0, 5);
   }
-  
+
   return recommendations;
 }
 
@@ -641,7 +663,7 @@ export function createPlugin(
     version,
     ...(description !== undefined && { description }),
     converters,
-    ...(aliases !== undefined && { aliases })
+    ...(aliases !== undefined && { aliases }),
   };
 }
 
@@ -655,61 +677,68 @@ export const RegistryDebug = {
   listConverters(): void {
     const registry = ConverterFactory.getRegistry();
     const stats = registry.getStatistics();
-    
+
     console.log('\n=== Converter Registry Debug Info ===');
     console.log(`Total Converters: ${stats.totalConverters}`);
     console.log(`Total Aliases: ${stats.totalAliases}`);
     console.log(`Deprecated Converters: ${stats.deprecatedConverters}`);
-    
+
     console.log('\n--- Converters by Category ---');
-    for (const [category, count] of Object.entries(stats.convertersByCategory)) {
+    for (const [category, count] of Object.entries(
+      stats.convertersByCategory
+    )) {
       console.log(`${category}: ${count} converters`);
-      
+
       const converters = registry.getConvertersByCategory(category);
       for (const converter of converters) {
         const status = converter.isDeprecated() ? ' (DEPRECATED)' : '';
         console.log(`  - ${converter['flowiseType']}${status}`);
       }
     }
-    
+
     console.log('\n--- Registered Aliases ---');
     const aliases = registry.getRegisteredAliases();
     for (const [alias, target] of Object.entries(aliases)) {
       console.log(`  ${alias} → ${target}`);
     }
   },
-  
+
   /**
    * Test a converter with sample data
    */
   testConverter(nodeType: string, sampleNode?: Partial<any>): void {
     const registry = ConverterFactory.getRegistry();
     const converter = registry.getConverter(nodeType);
-    
+
     if (!converter) {
       console.error(`No converter found for type: ${nodeType}`);
       return;
     }
-    
+
     console.log(`\n=== Testing Converter: ${nodeType} ===`);
     console.log(`Category: ${converter['category']}`);
     console.log(`Deprecated: ${converter.isDeprecated()}`);
-    console.log(`Supported Versions: ${converter.getSupportedVersions().join(', ')}`);
-    
+    console.log(
+      `Supported Versions: ${converter.getSupportedVersions().join(', ')}`
+    );
+
     if (sampleNode) {
       try {
         const canConvert = converter.canConvert(sampleNode as any);
         console.log(`Can Convert: ${canConvert}`);
-        
+
         if (canConvert) {
-          const dependencies = converter.getDependencies(sampleNode as any, {} as any);
+          const dependencies = converter.getDependencies(
+            sampleNode as any,
+            {} as any
+          );
           console.log(`Dependencies: ${dependencies.join(', ')}`);
         }
       } catch (error) {
         console.error(`Test failed: ${error}`);
       }
     }
-  }
+  },
 };
 
 // Initialize the registry on module load

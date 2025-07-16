@@ -1,15 +1,22 @@
 /**
  * High-Level Converter Pipeline
- * 
+ *
  * This module provides a simplified, high-level interface for converting
  * Flowise flows to LangChain code with sensible defaults and error handling.
  */
 
-import { FlowiseToLangChainConverter, type ConversionMetrics } from './index.js';
+import {
+  FlowiseToLangChainConverter,
+  type ConversionMetrics,
+} from './index.js';
 import { writeFile, mkdir } from 'fs/promises';
 import { dirname, resolve, join } from 'path';
 import { Logger } from './cli/utils/logger.js';
-import type { CodeGenerationResult, GenerationContext, FlowiseChatFlow } from './ir/types.js';
+import type {
+  CodeGenerationResult,
+  GenerationContext,
+  FlowiseChatFlow,
+} from './ir/types.js';
 
 /**
  * Conversion options for the high-level pipeline
@@ -17,28 +24,28 @@ import type { CodeGenerationResult, GenerationContext, FlowiseChatFlow } from '.
 export interface ConversionOptions {
   /** Output directory for generated files */
   outputPath?: string;
-  
+
   /** Include LangFuse tracing integration */
   includeLangfuse?: boolean;
-  
+
   /** Target language/format (currently only 'typescript') */
   target?: 'typescript';
-  
+
   /** Output module format */
   outputFormat?: 'esm' | 'cjs';
-  
+
   /** Include detailed comments in generated code */
   includeComments?: boolean;
-  
+
   /** Overwrite existing files */
   overwrite?: boolean;
-  
+
   /** Verbose logging */
   verbose?: boolean;
-  
+
   /** Silent mode (errors only) */
   silent?: boolean;
-  
+
   /** Additional generation context */
   context?: Partial<GenerationContext>;
 }
@@ -49,7 +56,7 @@ export interface ConversionOptions {
 export interface ConversionResult {
   /** Whether conversion was successful */
   success: boolean;
-  
+
   /** Generated files with their paths */
   files: Array<{
     path: string;
@@ -57,13 +64,13 @@ export interface ConversionResult {
     size: number;
     type: 'main' | 'types' | 'config' | 'test';
   }>;
-  
+
   /** Conversion errors */
   errors: string[];
-  
+
   /** Conversion warnings */
   warnings: string[];
-  
+
   /** Performance and analysis metrics */
   metrics: ConversionMetrics & {
     totalFiles: number;
@@ -72,7 +79,7 @@ export interface ConversionResult {
     generationTime: number;
     ioTime: number;
   };
-  
+
   /** Analysis of the converted flow */
   analysis: {
     nodeCount: number;
@@ -93,10 +100,10 @@ export class ConverterPipeline {
 
   constructor(options: Pick<ConversionOptions, 'verbose' | 'silent'> = {}) {
     this.logger = new Logger();
-    
+
     this.converter = new FlowiseToLangChainConverter({
       verbose: options.verbose || false,
-      silent: options.silent || false
+      silent: options.silent || false,
     });
   }
 
@@ -117,18 +124,17 @@ export class ConverterPipeline {
       this.logger.debug('Input file loaded');
 
       return await this.convertContent(inputContent, options);
-
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       this.logger.error('File conversion failed: ' + err.message);
-      
+
       return {
         success: false,
         files: [],
         errors: [err.message],
         warnings: [],
         metrics: this.createExtendedMetrics(startTime, 'file_error'),
-        analysis: this.createEmptyAnalysis()
+        analysis: this.createEmptyAnalysis(),
       };
     }
   }
@@ -146,7 +152,8 @@ export class ConverterPipeline {
     try {
       // Build generation context
       const baseContext: Partial<GenerationContext> = {
-        targetLanguage: (options.target as 'typescript' | 'python') || 'typescript',
+        targetLanguage:
+          (options.target as 'typescript' | 'python') || 'typescript',
         includeLangfuse: options.includeLangfuse || false,
         outputPath: '',
         projectName: 'converted-flow',
@@ -159,13 +166,13 @@ export class ConverterPipeline {
           useSpaces: true,
           semicolons: true,
           singleQuotes: true,
-          trailingCommas: true
-        }
+          trailingCommas: true,
+        },
       };
-      
+
       const context = {
         ...baseContext,
-        ...options.context
+        ...options.context,
       };
 
       this.logger.debug('Starting conversion with context:', context);
@@ -174,7 +181,10 @@ export class ConverterPipeline {
       const analysisTime = Date.now() - analysisStart;
       const generationStart = Date.now();
 
-      const result = await this.converter.convert(input, context as GenerationContext);
+      const result = await this.converter.convert(
+        input,
+        context as GenerationContext
+      );
       const generationTime = Date.now() - generationStart;
 
       if (!result.success || !result.result) {
@@ -186,16 +196,20 @@ export class ConverterPipeline {
           metrics: this.createExtendedMetrics(startTime, 'conversion_error', {
             analysisTime,
             generationTime,
-            ioTime: 0
+            ioTime: 0,
           }),
-          analysis: this.createEmptyAnalysis()
+          analysis: this.createEmptyAnalysis(),
         };
       }
 
       // Write files if output path is specified
       const ioStart = Date.now();
-      const files = options.outputPath 
-        ? await this.writeFiles(result.result, options.outputPath, options.overwrite || false)
+      const files = options.outputPath
+        ? await this.writeFiles(
+            result.result,
+            options.outputPath,
+            options.overwrite || false
+          )
         : [];
       const ioTime = Date.now() - ioStart;
 
@@ -215,25 +229,27 @@ export class ConverterPipeline {
           generationTime,
           ioTime,
           totalFiles: files.length,
-          totalBytes: files.reduce((sum, f) => sum + f.size, 0)
+          totalBytes: files.reduce((sum, f) => sum + f.size, 0),
         }),
         analysis: {
           ...analysis,
-          complexity: this.calculateComplexity(analysis.nodeCount, analysis.connectionCount)
-        }
+          complexity: this.calculateComplexity(
+            analysis.nodeCount,
+            analysis.connectionCount
+          ),
+        },
       };
-
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       this.logger.error('Content conversion failed: ' + err.message);
-      
+
       return {
         success: false,
         files: [],
         errors: [err.message],
         warnings: [],
         metrics: this.createExtendedMetrics(startTime, 'error'),
-        analysis: this.createEmptyAnalysis()
+        analysis: this.createEmptyAnalysis(),
       };
     }
   }
@@ -250,15 +266,18 @@ export class ConverterPipeline {
     try {
       const result = await this.converter.validate(input);
       const analysis = result.analysis || this.createEmptyAnalysis();
-      
+
       return {
         isValid: result.isValid,
         errors: result.errors,
         warnings: result.warnings,
         analysis: {
           ...analysis,
-          complexity: this.calculateComplexity(analysis.nodeCount, analysis.connectionCount)
-        }
+          complexity: this.calculateComplexity(
+            analysis.nodeCount,
+            analysis.connectionCount
+          ),
+        },
       };
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
@@ -266,7 +285,7 @@ export class ConverterPipeline {
         isValid: false,
         errors: [err.message],
         warnings: [],
-        analysis: this.createEmptyAnalysis()
+        analysis: this.createEmptyAnalysis(),
       };
     }
   }
@@ -282,26 +301,26 @@ export class ConverterPipeline {
     version: string;
   }> {
     const capabilities = await this.converter.getCapabilities();
-    
+
     // Get version from package.json
     const { readFile } = await import('fs/promises');
     const { fileURLToPath } = await import('url');
     const { dirname, join } = await import('path');
-    
+
     try {
       const __dirname = dirname(fileURLToPath(import.meta.url));
       const packagePath = join(__dirname, '../package.json');
       const packageContent = await readFile(packagePath, 'utf-8');
       const packageJson = JSON.parse(packageContent);
-      
+
       return {
         ...capabilities,
-        version: packageJson.version || '1.0.0'
+        version: packageJson.version || '1.0.0',
       };
     } catch {
       return {
         ...capabilities,
-        version: '1.0.0'
+        version: '1.0.0',
       };
     }
   }
@@ -317,7 +336,9 @@ export class ConverterPipeline {
     const files: ConversionResult['files'] = [];
     const outputDir = resolve(outputPath);
 
-    this.logger.debug(`Writing ${codeResult.files.length} files to ${outputDir}`);
+    this.logger.debug(
+      `Writing ${codeResult.files.length} files to ${outputDir}`
+    );
 
     // Create output directory
     await mkdir(outputDir, { recursive: true });
@@ -349,7 +370,7 @@ export class ConverterPipeline {
         path: filePath,
         relativePath: file.path,
         size,
-        type: this.getFileType(file.path)
+        type: this.getFileType(file.path),
       });
 
       this.logger.debug(`Written: ${file.path} (${size} bytes)`);
@@ -377,9 +398,12 @@ export class ConverterPipeline {
   /**
    * Calculate complexity based on node and connection counts
    */
-  private calculateComplexity(nodeCount: number, connectionCount: number): 'simple' | 'moderate' | 'complex' {
+  private calculateComplexity(
+    nodeCount: number,
+    connectionCount: number
+  ): 'simple' | 'moderate' | 'complex' {
     const totalElements = nodeCount + connectionCount;
-    
+
     if (totalElements <= 5) return 'simple';
     if (totalElements <= 15) return 'moderate';
     return 'complex';
@@ -389,8 +413,8 @@ export class ConverterPipeline {
    * Create extended metrics object
    */
   private createExtendedMetrics(
-    startTime: number, 
-    status: string, 
+    startTime: number,
+    status: string,
     additional: Partial<ConversionResult['metrics']> = {}
   ): ConversionResult['metrics'] {
     return {
@@ -403,7 +427,7 @@ export class ConverterPipeline {
       analysisTime: 0,
       generationTime: 0,
       ioTime: 0,
-      ...additional
+      ...additional,
     };
   }
 
@@ -417,7 +441,7 @@ export class ConverterPipeline {
       supportedTypes: [],
       unsupportedTypes: [],
       coverage: 0,
-      complexity: 'simple'
+      complexity: 'simple',
     };
   }
 }
@@ -452,9 +476,7 @@ export async function convertContent(
 /**
  * Validate a Flowise flow
  */
-export async function validateFlow(
-  input: string | FlowiseChatFlow
-): Promise<{
+export async function validateFlow(input: string | FlowiseChatFlow): Promise<{
   isValid: boolean;
   errors: string[];
   warnings: string[];

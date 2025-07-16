@@ -1,6 +1,6 @@
 /**
  * Prompt Template Converters
- * 
+ *
  * Converters for various prompt template nodes including ChatPromptTemplate,
  * PromptTemplate, FewShotPromptTemplate, and message types.
  */
@@ -13,8 +13,11 @@ import { BaseConverter } from '../registry.js';
  */
 abstract class BasePromptConverter extends BaseConverter {
   readonly category = 'prompt';
-  
-  protected generatePromptConfiguration(node: IRNode, context: GenerationContext): {
+
+  protected generatePromptConfiguration(
+    node: IRNode,
+    context: GenerationContext
+  ): {
     imports: string[];
     packageName: string;
     className: string;
@@ -24,47 +27,55 @@ abstract class BasePromptConverter extends BaseConverter {
       imports: this.getRequiredImports(),
       packageName: this.getPackageName(),
       className: this.getClassName(),
-      config: this.extractPromptConfig(node)
+      config: this.extractPromptConfig(node),
     };
   }
-  
+
   protected abstract getRequiredImports(): string[];
   protected abstract getPackageName(): string;
   protected abstract getClassName(): string;
   protected abstract extractPromptConfig(node: IRNode): Record<string, unknown>;
-  
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'prompt');
-    const config = this.generatePromptConfiguration(node, context);
+    const config = this.generatePromptConfiguration(node, _context);
     const fragments: CodeFragment[] = [];
-    
+
     // Import fragment
-    fragments.push(this.createCodeFragment(
-      `${node.id}_import`,
-      'import',
-      this.generateImport(config.packageName, config.imports),
-      [config.packageName],
-      node.id,
-      1
-    ));
-    
+    fragments.push(
+      this.createCodeFragment(
+        `${node.id}_import`,
+        'import',
+        this.generateImport(config.packageName, config.imports),
+        [config.packageName],
+        node.id,
+        1
+      )
+    );
+
     // Generate the prompt instantiation
-    const instantiation = this.generateInstantiation(variableName, config.className, config.config);
-    
+    const instantiation = this.generateInstantiation(
+      variableName,
+      config.className,
+      config.config
+    );
+
     // Declaration fragment
-    fragments.push(this.createCodeFragment(
-      `${node.id}_declaration`,
-      'declaration',
-      instantiation,
-      [],
-      node.id,
-      2,
-      { exports: [variableName] }
-    ));
-    
+    fragments.push(
+      this.createCodeFragment(
+        `${node.id}_declaration`,
+        'declaration',
+        instantiation,
+        [],
+        node.id,
+        2,
+        { exports: [variableName] }
+      )
+    );
+
     return fragments;
   }
-  
+
   protected generateInstantiation(
     variableName: string,
     className: string,
@@ -74,7 +85,7 @@ abstract class BasePromptConverter extends BaseConverter {
       .filter(([_, value]) => value !== undefined)
       .map(([key, value]) => `  ${key}: ${this.formatParameterValue(value)}`)
       .join(',\n');
-    
+
     return `const ${variableName} = ${className}.fromTemplate({\n${configStr}\n});`;
   }
 }
@@ -84,47 +95,56 @@ abstract class BasePromptConverter extends BaseConverter {
  */
 export class ChatPromptTemplateConverter extends BasePromptConverter {
   readonly flowiseType = 'chatPromptTemplate';
-  
+
   protected getRequiredImports(): string[] {
     return ['ChatPromptTemplate', 'SystemMessage', 'HumanMessage'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/prompts';
   }
-  
+
   protected getClassName(): string {
     return 'ChatPromptTemplate';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractPromptConfig(node: IRNode): Record<string, unknown> {
     const systemMessage = this.getParameterValue<string>(node, 'systemMessage');
-    const humanMessage = this.getParameterValue<string>(node, 'humanMessage', '{input}');
-    const formatInstructions = this.getParameterValue<string>(node, 'formatInstructions');
-    
+    const humanMessage = this.getParameterValue<string>(
+      node,
+      'humanMessage',
+      '{input}'
+    );
+    const formatInstructions = this.getParameterValue<string>(
+      node,
+      'formatInstructions'
+    );
+
     const messages: string[] = [];
-    
+
     if (systemMessage) {
       messages.push(`["system", ${this.formatParameterValue(systemMessage)}]`);
     }
-    
+
     if (humanMessage) {
       messages.push(`["human", ${this.formatParameterValue(humanMessage)}]`);
     }
-    
+
     if (formatInstructions) {
-      messages.push(`["system", ${this.formatParameterValue(formatInstructions)}]`);
+      messages.push(
+        `["system", ${this.formatParameterValue(formatInstructions)}]`
+      );
     }
-    
+
     return {
-      template: `[${messages.join(', ')}]`
+      template: `[${messages.join(', ')}]`,
     };
   }
-  
+
   protected generateInstantiation(
     variableName: string,
     className: string,
@@ -139,32 +159,43 @@ export class ChatPromptTemplateConverter extends BasePromptConverter {
  */
 export class PromptTemplateConverter extends BasePromptConverter {
   readonly flowiseType = 'promptTemplate';
-  
+
   protected getRequiredImports(): string[] {
     return ['PromptTemplate'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/prompts';
   }
-  
+
   protected getClassName(): string {
     return 'PromptTemplate';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractPromptConfig(node: IRNode): Record<string, unknown> {
-    const template = this.getParameterValue<string>(node, 'template', '{input}');
-    const inputVariables = this.getParameterValue<string[]>(node, 'inputVariables', ['input']);
-    const partialVariables = this.getParameterValue<Record<string, string>>(node, 'partialVariables');
-    
+    const template = this.getParameterValue<string>(
+      node,
+      'template',
+      '{input}'
+    );
+    const inputVariables = this.getParameterValue<string[]>(
+      node,
+      'inputVariables',
+      ['input']
+    );
+    const partialVariables = this.getParameterValue<Record<string, string>>(
+      node,
+      'partialVariables'
+    );
+
     return {
       template,
       inputVariables,
-      ...(partialVariables && { partialVariables })
+      ...(partialVariables && { partialVariables }),
     };
   }
 }
@@ -174,41 +205,57 @@ export class PromptTemplateConverter extends BasePromptConverter {
  */
 export class FewShotPromptTemplateConverter extends BasePromptConverter {
   readonly flowiseType = 'fewShotPromptTemplate';
-  
+
   protected getRequiredImports(): string[] {
     return ['FewShotPromptTemplate', 'PromptTemplate'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/prompts';
   }
-  
+
   protected getClassName(): string {
     return 'FewShotPromptTemplate';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractPromptConfig(node: IRNode): Record<string, unknown> {
-    const examples = this.getParameterValue<Array<Record<string, string>>>(node, 'examples', []);
-    const examplePromptTemplate = this.getParameterValue<string>(node, 'examplePrompt', '{input}\n{output}');
+    const examples = this.getParameterValue<Array<Record<string, string>>>(
+      node,
+      'examples',
+      []
+    );
+    const examplePromptTemplate = this.getParameterValue<string>(
+      node,
+      'examplePrompt',
+      '{input}\n{output}'
+    );
     const prefix = this.getParameterValue<string>(node, 'prefix', '');
     const suffix = this.getParameterValue<string>(node, 'suffix', '{input}');
-    const inputVariables = this.getParameterValue<string[]>(node, 'inputVariables', ['input']);
-    const exampleSeparator = this.getParameterValue<string>(node, 'exampleSeparator', '\n\n');
-    
+    const inputVariables = this.getParameterValue<string[]>(
+      node,
+      'inputVariables',
+      ['input']
+    );
+    const exampleSeparator = this.getParameterValue<string>(
+      node,
+      'exampleSeparator',
+      '\n\n'
+    );
+
     return {
       examples,
       examplePrompt: `PromptTemplate.fromTemplate(${this.formatParameterValue(examplePromptTemplate)})`,
       prefix,
       suffix,
       inputVariables,
-      exampleSeparator
+      exampleSeparator,
     };
   }
-  
+
   protected generateInstantiation(
     variableName: string,
     className: string,
@@ -223,7 +270,7 @@ export class FewShotPromptTemplateConverter extends BasePromptConverter {
         return `  ${key}: ${this.formatParameterValue(value)}`;
       })
       .join(',\n');
-    
+
     return `const ${variableName} = new ${className}({\n${configEntries}\n});`;
   }
 }
@@ -233,28 +280,28 @@ export class FewShotPromptTemplateConverter extends BasePromptConverter {
  */
 export class SystemMessageConverter extends BasePromptConverter {
   readonly flowiseType = 'systemMessage';
-  
+
   protected getRequiredImports(): string[] {
     return ['SystemMessage'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/messages';
   }
-  
+
   protected getClassName(): string {
     return 'SystemMessage';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractPromptConfig(node: IRNode): Record<string, unknown> {
     const content = this.getParameterValue<string>(node, 'content', '');
     return { content };
   }
-  
+
   protected generateInstantiation(
     variableName: string,
     className: string,
@@ -269,28 +316,28 @@ export class SystemMessageConverter extends BasePromptConverter {
  */
 export class HumanMessageConverter extends BasePromptConverter {
   readonly flowiseType = 'humanMessage';
-  
+
   protected getRequiredImports(): string[] {
     return ['HumanMessage'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/messages';
   }
-  
+
   protected getClassName(): string {
     return 'HumanMessage';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractPromptConfig(node: IRNode): Record<string, unknown> {
     const content = this.getParameterValue<string>(node, 'content', '');
     return { content };
   }
-  
+
   protected generateInstantiation(
     variableName: string,
     className: string,
@@ -305,28 +352,28 @@ export class HumanMessageConverter extends BasePromptConverter {
  */
 export class AIMessageConverter extends BasePromptConverter {
   readonly flowiseType = 'aiMessage';
-  
+
   protected getRequiredImports(): string[] {
     return ['AIMessage'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/messages';
   }
-  
+
   protected getClassName(): string {
     return 'AIMessage';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractPromptConfig(node: IRNode): Record<string, unknown> {
     const content = this.getParameterValue<string>(node, 'content', '');
     return { content };
   }
-  
+
   protected generateInstantiation(
     variableName: string,
     className: string,

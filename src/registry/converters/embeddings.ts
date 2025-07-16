@@ -1,6 +1,6 @@
 /**
  * Embeddings Converters
- * 
+ *
  * Converters for various embedding models including OpenAI, Cohere, Hugging Face, etc.
  */
 
@@ -12,8 +12,11 @@ import { BaseConverter } from '../registry.js';
  */
 abstract class BaseEmbeddingsConverter extends BaseConverter {
   readonly category = 'embeddings';
-  
-  protected generateEmbeddingsConfiguration(node: IRNode, context: GenerationContext): {
+
+  protected generateEmbeddingsConfiguration(
+    node: IRNode,
+    context: GenerationContext
+  ): {
     imports: string[];
     packageName: string;
     className: string;
@@ -23,56 +26,64 @@ abstract class BaseEmbeddingsConverter extends BaseConverter {
       imports: this.getRequiredImports(),
       packageName: this.getPackageName(),
       className: this.getClassName(),
-      config: this.extractEmbeddingsConfig(node)
+      config: this.extractEmbeddingsConfig(node),
     };
   }
-  
+
   protected abstract getRequiredImports(): string[];
   protected abstract getPackageName(): string;
   protected abstract getClassName(): string;
-  protected abstract extractEmbeddingsConfig(node: IRNode): Record<string, unknown>;
-  
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  protected abstract extractEmbeddingsConfig(
+    node: IRNode
+  ): Record<string, unknown>;
+
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'embeddings');
-    const config = this.generateEmbeddingsConfiguration(node, context);
+    const config = this.generateEmbeddingsConfiguration(node, _context);
     const fragments: CodeFragment[] = [];
-    
+
     // Import fragment
-    fragments.push(this.createCodeFragment(
-      `${node.id}_import`,
-      'import',
-      this.generateImport(config.packageName, config.imports),
-      [config.packageName],
-      node.id,
-      1
-    ));
-    
+    fragments.push(
+      this.createCodeFragment(
+        `${node.id}_import`,
+        'import',
+        this.generateImport(config.packageName, config.imports),
+        [config.packageName],
+        node.id,
+        1
+      )
+    );
+
     // Configuration fragment
     const configStr = this.generateConfigurationString(config.config);
-    const initCode = configStr 
+    const initCode = configStr
       ? `const ${variableName} = new ${config.className}(${configStr});`
       : `const ${variableName} = new ${config.className}();`;
-    
-    fragments.push(this.createCodeFragment(
-      `${node.id}_init`,
-      'initialization',
-      initCode,
-      [config.className],
-      node.id,
-      140
-    ));
-    
+
+    fragments.push(
+      this.createCodeFragment(
+        `${node.id}_init`,
+        'initialization',
+        initCode,
+        [config.className],
+        node.id,
+        140
+      )
+    );
+
     return fragments;
   }
-  
-  protected generateConfigurationString(config: Record<string, unknown>): string {
+
+  protected generateConfigurationString(
+    config: Record<string, unknown>
+  ): string {
     const entries = Object.entries(config);
     if (entries.length === 0) return '';
-    
+
     const configPairs = entries.map(([key, value]) => {
       return `${key}: ${this.formatParameterValue(value)}`;
     });
-    
+
     return `{\n  ${configPairs.join(',\n  ')}\n}`;
   }
 }
@@ -82,49 +93,53 @@ abstract class BaseEmbeddingsConverter extends BaseConverter {
  */
 export class OpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
   readonly flowiseType = 'openAIEmbeddings';
-  
+
   protected getRequiredImports(): string[] {
     return ['OpenAIEmbeddings'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/openai';
   }
-  
+
   protected getClassName(): string {
     return 'OpenAIEmbeddings';
   }
-  
+
   protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     const apiKey = this.getParameterValue(node, 'apiKey');
     if (apiKey) {
       config.openAIApiKey = apiKey;
     } else {
       config.openAIApiKey = 'process.env.OPENAI_API_KEY';
     }
-    
-    const model = this.getParameterValue(node, 'model', 'text-embedding-ada-002');
+
+    const model = this.getParameterValue(
+      node,
+      'model',
+      'text-embedding-ada-002'
+    );
     config.model = model;
-    
+
     const batchSize = this.getParameterValue(node, 'batchSize');
     if (batchSize) {
       config.batchSize = batchSize;
     }
-    
+
     const stripNewLines = this.getParameterValue(node, 'stripNewLines');
     if (stripNewLines !== undefined) {
       config.stripNewLines = stripNewLines;
     }
-    
+
     return config;
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/openai'];
   }
-  
+
   getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
@@ -135,44 +150,44 @@ export class OpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
  */
 export class CohereEmbeddingsConverter extends BaseEmbeddingsConverter {
   readonly flowiseType = 'cohereEmbeddings';
-  
+
   protected getRequiredImports(): string[] {
     return ['CohereEmbeddings'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/cohere';
   }
-  
+
   protected getClassName(): string {
     return 'CohereEmbeddings';
   }
-  
+
   protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     const apiKey = this.getParameterValue(node, 'apiKey');
     if (apiKey) {
       config.apiKey = apiKey;
     } else {
       config.apiKey = 'process.env.COHERE_API_KEY';
     }
-    
+
     const model = this.getParameterValue(node, 'model', 'embed-english-v2.0');
     config.model = model;
-    
+
     const batchSize = this.getParameterValue(node, 'batchSize');
     if (batchSize) {
       config.batchSize = batchSize;
     }
-    
+
     return config;
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/cohere'];
   }
-  
+
   getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
@@ -183,44 +198,48 @@ export class CohereEmbeddingsConverter extends BaseEmbeddingsConverter {
  */
 export class HuggingFaceEmbeddingsConverter extends BaseEmbeddingsConverter {
   readonly flowiseType = 'huggingFaceEmbeddings';
-  
+
   protected getRequiredImports(): string[] {
     return ['HuggingFaceInferenceEmbeddings'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/community/embeddings/hf';
   }
-  
+
   protected getClassName(): string {
     return 'HuggingFaceInferenceEmbeddings';
   }
-  
+
   protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     const apiKey = this.getParameterValue(node, 'apiKey');
     if (apiKey) {
       config.apiKey = apiKey;
     } else {
       config.apiKey = 'process.env.HUGGINGFACEHUB_API_TOKEN';
     }
-    
-    const model = this.getParameterValue(node, 'model', 'sentence-transformers/all-MiniLM-L6-v2');
+
+    const model = this.getParameterValue(
+      node,
+      'model',
+      'sentence-transformers/all-MiniLM-L6-v2'
+    );
     config.model = model;
-    
+
     const endpoint = this.getParameterValue(node, 'endpoint');
     if (endpoint) {
       config.endpoint = endpoint;
     }
-    
+
     return config;
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/community/embeddings/hf'];
   }
-  
+
   getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
@@ -231,53 +250,55 @@ export class HuggingFaceEmbeddingsConverter extends BaseEmbeddingsConverter {
  */
 export class AzureOpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
   readonly flowiseType = 'azureOpenAIEmbeddings';
-  
+
   protected getRequiredImports(): string[] {
     return ['AzureOpenAIEmbeddings'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/openai';
   }
-  
+
   protected getClassName(): string {
     return 'AzureOpenAIEmbeddings';
   }
-  
+
   protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     const apiKey = this.getParameterValue(node, 'apiKey');
     if (apiKey) {
       config.azureOpenAIApiKey = apiKey;
     } else {
       config.azureOpenAIApiKey = 'process.env.AZURE_OPENAI_API_KEY';
     }
-    
+
     const instanceName = this.getParameterValue(node, 'instanceName');
     if (instanceName) {
       config.azureOpenAIApiInstanceName = instanceName;
     } else {
-      config.azureOpenAIApiInstanceName = 'process.env.AZURE_OPENAI_API_INSTANCE_NAME';
+      config.azureOpenAIApiInstanceName =
+        'process.env.AZURE_OPENAI_API_INSTANCE_NAME';
     }
-    
+
     const deploymentName = this.getParameterValue(node, 'deploymentName');
     if (deploymentName) {
       config.azureOpenAIApiDeploymentName = deploymentName;
     } else {
-      config.azureOpenAIApiDeploymentName = 'process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME';
+      config.azureOpenAIApiDeploymentName =
+        'process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME';
     }
-    
+
     const apiVersion = this.getParameterValue(node, 'apiVersion', '2023-05-15');
     config.azureOpenAIApiVersion = apiVersion;
-    
+
     return config;
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/openai'];
   }
-  
+
   getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
@@ -288,42 +309,46 @@ export class AzureOpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
  */
 export class GoogleVertexAIEmbeddingsConverter extends BaseEmbeddingsConverter {
   readonly flowiseType = 'googleVertexAIEmbeddings';
-  
+
   protected getRequiredImports(): string[] {
     return ['GoogleVertexAIEmbeddings'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/google-vertexai';
   }
-  
+
   protected getClassName(): string {
     return 'GoogleVertexAIEmbeddings';
   }
-  
+
   protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     const projectId = this.getParameterValue(node, 'projectId');
     if (projectId) {
       config.projectId = projectId;
     } else {
       config.projectId = 'process.env.GOOGLE_CLOUD_PROJECT_ID';
     }
-    
+
     const location = this.getParameterValue(node, 'location', 'us-central1');
     config.location = location;
-    
-    const model = this.getParameterValue(node, 'model', 'textembedding-gecko@001');
+
+    const model = this.getParameterValue(
+      node,
+      'model',
+      'textembedding-gecko@001'
+    );
     config.model = model;
-    
+
     return config;
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/google-vertexai'];
   }
-  
+
   getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }

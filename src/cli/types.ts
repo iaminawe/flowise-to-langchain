@@ -29,6 +29,7 @@ export interface ValidationSuggestion {
   message: string;
   nodeId?: string;
   action?: string;
+  impact?: 'low' | 'medium' | 'high';
 }
 
 export interface ValidationResult {
@@ -121,13 +122,6 @@ export interface LogLevel {
   message: string;
   timestamp?: Date;
   context?: Record<string, unknown>;
-}
-
-export interface ValidationSuggestion {
-  type: 'optimization' | 'best_practice' | 'simplification' | 'modernization';
-  message: string;
-  nodeId?: string;
-  impact: 'low' | 'medium' | 'high';
 }
 
 export interface CliError extends Error {

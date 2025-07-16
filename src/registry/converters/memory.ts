@@ -1,6 +1,6 @@
 /**
  * Memory Converters
- * 
+ *
  * Converters for various memory types including BufferMemory, BufferWindowMemory,
  * SummaryBufferMemory, and other memory implementations.
  */
@@ -13,8 +13,11 @@ import { BaseConverter } from '../registry.js';
  */
 abstract class BaseMemoryConverter extends BaseConverter {
   readonly category = 'memory';
-  
-  protected generateMemoryConfiguration(node: IRNode, context: GenerationContext): {
+
+  protected generateMemoryConfiguration(
+    node: IRNode,
+    context: GenerationContext
+  ): {
     imports: string[];
     packageName: string;
     className: string;
@@ -24,51 +27,55 @@ abstract class BaseMemoryConverter extends BaseConverter {
       imports: this.getRequiredImports(),
       packageName: this.getPackageName(),
       className: this.getClassName(),
-      config: this.extractMemoryConfig(node)
+      config: this.extractMemoryConfig(node),
     };
   }
-  
+
   protected abstract getRequiredImports(): string[];
   protected abstract getPackageName(): string;
   protected abstract getClassName(): string;
   protected abstract extractMemoryConfig(node: IRNode): Record<string, unknown>;
-  
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'memory');
-    const config = this.generateMemoryConfiguration(node, context);
+    const config = this.generateMemoryConfiguration(node, _context);
     const fragments: CodeFragment[] = [];
-    
+
     // Import fragment
-    fragments.push(this.createCodeFragment(
-      `${node.id}_import`,
-      'import',
-      this.generateImport(config.packageName, config.imports),
-      [config.packageName],
-      node.id,
-      1
-    ));
-    
+    fragments.push(
+      this.createCodeFragment(
+        `${node.id}_import`,
+        'import',
+        this.generateImport(config.packageName, config.imports),
+        [config.packageName],
+        node.id,
+        1
+      )
+    );
+
     // Generate the memory instantiation
     const instantiation = this.generateMemoryInstantiation(
       variableName,
       config.className,
       config.config
     );
-    
+
     // Declaration fragment
-    fragments.push(this.createCodeFragment(
-      `${node.id}_declaration`,
-      'declaration',
-      instantiation,
-      [],
-      node.id,
-      2,
-      { exports: [variableName] }
-    ));
-    
+    fragments.push(
+      this.createCodeFragment(
+        `${node.id}_declaration`,
+        'declaration',
+        instantiation,
+        [],
+        node.id,
+        2,
+        { exports: [variableName] }
+      )
+    );
+
     return fragments;
   }
-  
+
   protected generateMemoryInstantiation(
     variableName: string,
     className: string,
@@ -78,11 +85,11 @@ abstract class BaseMemoryConverter extends BaseConverter {
       .filter(([_, value]) => value !== undefined)
       .map(([key, value]) => `  ${key}: ${this.formatParameterValue(value)}`)
       .join(',\n');
-    
+
     if (configEntries.length === 0) {
       return `const ${variableName} = new ${className}();`;
     }
-    
+
     return `const ${variableName} = new ${className}({\n${configEntries}\n});`;
   }
 }
@@ -92,38 +99,54 @@ abstract class BaseMemoryConverter extends BaseConverter {
  */
 export class BufferMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'bufferMemory';
-  
+
   protected getRequiredImports(): string[] {
     return ['BufferMemory'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/memory';
   }
-  
+
   protected getClassName(): string {
     return 'BufferMemory';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
-    const memoryKey = this.getParameterValue<string>(node, 'memoryKey', 'history');
+    const memoryKey = this.getParameterValue<string>(
+      node,
+      'memoryKey',
+      'history'
+    );
     const inputKey = this.getParameterValue<string>(node, 'inputKey', 'input');
-    const outputKey = this.getParameterValue<string>(node, 'outputKey', 'output');
-    const returnMessages = this.getParameterValue<boolean>(node, 'returnMessages', false);
-    const humanPrefix = this.getParameterValue<string>(node, 'humanPrefix', 'Human');
+    const outputKey = this.getParameterValue<string>(
+      node,
+      'outputKey',
+      'output'
+    );
+    const returnMessages = this.getParameterValue<boolean>(
+      node,
+      'returnMessages',
+      false
+    );
+    const humanPrefix = this.getParameterValue<string>(
+      node,
+      'humanPrefix',
+      'Human'
+    );
     const aiPrefix = this.getParameterValue<string>(node, 'aiPrefix', 'AI');
-    
+
     return {
       memoryKey,
       inputKey,
       outputKey,
       returnMessages,
       humanPrefix,
-      aiPrefix
+      aiPrefix,
     };
   }
 }
@@ -133,32 +156,48 @@ export class BufferMemoryConverter extends BaseMemoryConverter {
  */
 export class BufferWindowMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'bufferWindowMemory';
-  
+
   protected getRequiredImports(): string[] {
     return ['BufferWindowMemory'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/memory';
   }
-  
+
   protected getClassName(): string {
     return 'BufferWindowMemory';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
     const k = this.getParameterValue<number>(node, 'k', 5);
-    const memoryKey = this.getParameterValue<string>(node, 'memoryKey', 'history');
+    const memoryKey = this.getParameterValue<string>(
+      node,
+      'memoryKey',
+      'history'
+    );
     const inputKey = this.getParameterValue<string>(node, 'inputKey', 'input');
-    const outputKey = this.getParameterValue<string>(node, 'outputKey', 'output');
-    const returnMessages = this.getParameterValue<boolean>(node, 'returnMessages', false);
-    const humanPrefix = this.getParameterValue<string>(node, 'humanPrefix', 'Human');
+    const outputKey = this.getParameterValue<string>(
+      node,
+      'outputKey',
+      'output'
+    );
+    const returnMessages = this.getParameterValue<boolean>(
+      node,
+      'returnMessages',
+      false
+    );
+    const humanPrefix = this.getParameterValue<string>(
+      node,
+      'humanPrefix',
+      'Human'
+    );
     const aiPrefix = this.getParameterValue<string>(node, 'aiPrefix', 'AI');
-    
+
     return {
       k,
       memoryKey,
@@ -166,7 +205,7 @@ export class BufferWindowMemoryConverter extends BaseMemoryConverter {
       outputKey,
       returnMessages,
       humanPrefix,
-      aiPrefix
+      aiPrefix,
     };
   }
 }
@@ -176,32 +215,52 @@ export class BufferWindowMemoryConverter extends BaseMemoryConverter {
  */
 export class SummaryBufferMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'summaryBufferMemory';
-  
+
   protected getRequiredImports(): string[] {
     return ['ConversationSummaryBufferMemory'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/memory';
   }
-  
+
   protected getClassName(): string {
     return 'ConversationSummaryBufferMemory';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
-    const maxTokenLimit = this.getParameterValue<number>(node, 'maxTokenLimit', 2000);
-    const memoryKey = this.getParameterValue<string>(node, 'memoryKey', 'history');
+    const maxTokenLimit = this.getParameterValue<number>(
+      node,
+      'maxTokenLimit',
+      2000
+    );
+    const memoryKey = this.getParameterValue<string>(
+      node,
+      'memoryKey',
+      'history'
+    );
     const inputKey = this.getParameterValue<string>(node, 'inputKey', 'input');
-    const outputKey = this.getParameterValue<string>(node, 'outputKey', 'output');
-    const returnMessages = this.getParameterValue<boolean>(node, 'returnMessages', false);
-    const humanPrefix = this.getParameterValue<string>(node, 'humanPrefix', 'Human');
+    const outputKey = this.getParameterValue<string>(
+      node,
+      'outputKey',
+      'output'
+    );
+    const returnMessages = this.getParameterValue<boolean>(
+      node,
+      'returnMessages',
+      false
+    );
+    const humanPrefix = this.getParameterValue<string>(
+      node,
+      'humanPrefix',
+      'Human'
+    );
     const aiPrefix = this.getParameterValue<string>(node, 'aiPrefix', 'AI');
-    
+
     return {
       maxTokenLimit,
       memoryKey,
@@ -209,10 +268,10 @@ export class SummaryBufferMemoryConverter extends BaseMemoryConverter {
       outputKey,
       returnMessages,
       humanPrefix,
-      aiPrefix
+      aiPrefix,
     };
   }
-  
+
   protected generateMemoryInstantiation(
     variableName: string,
     className: string,
@@ -223,9 +282,9 @@ export class SummaryBufferMemoryConverter extends BaseMemoryConverter {
       .filter(([_, value]) => value !== undefined)
       .map(([key, value]) => `  ${key}: ${this.formatParameterValue(value)}`)
       .join(',\n');
-    
+
     const llmComment = '  // llm: will be provided by connection resolution';
-    
+
     return `const ${variableName} = new ${className}({\n${llmComment}\n${configEntries}\n});`;
   }
 }
@@ -235,37 +294,49 @@ export class SummaryBufferMemoryConverter extends BaseMemoryConverter {
  */
 export class VectorStoreRetrieverMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'vectorStoreRetrieverMemory';
-  
+
   protected getRequiredImports(): string[] {
     return ['VectorStoreRetrieverMemory'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/memory';
   }
-  
+
   protected getClassName(): string {
     return 'VectorStoreRetrieverMemory';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
-    const memoryKey = this.getParameterValue<string>(node, 'memoryKey', 'history');
+    const memoryKey = this.getParameterValue<string>(
+      node,
+      'memoryKey',
+      'history'
+    );
     const inputKey = this.getParameterValue<string>(node, 'inputKey', 'input');
-    const outputKey = this.getParameterValue<string>(node, 'outputKey', 'output');
-    const returnDocs = this.getParameterValue<boolean>(node, 'returnDocs', false);
-    
+    const outputKey = this.getParameterValue<string>(
+      node,
+      'outputKey',
+      'output'
+    );
+    const returnDocs = this.getParameterValue<boolean>(
+      node,
+      'returnDocs',
+      false
+    );
+
     return {
       memoryKey,
       inputKey,
       outputKey,
-      returnDocs
+      returnDocs,
     };
   }
-  
+
   protected generateMemoryInstantiation(
     variableName: string,
     className: string,
@@ -276,9 +347,10 @@ export class VectorStoreRetrieverMemoryConverter extends BaseMemoryConverter {
       .filter(([_, value]) => value !== undefined)
       .map(([key, value]) => `  ${key}: ${this.formatParameterValue(value)}`)
       .join(',\n');
-    
-    const retrieverComment = '  // retriever: will be provided by connection resolution';
-    
+
+    const retrieverComment =
+      '  // retriever: will be provided by connection resolution';
+
     return `const ${variableName} = new ${className}({\n${retrieverComment}\n${configEntries}\n});`;
   }
 }
@@ -288,41 +360,57 @@ export class VectorStoreRetrieverMemoryConverter extends BaseMemoryConverter {
  */
 export class ConversationSummaryMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'conversationSummaryMemory';
-  
+
   protected getRequiredImports(): string[] {
     return ['ConversationSummaryMemory'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/memory';
   }
-  
+
   protected getClassName(): string {
     return 'ConversationSummaryMemory';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
-    const memoryKey = this.getParameterValue<string>(node, 'memoryKey', 'history');
+    const memoryKey = this.getParameterValue<string>(
+      node,
+      'memoryKey',
+      'history'
+    );
     const inputKey = this.getParameterValue<string>(node, 'inputKey', 'input');
-    const outputKey = this.getParameterValue<string>(node, 'outputKey', 'output');
-    const returnMessages = this.getParameterValue<boolean>(node, 'returnMessages', false);
-    const humanPrefix = this.getParameterValue<string>(node, 'humanPrefix', 'Human');
+    const outputKey = this.getParameterValue<string>(
+      node,
+      'outputKey',
+      'output'
+    );
+    const returnMessages = this.getParameterValue<boolean>(
+      node,
+      'returnMessages',
+      false
+    );
+    const humanPrefix = this.getParameterValue<string>(
+      node,
+      'humanPrefix',
+      'Human'
+    );
     const aiPrefix = this.getParameterValue<string>(node, 'aiPrefix', 'AI');
-    
+
     return {
       memoryKey,
       inputKey,
       outputKey,
       returnMessages,
       humanPrefix,
-      aiPrefix
+      aiPrefix,
     };
   }
-  
+
   protected generateMemoryInstantiation(
     variableName: string,
     className: string,
@@ -333,9 +421,9 @@ export class ConversationSummaryMemoryConverter extends BaseMemoryConverter {
       .filter(([_, value]) => value !== undefined)
       .map(([key, value]) => `  ${key}: ${this.formatParameterValue(value)}`)
       .join(',\n');
-    
+
     const llmComment = '  // llm: will be provided by connection resolution';
-    
+
     return `const ${variableName} = new ${className}({\n${llmComment}\n${configEntries}\n});`;
   }
 }
@@ -345,41 +433,55 @@ export class ConversationSummaryMemoryConverter extends BaseMemoryConverter {
  */
 export class EntityMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'entityMemory';
-  
+
   protected getRequiredImports(): string[] {
     return ['EntityMemory'];
   }
-  
+
   protected getPackageName(): string {
     return '@langchain/core/memory';
   }
-  
+
   protected getClassName(): string {
     return 'EntityMemory';
   }
-  
+
   getDependencies(): string[] {
     return ['@langchain/core'];
   }
-  
+
   protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
-    const memoryKey = this.getParameterValue<string>(node, 'memoryKey', 'entities');
+    const memoryKey = this.getParameterValue<string>(
+      node,
+      'memoryKey',
+      'entities'
+    );
     const inputKey = this.getParameterValue<string>(node, 'inputKey', 'input');
-    const outputKey = this.getParameterValue<string>(node, 'outputKey', 'output');
-    const entityExtractionPrompt = this.getParameterValue<string>(node, 'entityExtractionPrompt');
-    const entitySummarizationPrompt = this.getParameterValue<string>(node, 'entitySummarizationPrompt');
+    const outputKey = this.getParameterValue<string>(
+      node,
+      'outputKey',
+      'output'
+    );
+    const entityExtractionPrompt = this.getParameterValue<string>(
+      node,
+      'entityExtractionPrompt'
+    );
+    const entitySummarizationPrompt = this.getParameterValue<string>(
+      node,
+      'entitySummarizationPrompt'
+    );
     const k = this.getParameterValue<number>(node, 'k', 3);
-    
+
     return {
       memoryKey,
       inputKey,
       outputKey,
       k,
       ...(entityExtractionPrompt && { entityExtractionPrompt }),
-      ...(entitySummarizationPrompt && { entitySummarizationPrompt })
+      ...(entitySummarizationPrompt && { entitySummarizationPrompt }),
     };
   }
-  
+
   protected generateMemoryInstantiation(
     variableName: string,
     className: string,
@@ -390,9 +492,9 @@ export class EntityMemoryConverter extends BaseMemoryConverter {
       .filter(([_, value]) => value !== undefined)
       .map(([key, value]) => `  ${key}: ${this.formatParameterValue(value)}`)
       .join(',\n');
-    
+
     const llmComment = '  // llm: will be provided by connection resolution';
-    
+
     return `const ${variableName} = new ${className}({\n${llmComment}\n${configEntries}\n});`;
   }
 }

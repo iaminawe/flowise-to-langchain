@@ -1,13 +1,13 @@
 /**
  * Intermediate Representation (IR) Module
- * 
+ *
  * This module provides a complete IR system for converting Flowise chatflows
  * to LangChain code. It includes type definitions, graph analysis, node handling,
  * and transformation utilities.
  */
 
 // Selective exports to avoid conflicts
-export type { 
+export type {
   IRNode,
   IRGraph,
   IRConnection,
@@ -21,7 +21,7 @@ export type {
   ConversionMetrics,
   TransformationMetrics,
   GraphStats,
-  TransformationResult
+  TransformationResult,
 } from './types.js';
 
 export { IRGraphAnalyzer } from './graph.js';
@@ -30,15 +30,15 @@ export { FlowiseToIRTransformer, IRToCodeTransformer } from './transformer.js';
 // Import classes for processor
 import { FlowiseToIRTransformer, IRToCodeTransformer } from './transformer.js';
 import { IRGraphAnalyzer } from './graph.js';
-import type { 
-  FlowiseChatFlow, 
-  GenerationContext, 
-  IRGraph, 
-  ValidationResult, 
+import type {
+  FlowiseChatFlow,
+  GenerationContext,
+  IRGraph,
+  ValidationResult,
   TransformationResult,
   CodeGenerationResult,
   GraphStats,
-  NodeId
+  NodeId,
 } from './types.js';
 
 // Note: Main types are exported via "export * from" statements above
@@ -78,21 +78,25 @@ export class IRProcessor {
     transformationResult: TransformationResult;
   }> {
     // Transform Flowise to IR
-    const transformationResult = await this.flowiseTransformer.transform(flowiseData);
-    
+    const transformationResult =
+      await this.flowiseTransformer.transform(flowiseData);
+
     if (!transformationResult.validation.isValid) {
       throw new Error(
-        `Invalid flow: ${transformationResult.validation.errors.map(e => e.message).join(', ')}`
+        `Invalid flow: ${transformationResult.validation.errors.map((e) => e.message).join(', ')}`
       );
     }
 
     // Generate code from IR
-    const code = await this.codeTransformer.generateCode(transformationResult.graph, context);
+    const code = await this.codeTransformer.generateCode(
+      transformationResult.graph,
+      context
+    );
 
     return {
       ir: transformationResult.graph,
       code,
-      transformationResult
+      transformationResult,
     };
   }
 
@@ -114,11 +118,11 @@ export class IRProcessor {
   }> {
     const result = await this.flowiseTransformer.transform(flowiseData);
     const stats = IRGraphAnalyzer.analyzeGraph(result.graph);
-    
+
     return {
       metrics: result.metrics,
       stats,
-      validation: result.validation
+      validation: result.validation,
     };
   }
 }
@@ -138,7 +142,7 @@ export class IRUtils {
         version: '1.0.0',
         flowiseVersion: '1.5.0',
         isTemplate: false,
-        settings: {}
+        settings: {},
       },
       nodes: [],
       connections: [],
@@ -150,17 +154,20 @@ export class IRUtils {
         entryPoints: [],
         exitPoints: [],
         cycles: [],
-        dependencies: new Map()
-      }
+        dependencies: new Map(),
+      },
     };
   }
 
   /**
    * Merge multiple IR graphs into one
    */
-  static mergeGraphs(graphs: IRGraph[], name: string = 'Merged Graph'): IRGraph {
+  static mergeGraphs(
+    graphs: IRGraph[],
+    name: string = 'Merged Graph'
+  ): IRGraph {
     const merged = this.createTestGraph(name);
-    
+
     for (const graph of graphs) {
       merged.nodes.push(...graph.nodes);
       merged.connections.push(...graph.connections);
@@ -176,7 +183,7 @@ export class IRUtils {
       entryPoints: stats.entryPoints,
       exitPoints: stats.exitPoints,
       cycles: [],
-      dependencies: new Map()
+      dependencies: new Map(),
     };
 
     return merged;
@@ -187,12 +194,12 @@ export class IRUtils {
    */
   static extractSubgraph(graph: IRGraph, nodeIds: NodeId[]): IRGraph {
     const subgraph = IRGraphAnalyzer.extractSubgraph(graph, nodeIds, true);
-    
+
     return {
       metadata: {
         ...graph.metadata,
         name: `${graph.metadata.name} (Subgraph)`,
-        description: 'Extracted subgraph'
+        description: 'Extracted subgraph',
       },
       nodes: subgraph.nodes,
       connections: subgraph.connections,
@@ -204,8 +211,8 @@ export class IRUtils {
         entryPoints: [],
         exitPoints: [],
         cycles: [],
-        dependencies: new Map()
-      }
+        dependencies: new Map(),
+      },
     };
   }
 
@@ -258,7 +265,7 @@ export class IRUtils {
       complexity: stats.complexity,
       isValid: validation.isValid,
       errorCount: validation.errors.length,
-      warningCount: validation.warnings.length
+      warningCount: validation.warnings.length,
     };
   }
 
@@ -277,9 +284,9 @@ export class IRUtils {
       text_splitter: '#F8C471',
       loader: '#82E0AA',
       utility: '#D5DBDB',
-      control_flow: '#EC7063'
+      control_flow: '#EC7063',
     };
-    
+
     return colors[category] || '#D5DBDB';
   }
 }

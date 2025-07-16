@@ -15,7 +15,11 @@ export class Logger {
     return messageIndex >= currentIndex;
   }
 
-  private formatMessage(level: string, message: string, context?: Record<string, unknown>): string {
+  private formatMessage(
+    level: string,
+    message: string,
+    context?: Record<string, unknown>
+  ): string {
     const timestamp = new Date().toISOString();
     const levelColors = {
       debug: chalk.gray,
@@ -24,16 +28,17 @@ export class Logger {
       error: chalk.red,
     };
 
-    const colorFn = levelColors[level as keyof typeof levelColors] || chalk.white;
+    const colorFn =
+      levelColors[level as keyof typeof levelColors] || chalk.white;
     const levelStr = colorFn(`[${level.toUpperCase()}]`);
-    
+
     let formatted = `${chalk.gray(timestamp)} ${levelStr} ${message}`;
-    
+
     if (context && Object.keys(context).length > 0) {
       const contextStr = JSON.stringify(context, null, 2);
       formatted += `\n${chalk.gray(contextStr)}`;
     }
-    
+
     return formatted;
   }
 
@@ -64,7 +69,7 @@ export class Logger {
   log(logEntry: LogLevel): void {
     const message = logEntry.message;
     const context = logEntry.context;
-    
+
     switch (logEntry.level) {
       case 'debug':
         this.debug(message, context);

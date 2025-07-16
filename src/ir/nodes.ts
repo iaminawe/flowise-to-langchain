@@ -1,6 +1,6 @@
 /**
  * Node and Edge Definitions for Flowise-to-LangChain IR
- * 
+ *
  * This module provides specific node type definitions and edge handling
  * for the Intermediate Representation system.
  */
@@ -20,7 +20,7 @@ export interface NodeFactory {
 /**
  * LLM node types
  */
-export type LLMNodeType = 
+export type LLMNodeType =
   | 'openAI'
   | 'chatOpenAI'
   | 'anthropic'
@@ -129,14 +129,14 @@ export type TextSplitterNodeType =
 /**
  * All supported node types
  */
-export type SupportedNodeType = 
-  | LLMNodeType 
-  | ChainNodeType 
-  | AgentNodeType 
-  | ToolNodeType 
-  | MemoryNodeType 
-  | VectorStoreNodeType 
-  | EmbeddingNodeType 
+export type SupportedNodeType =
+  | LLMNodeType
+  | ChainNodeType
+  | AgentNodeType
+  | ToolNodeType
+  | MemoryNodeType
+  | VectorStoreNodeType
+  | EmbeddingNodeType
   | PromptNodeType
   | TextSplitterNodeType;
 
@@ -182,7 +182,7 @@ export const PortTypes = {
   BOOLEAN: 'boolean',
   OBJECT: 'object',
   ARRAY: 'array',
-  
+
   // LangChain types
   LLM: 'llm',
   CHAT_MODEL: 'chatModel',
@@ -197,10 +197,10 @@ export const PortTypes = {
   DOCUMENT: 'document',
   OUTPUT_PARSER: 'outputParser',
   TEXT_SPLITTER: 'textSplitter',
-  
+
   // Special types
   ANY: 'any',
-  VOID: 'void'
+  VOID: 'void',
 } as const;
 
 /**
@@ -221,8 +221,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'LLM',
         type: 'output',
         dataType: PortTypes.LLM,
-        description: 'OpenAI language model instance'
-      }
+        description: 'OpenAI language model instance',
+      },
     ],
     parameters: [
       {
@@ -231,7 +231,7 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: 'gpt-3.5-turbo',
         required: true,
         description: 'Model name to use',
-        options: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k']
+        options: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k'],
       },
       {
         name: 'temperature',
@@ -239,7 +239,7 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: 0.7,
         required: false,
         description: 'Temperature for randomness',
-        validation: { min: 0, max: 2 }
+        validation: { min: 0, max: 2 },
       },
       {
         name: 'maxTokens',
@@ -247,17 +247,17 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: undefined,
         required: false,
         description: 'Maximum tokens to generate',
-        validation: { min: 1, max: 4096 }
+        validation: { min: 1, max: 4096 },
       },
       {
         name: 'openAIApiKey',
         type: 'credential',
         value: undefined,
         required: true,
-        description: 'OpenAI API Key'
-      }
+        description: 'OpenAI API Key',
+      },
     ],
-    tags: ['llm', 'openai', 'gpt']
+    tags: ['llm', 'openai', 'gpt'],
   },
 
   // Chat-based LLM
@@ -274,8 +274,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'ChatModel',
         type: 'output',
         dataType: PortTypes.LLM,
-        description: 'ChatOpenAI language model instance'
-      }
+        description: 'ChatOpenAI language model instance',
+      },
     ],
     parameters: [
       {
@@ -284,7 +284,7 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: 'gpt-3.5-turbo',
         required: true,
         description: 'Model name to use',
-        options: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k']
+        options: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k'],
       },
       {
         name: 'temperature',
@@ -292,7 +292,7 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: 0.7,
         required: false,
         description: 'Temperature for randomness',
-        validation: { min: 0, max: 2 }
+        validation: { min: 0, max: 2 },
       },
       {
         name: 'maxTokens',
@@ -300,17 +300,17 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: undefined,
         required: false,
         description: 'Maximum tokens to generate',
-        validation: { min: 1, max: 4096 }
+        validation: { min: 1, max: 4096 },
       },
       {
         name: 'openAIApiKey',
         type: 'credential',
         value: undefined,
         required: true,
-        description: 'OpenAI API Key'
-      }
+        description: 'OpenAI API Key',
+      },
     ],
-    tags: ['llm', 'openai', 'gpt', 'chat']
+    tags: ['llm', 'openai', 'gpt', 'chat'],
   },
 
   // Prompt Templates
@@ -327,8 +327,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Prompt',
         type: 'output',
         dataType: PortTypes.PROMPT,
-        description: 'Prompt template instance'
-      }
+        description: 'Prompt template instance',
+      },
     ],
     parameters: [
       {
@@ -336,17 +336,17 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         type: 'string',
         value: '{input}',
         required: true,
-        description: 'Prompt template string'
+        description: 'Prompt template string',
       },
       {
         name: 'inputVariables',
         type: 'array',
         value: ['input'],
         required: true,
-        description: 'Input variable names'
-      }
+        description: 'Input variable names',
+      },
     ],
-    tags: ['prompt', 'template']
+    tags: ['prompt', 'template'],
   },
 
   chatPromptTemplate: {
@@ -362,8 +362,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Prompt',
         type: 'output',
         dataType: PortTypes.PROMPT,
-        description: 'Chat prompt template instance'
-      }
+        description: 'Chat prompt template instance',
+      },
     ],
     parameters: [
       {
@@ -371,24 +371,24 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         type: 'string',
         value: '',
         required: false,
-        description: 'System message template'
+        description: 'System message template',
       },
       {
         name: 'humanMessage',
         type: 'string',
         value: '{input}',
         required: true,
-        description: 'Human message template'
+        description: 'Human message template',
       },
       {
         name: 'formatInstructions',
         type: 'string',
         value: '',
         required: false,
-        description: 'Additional formatting instructions'
-      }
+        description: 'Additional formatting instructions',
+      },
     ],
-    tags: ['prompt', 'template', 'chat']
+    tags: ['prompt', 'template', 'chat'],
   },
 
   llmChain: {
@@ -403,14 +403,14 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Language Model',
         type: 'input',
         dataType: PortTypes.LLM,
-        description: 'Language model to use'
+        description: 'Language model to use',
       },
       {
         id: 'prompt',
         label: 'Prompt',
         type: 'input',
         dataType: PortTypes.PROMPT,
-        description: 'Prompt template'
+        description: 'Prompt template',
       },
       {
         id: 'memory',
@@ -418,8 +418,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         type: 'input',
         dataType: PortTypes.MEMORY,
         optional: true,
-        description: 'Memory for conversation history'
-      }
+        description: 'Memory for conversation history',
+      },
     ],
     outputs: [
       {
@@ -427,8 +427,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Chain',
         type: 'output',
         dataType: PortTypes.CHAIN,
-        description: 'LLM Chain instance'
-      }
+        description: 'LLM Chain instance',
+      },
     ],
     parameters: [
       {
@@ -436,17 +436,17 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         type: 'string',
         value: 'text',
         required: false,
-        description: 'Output key name'
+        description: 'Output key name',
       },
       {
         name: 'returnValues',
         type: 'array',
         value: [],
         required: false,
-        description: 'Keys to return in output'
-      }
+        description: 'Keys to return in output',
+      },
     ],
-    tags: ['chain', 'llm', 'prompt']
+    tags: ['chain', 'llm', 'prompt'],
   },
 
   bufferMemory: {
@@ -462,8 +462,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Memory',
         type: 'output',
         dataType: PortTypes.MEMORY,
-        description: 'Buffer memory instance'
-      }
+        description: 'Buffer memory instance',
+      },
     ],
     parameters: [
       {
@@ -471,31 +471,31 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         type: 'string',
         value: 'history',
         required: false,
-        description: 'Key to store memory under'
+        description: 'Key to store memory under',
       },
       {
         name: 'inputKey',
         type: 'string',
         value: 'input',
         required: false,
-        description: 'Input variable name'
+        description: 'Input variable name',
       },
       {
         name: 'outputKey',
         type: 'string',
         value: 'output',
         required: false,
-        description: 'Output variable name'
+        description: 'Output variable name',
       },
       {
         name: 'returnMessages',
         type: 'boolean',
         value: false,
         required: false,
-        description: 'Return messages instead of string'
-      }
+        description: 'Return messages instead of string',
+      },
     ],
-    tags: ['memory', 'buffer', 'conversation']
+    tags: ['memory', 'buffer', 'conversation'],
   },
 
   calculator: {
@@ -511,11 +511,11 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Tool',
         type: 'output',
         dataType: PortTypes.TOOL,
-        description: 'Calculator tool instance'
-      }
+        description: 'Calculator tool instance',
+      },
     ],
     parameters: [],
-    tags: ['tool', 'calculator', 'math']
+    tags: ['tool', 'calculator', 'math'],
   },
 
   serpAPI: {
@@ -531,8 +531,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Tool',
         type: 'output',
         dataType: PortTypes.TOOL,
-        description: 'SerpAPI tool instance'
-      }
+        description: 'SerpAPI tool instance',
+      },
     ],
     parameters: [
       {
@@ -540,17 +540,18 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         type: 'credential',
         value: undefined,
         required: true,
-        description: 'SerpAPI API Key'
-      }
+        description: 'SerpAPI API Key',
+      },
     ],
-    tags: ['tool', 'search', 'serpapi']
+    tags: ['tool', 'search', 'serpapi'],
   },
 
   bufferWindowMemory: {
     type: 'bufferWindowMemory',
     category: 'memory',
     label: 'Buffer Window Memory',
-    description: 'Memory that maintains a sliding window of conversation history',
+    description:
+      'Memory that maintains a sliding window of conversation history',
     version: '1.0.0',
     inputs: [],
     outputs: [
@@ -559,8 +560,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Memory',
         type: 'output',
         dataType: PortTypes.MEMORY,
-        description: 'Buffer window memory instance'
-      }
+        description: 'Buffer window memory instance',
+      },
     ],
     parameters: [
       {
@@ -568,21 +569,21 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         type: 'string',
         value: 'history',
         required: false,
-        description: 'Key to store memory under'
+        description: 'Key to store memory under',
       },
       {
         name: 'inputKey',
         type: 'string',
         value: 'input',
         required: false,
-        description: 'Input variable name'
+        description: 'Input variable name',
       },
       {
         name: 'outputKey',
         type: 'string',
         value: 'output',
         required: false,
-        description: 'Output variable name'
+        description: 'Output variable name',
       },
       {
         name: 'k',
@@ -590,17 +591,17 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: 5,
         required: false,
         description: 'Number of previous messages to keep in buffer',
-        validation: { min: 1, max: 50 }
+        validation: { min: 1, max: 50 },
       },
       {
         name: 'returnMessages',
         type: 'boolean',
         value: false,
         required: false,
-        description: 'Return messages instead of string'
-      }
+        description: 'Return messages instead of string',
+      },
     ],
-    tags: ['memory', 'buffer', 'window', 'conversation']
+    tags: ['memory', 'buffer', 'window', 'conversation'],
   },
 
   conversationSummaryMemory: {
@@ -615,8 +616,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'LLM',
         type: 'input',
         dataType: PortTypes.LLM,
-        description: 'Language model for summarization'
-      }
+        description: 'Language model for summarization',
+      },
     ],
     outputs: [
       {
@@ -624,8 +625,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Memory',
         type: 'output',
         dataType: PortTypes.MEMORY,
-        description: 'Conversation summary memory instance'
-      }
+        description: 'Conversation summary memory instance',
+      },
     ],
     parameters: [
       {
@@ -633,21 +634,21 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         type: 'string',
         value: 'history',
         required: false,
-        description: 'Key to store memory under'
+        description: 'Key to store memory under',
       },
       {
         name: 'inputKey',
         type: 'string',
         value: 'input',
         required: false,
-        description: 'Input variable name'
+        description: 'Input variable name',
       },
       {
         name: 'outputKey',
         type: 'string',
         value: 'output',
         required: false,
-        description: 'Output variable name'
+        description: 'Output variable name',
       },
       {
         name: 'maxTokenLimit',
@@ -655,17 +656,17 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: 2000,
         required: false,
         description: 'Maximum tokens before summarization',
-        validation: { min: 100, max: 10000 }
+        validation: { min: 100, max: 10000 },
       },
       {
         name: 'returnMessages',
         type: 'boolean',
         value: false,
         required: false,
-        description: 'Return messages instead of string'
-      }
+        description: 'Return messages instead of string',
+      },
     ],
-    tags: ['memory', 'summary', 'conversation', 'llm']
+    tags: ['memory', 'summary', 'conversation', 'llm'],
   },
 
   webBrowser: {
@@ -680,15 +681,15 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'LLM',
         type: 'input',
         dataType: PortTypes.LLM,
-        description: 'Language model for text processing'
+        description: 'Language model for text processing',
       },
       {
         id: 'embeddings',
         label: 'Embeddings',
         type: 'input',
         dataType: PortTypes.EMBEDDINGS,
-        description: 'Embeddings model for text vectorization'
-      }
+        description: 'Embeddings model for text vectorization',
+      },
     ],
     outputs: [
       {
@@ -696,8 +697,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Tool',
         type: 'output',
         dataType: PortTypes.TOOL,
-        description: 'Web browser tool instance'
-      }
+        description: 'Web browser tool instance',
+      },
     ],
     parameters: [
       {
@@ -705,7 +706,7 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         type: 'boolean',
         value: true,
         required: false,
-        description: 'Run browser in headless mode'
+        description: 'Run browser in headless mode',
       },
       {
         name: 'timeout',
@@ -713,10 +714,10 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: 30000,
         required: false,
         description: 'Timeout for web requests in milliseconds',
-        validation: { min: 1000, max: 120000 }
-      }
+        validation: { min: 1000, max: 120000 },
+      },
     ],
-    tags: ['tool', 'browser', 'web', 'scraping']
+    tags: ['tool', 'browser', 'web', 'scraping'],
   },
 
   // Agent Templates
@@ -732,14 +733,14 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Language Model',
         type: 'input',
         dataType: PortTypes.LLM,
-        description: 'Language model (must support function calling)'
+        description: 'Language model (must support function calling)',
       },
       {
         id: 'tools',
         label: 'Tools',
         type: 'input',
         dataType: PortTypes.TOOL,
-        description: 'Tools for the agent to use'
+        description: 'Tools for the agent to use',
       },
       {
         id: 'prompt',
@@ -747,8 +748,9 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         type: 'input',
         dataType: PortTypes.PROMPT,
         optional: true,
-        description: 'Optional custom prompt (defaults to hwchase17/openai-functions-agent)'
-      }
+        description:
+          'Optional custom prompt (defaults to hwchase17/openai-functions-agent)',
+      },
     ],
     outputs: [
       {
@@ -756,8 +758,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Agent',
         type: 'output',
         dataType: PortTypes.AGENT,
-        description: 'OpenAI Functions Agent executor'
-      }
+        description: 'OpenAI Functions Agent executor',
+      },
     ],
     parameters: [
       {
@@ -766,7 +768,7 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: 15,
         required: false,
         description: 'Maximum number of iterations the agent can take',
-        validation: { min: 1, max: 100 }
+        validation: { min: 1, max: 100 },
       },
       {
         name: 'maxExecutionTime',
@@ -774,24 +776,24 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: undefined,
         required: false,
         description: 'Maximum execution time in seconds',
-        validation: { min: 1, max: 3600 }
+        validation: { min: 1, max: 3600 },
       },
       {
         name: 'verbose',
         type: 'boolean',
         value: false,
         required: false,
-        description: 'Enable verbose logging'
+        description: 'Enable verbose logging',
       },
       {
         name: 'returnIntermediateSteps',
         type: 'boolean',
         value: false,
         required: false,
-        description: 'Return intermediate steps in the response'
-      }
+        description: 'Return intermediate steps in the response',
+      },
     ],
-    tags: ['agent', 'openai', 'functions', 'tools']
+    tags: ['agent', 'openai', 'functions', 'tools'],
   },
 
   conversationalAgent: {
@@ -806,14 +808,14 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Language Model',
         type: 'input',
         dataType: PortTypes.LLM,
-        description: 'Language model for the agent'
+        description: 'Language model for the agent',
       },
       {
         id: 'tools',
         label: 'Tools',
         type: 'input',
         dataType: PortTypes.TOOL,
-        description: 'Tools for the agent to use'
+        description: 'Tools for the agent to use',
       },
       {
         id: 'memory',
@@ -821,8 +823,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         type: 'input',
         dataType: PortTypes.MEMORY,
         optional: true,
-        description: 'Memory for conversation history'
-      }
+        description: 'Memory for conversation history',
+      },
     ],
     outputs: [
       {
@@ -830,8 +832,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Agent',
         type: 'output',
         dataType: PortTypes.AGENT,
-        description: 'Conversational Agent executor'
-      }
+        description: 'Conversational Agent executor',
+      },
     ],
     parameters: [
       {
@@ -843,8 +845,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         options: [
           'chat-conversational-react-description',
           'conversational-react-description',
-          'zero-shot-react-description'
-        ]
+          'zero-shot-react-description',
+        ],
       },
       {
         name: 'maxIterations',
@@ -852,7 +854,7 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: 15,
         required: false,
         description: 'Maximum number of iterations the agent can take',
-        validation: { min: 1, max: 100 }
+        validation: { min: 1, max: 100 },
       },
       {
         name: 'maxExecutionTime',
@@ -860,24 +862,24 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: undefined,
         required: false,
         description: 'Maximum execution time in seconds',
-        validation: { min: 1, max: 3600 }
+        validation: { min: 1, max: 3600 },
       },
       {
         name: 'verbose',
         type: 'boolean',
         value: false,
         required: false,
-        description: 'Enable verbose logging'
+        description: 'Enable verbose logging',
       },
       {
         name: 'returnIntermediateSteps',
         type: 'boolean',
         value: false,
         required: false,
-        description: 'Return intermediate steps in the response'
-      }
+        description: 'Return intermediate steps in the response',
+      },
     ],
-    tags: ['agent', 'conversational', 'chat', 'tools']
+    tags: ['agent', 'conversational', 'chat', 'tools'],
   },
 
   toolCallingAgent: {
@@ -892,22 +894,22 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Language Model',
         type: 'input',
         dataType: PortTypes.LLM,
-        description: 'Language model (must support tool calling)'
+        description: 'Language model (must support tool calling)',
       },
       {
         id: 'tools',
         label: 'Tools',
         type: 'input',
         dataType: PortTypes.TOOL,
-        description: 'Tools for the agent to use'
+        description: 'Tools for the agent to use',
       },
       {
         id: 'prompt',
         label: 'Prompt',
         type: 'input',
         dataType: PortTypes.PROMPT,
-        description: 'Prompt template for the agent'
-      }
+        description: 'Prompt template for the agent',
+      },
     ],
     outputs: [
       {
@@ -915,8 +917,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Agent',
         type: 'output',
         dataType: PortTypes.AGENT,
-        description: 'Tool Calling Agent executor'
-      }
+        description: 'Tool Calling Agent executor',
+      },
     ],
     parameters: [
       {
@@ -925,7 +927,7 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: 15,
         required: false,
         description: 'Maximum number of iterations the agent can take',
-        validation: { min: 1, max: 100 }
+        validation: { min: 1, max: 100 },
       },
       {
         name: 'maxExecutionTime',
@@ -933,24 +935,24 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: undefined,
         required: false,
         description: 'Maximum execution time in seconds',
-        validation: { min: 1, max: 3600 }
+        validation: { min: 1, max: 3600 },
       },
       {
         name: 'verbose',
         type: 'boolean',
         value: false,
         required: false,
-        description: 'Enable verbose logging'
+        description: 'Enable verbose logging',
       },
       {
         name: 'returnIntermediateSteps',
         type: 'boolean',
         value: false,
         required: false,
-        description: 'Return intermediate steps in the response'
-      }
+        description: 'Return intermediate steps in the response',
+      },
     ],
-    tags: ['agent', 'tool-calling', 'modern', 'tools']
+    tags: ['agent', 'tool-calling', 'modern', 'tools'],
   },
 
   structuredChatAgent: {
@@ -965,22 +967,22 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Language Model',
         type: 'input',
         dataType: PortTypes.LLM,
-        description: 'Language model for the agent'
+        description: 'Language model for the agent',
       },
       {
         id: 'tools',
         label: 'Tools',
         type: 'input',
         dataType: PortTypes.TOOL,
-        description: 'Tools for the agent to use'
+        description: 'Tools for the agent to use',
       },
       {
         id: 'prompt',
         label: 'Prompt',
         type: 'input',
         dataType: PortTypes.PROMPT,
-        description: 'Prompt template for the agent'
-      }
+        description: 'Prompt template for the agent',
+      },
     ],
     outputs: [
       {
@@ -988,8 +990,8 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         label: 'Agent',
         type: 'output',
         dataType: PortTypes.AGENT,
-        description: 'Structured Chat Agent executor'
-      }
+        description: 'Structured Chat Agent executor',
+      },
     ],
     parameters: [
       {
@@ -998,7 +1000,7 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: 15,
         required: false,
         description: 'Maximum number of iterations the agent can take',
-        validation: { min: 1, max: 100 }
+        validation: { min: 1, max: 100 },
       },
       {
         name: 'maxExecutionTime',
@@ -1006,25 +1008,25 @@ export const NodeTemplates: Record<string, NodeTemplate> = {
         value: undefined,
         required: false,
         description: 'Maximum execution time in seconds',
-        validation: { min: 1, max: 3600 }
+        validation: { min: 1, max: 3600 },
       },
       {
         name: 'verbose',
         type: 'boolean',
         value: false,
         required: false,
-        description: 'Enable verbose logging'
+        description: 'Enable verbose logging',
       },
       {
         name: 'returnIntermediateSteps',
         type: 'boolean',
         value: false,
         required: false,
-        description: 'Return intermediate steps in the response'
-      }
+        description: 'Return intermediate steps in the response',
+      },
     ],
-    tags: ['agent', 'structured', 'chat', 'tools']
-  }
+    tags: ['agent', 'structured', 'chat', 'tools'],
+  },
 };
 
 /**
@@ -1038,7 +1040,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'llm',
     required: true,
-    dataType: PortTypes.LLM
+    dataType: PortTypes.LLM,
   },
   {
     sourceType: 'chatOpenAI',
@@ -1046,7 +1048,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'llm',
     required: true,
-    dataType: PortTypes.CHAT_MODEL
+    dataType: PortTypes.CHAT_MODEL,
   },
 
   // Prompt to Chain connections
@@ -1056,7 +1058,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'prompt',
     required: true,
-    dataType: PortTypes.PROMPT
+    dataType: PortTypes.PROMPT,
   },
 
   // Memory to Chain connections
@@ -1066,7 +1068,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'memory',
     required: false,
-    dataType: PortTypes.MEMORY
+    dataType: PortTypes.MEMORY,
   },
 
   // Tool to Agent connections
@@ -1076,7 +1078,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
 
   // Memory to Chain connections - extended
@@ -1086,7 +1088,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'memory',
     required: false,
-    dataType: PortTypes.MEMORY
+    dataType: PortTypes.MEMORY,
   },
   {
     sourceType: 'conversationSummaryMemory',
@@ -1094,7 +1096,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'memory',
     required: false,
-    dataType: PortTypes.MEMORY
+    dataType: PortTypes.MEMORY,
   },
 
   // LLM to ConversationSummaryMemory connections
@@ -1104,7 +1106,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'llm',
     required: true,
-    dataType: PortTypes.LLM
+    dataType: PortTypes.LLM,
   },
   {
     sourceType: 'chatOpenAI',
@@ -1112,7 +1114,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'llm',
     required: true,
-    dataType: PortTypes.LLM
+    dataType: PortTypes.LLM,
   },
 
   // WebBrowser tool connections
@@ -1122,7 +1124,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'llm',
     required: true,
-    dataType: PortTypes.LLM
+    dataType: PortTypes.LLM,
   },
   {
     sourceType: 'chatOpenAI',
@@ -1130,7 +1132,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'llm',
     required: true,
-    dataType: PortTypes.LLM
+    dataType: PortTypes.LLM,
   },
 
   // Additional tool connections
@@ -1140,7 +1142,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'webBrowser',
@@ -1148,7 +1150,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
 
   // OpenAI Functions Agent connections
@@ -1158,7 +1160,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'llm',
     required: true,
-    dataType: PortTypes.LLM
+    dataType: PortTypes.LLM,
   },
   {
     sourceType: 'calculator',
@@ -1166,7 +1168,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'serpAPI',
@@ -1174,7 +1176,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'webBrowser',
@@ -1182,7 +1184,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'chatPromptTemplate',
@@ -1190,7 +1192,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'prompt',
     required: false,
-    dataType: PortTypes.PROMPT
+    dataType: PortTypes.PROMPT,
   },
 
   // Conversational Agent connections
@@ -1200,7 +1202,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'llm',
     required: true,
-    dataType: PortTypes.LLM
+    dataType: PortTypes.LLM,
   },
   {
     sourceType: 'openAI',
@@ -1208,7 +1210,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'llm',
     required: true,
-    dataType: PortTypes.LLM
+    dataType: PortTypes.LLM,
   },
   {
     sourceType: 'calculator',
@@ -1216,7 +1218,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'serpAPI',
@@ -1224,7 +1226,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'webBrowser',
@@ -1232,7 +1234,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'bufferMemory',
@@ -1240,7 +1242,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'memory',
     required: false,
-    dataType: PortTypes.MEMORY
+    dataType: PortTypes.MEMORY,
   },
   {
     sourceType: 'bufferWindowMemory',
@@ -1248,7 +1250,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'memory',
     required: false,
-    dataType: PortTypes.MEMORY
+    dataType: PortTypes.MEMORY,
   },
   {
     sourceType: 'conversationSummaryMemory',
@@ -1256,7 +1258,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'memory',
     required: false,
-    dataType: PortTypes.MEMORY
+    dataType: PortTypes.MEMORY,
   },
 
   // Tool Calling Agent connections
@@ -1266,7 +1268,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'llm',
     required: true,
-    dataType: PortTypes.LLM
+    dataType: PortTypes.LLM,
   },
   {
     sourceType: 'calculator',
@@ -1274,7 +1276,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'serpAPI',
@@ -1282,7 +1284,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'webBrowser',
@@ -1290,7 +1292,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'chatPromptTemplate',
@@ -1298,7 +1300,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'prompt',
     required: true,
-    dataType: PortTypes.PROMPT
+    dataType: PortTypes.PROMPT,
   },
 
   // Structured Chat Agent connections
@@ -1308,7 +1310,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'llm',
     required: true,
-    dataType: PortTypes.LLM
+    dataType: PortTypes.LLM,
   },
   {
     sourceType: 'calculator',
@@ -1316,7 +1318,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'serpAPI',
@@ -1324,7 +1326,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'webBrowser',
@@ -1332,7 +1334,7 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'tools',
     required: false,
-    dataType: PortTypes.TOOL
+    dataType: PortTypes.TOOL,
   },
   {
     sourceType: 'chatPromptTemplate',
@@ -1340,8 +1342,8 @@ export const ConnectionConstraints: ConnectionConstraint[] = [
     sourcePort: 'output',
     targetPort: 'prompt',
     required: true,
-    dataType: PortTypes.PROMPT
-  }
+    dataType: PortTypes.PROMPT,
+  },
 ];
 
 /**
@@ -1368,8 +1370,8 @@ export class StandardNodeFactory implements NodeFactory {
         description: template.description,
         tags: template.tags,
         deprecated: template.deprecated,
-        documentation: template.documentation
-      }
+        documentation: template.documentation,
+      },
     };
   }
 
@@ -1382,8 +1384,12 @@ export class StandardNodeFactory implements NodeFactory {
     // Validate required parameters
     for (const param of template.parameters) {
       if (param.required) {
-        const nodeParam = node.parameters.find(p => p.name === param.name);
-        if (!nodeParam || nodeParam.value === undefined || nodeParam.value === null) {
+        const nodeParam = node.parameters.find((p) => p.name === param.name);
+        if (
+          !nodeParam ||
+          nodeParam.value === undefined ||
+          nodeParam.value === null
+        ) {
           return false;
         }
       }
@@ -1399,10 +1405,10 @@ export class StandardNodeFactory implements NodeFactory {
 
   getPortConfiguration(type: string): { inputs: IRPort[]; outputs: IRPort[] } {
     const template = NodeTemplates[type];
-    return template 
-      ? { 
-          inputs: structuredClone(template.inputs), 
-          outputs: structuredClone(template.outputs) 
+    return template
+      ? {
+          inputs: structuredClone(template.inputs),
+          outputs: structuredClone(template.outputs),
         }
       : { inputs: [], outputs: [] };
   }
@@ -1419,36 +1425,39 @@ export class ConnectionValidator {
     targetPort: string
   ): { valid: boolean; error?: string } {
     // Find matching constraint
-    const constraint = ConnectionConstraints.find(c => 
-      c.sourceType === sourceNode.type &&
-      c.targetType === targetNode.type &&
-      c.sourcePort === sourcePort &&
-      c.targetPort === targetPort
+    const constraint = ConnectionConstraints.find(
+      (c) =>
+        c.sourceType === sourceNode.type &&
+        c.targetType === targetNode.type &&
+        c.sourcePort === sourcePort &&
+        c.targetPort === targetPort
     );
 
     if (!constraint) {
       return {
         valid: false,
-        error: `No valid connection path from ${sourceNode.type}.${sourcePort} to ${targetNode.type}.${targetPort}`
+        error: `No valid connection path from ${sourceNode.type}.${sourcePort} to ${targetNode.type}.${targetPort}`,
       };
     }
 
     // Validate data types
-    const sourcePortDef = sourceNode.outputs.find(p => p.id === sourcePort);
-    const targetPortDef = targetNode.inputs.find(p => p.id === targetPort);
+    const sourcePortDef = sourceNode.outputs.find((p) => p.id === sourcePort);
+    const targetPortDef = targetNode.inputs.find((p) => p.id === targetPort);
 
     if (!sourcePortDef || !targetPortDef) {
       return {
         valid: false,
-        error: 'Source or target port not found'
+        error: 'Source or target port not found',
       };
     }
 
-    if (sourcePortDef.dataType !== targetPortDef.dataType && 
-        targetPortDef.dataType !== PortTypes.ANY) {
+    if (
+      sourcePortDef.dataType !== targetPortDef.dataType &&
+      targetPortDef.dataType !== PortTypes.ANY
+    ) {
       return {
         valid: false,
-        error: `Data type mismatch: ${sourcePortDef.dataType} cannot connect to ${targetPortDef.dataType}`
+        error: `Data type mismatch: ${sourcePortDef.dataType} cannot connect to ${targetPortDef.dataType}`,
       };
     }
 
@@ -1458,13 +1467,13 @@ export class ConnectionValidator {
         if (!constraint.validation(sourceNode, targetNode)) {
           return {
             valid: false,
-            error: 'Custom validation failed'
+            error: 'Custom validation failed',
           };
         }
       } catch (error) {
         return {
           valid: false,
-          error: `Validation error: ${error}`
+          error: `Validation error: ${error}`,
         };
       }
     }
@@ -1473,15 +1482,15 @@ export class ConnectionValidator {
   }
 
   static getValidTargets(sourceNode: IRNode, sourcePort: string): string[] {
-    return ConnectionConstraints
-      .filter(c => c.sourceType === sourceNode.type && c.sourcePort === sourcePort)
-      .map(c => `${c.targetType}.${c.targetPort}`);
+    return ConnectionConstraints.filter(
+      (c) => c.sourceType === sourceNode.type && c.sourcePort === sourcePort
+    ).map((c) => `${c.targetType}.${c.targetPort}`);
   }
 
   static getValidSources(targetNode: IRNode, targetPort: string): string[] {
-    return ConnectionConstraints
-      .filter(c => c.targetType === targetNode.type && c.targetPort === targetPort)
-      .map(c => `${c.sourceType}.${c.sourcePort}`);
+    return ConnectionConstraints.filter(
+      (c) => c.targetType === targetNode.type && c.targetPort === targetPort
+    ).map((c) => `${c.sourceType}.${c.sourcePort}`);
   }
 }
 
@@ -1505,14 +1514,14 @@ export class EdgeUtils {
       targetHandle,
       label,
       metadata: {
-        createdAt: new Date().toISOString()
-      }
+        createdAt: new Date().toISOString(),
+      },
     };
   }
 
   static isValidEdge(connection: IRConnection, nodes: IRNode[]): boolean {
-    const sourceNode = nodes.find(n => n.id === connection.source);
-    const targetNode = nodes.find(n => n.id === connection.target);
+    const sourceNode = nodes.find((n) => n.id === connection.source);
+    const targetNode = nodes.find((n) => n.id === connection.target);
 
     if (!sourceNode || !targetNode) {
       return false;
@@ -1528,7 +1537,9 @@ export class EdgeUtils {
     return validation.valid;
   }
 
-  static getConnectionMetadata(connection: IRConnection): Record<string, unknown> {
+  static getConnectionMetadata(
+    connection: IRConnection
+  ): Record<string, unknown> {
     return connection.metadata || {};
   }
 }
@@ -1538,28 +1549,31 @@ export class EdgeUtils {
  */
 export class NodeUtils {
   static getNodesByCategory(nodes: IRNode[], category: string): IRNode[] {
-    return nodes.filter(node => node.category === category);
+    return nodes.filter((node) => node.category === category);
   }
 
   static getNodesByType(nodes: IRNode[], type: string): IRNode[] {
-    return nodes.filter(node => node.type === type);
+    return nodes.filter((node) => node.type === type);
   }
 
   static findNodeById(nodes: IRNode[], id: NodeId): IRNode | undefined {
-    return nodes.find(node => node.id === id);
+    return nodes.find((node) => node.id === id);
   }
 
-  static getConnectedNodes(nodeId: NodeId, connections: IRConnection[]): {
+  static getConnectedNodes(
+    nodeId: NodeId,
+    connections: IRConnection[]
+  ): {
     inputs: NodeId[];
     outputs: NodeId[];
   } {
     const inputs = connections
-      .filter(c => c.target === nodeId)
-      .map(c => c.source);
-    
+      .filter((c) => c.target === nodeId)
+      .map((c) => c.source);
+
     const outputs = connections
-      .filter(c => c.source === nodeId)
-      .map(c => c.target);
+      .filter((c) => c.source === nodeId)
+      .map((c) => c.target);
 
     return { inputs, outputs };
   }
@@ -1567,34 +1581,46 @@ export class NodeUtils {
   static cloneNode(node: IRNode, newId?: NodeId): IRNode {
     return {
       ...structuredClone(node),
-      id: newId || `${node.id}_copy`
+      id: newId || `${node.id}_copy`,
     };
   }
 
-  static validateNodeParameters(node: IRNode): { valid: boolean; errors: string[] } {
+  static validateNodeParameters(node: IRNode): {
+    valid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
-    
+
     for (const param of node.parameters) {
-      if (param.required && (param.value === undefined || param.value === null)) {
+      if (
+        param.required &&
+        (param.value === undefined || param.value === null)
+      ) {
         errors.push(`Required parameter '${param.name}' is missing`);
       }
 
       if (param.validation && param.value !== undefined) {
         const { min, max, pattern } = param.validation;
-        
+
         if (typeof param.value === 'number') {
           if (min !== undefined && param.value < min) {
-            errors.push(`Parameter '${param.name}' value ${param.value} is below minimum ${min}`);
+            errors.push(
+              `Parameter '${param.name}' value ${param.value} is below minimum ${min}`
+            );
           }
           if (max !== undefined && param.value > max) {
-            errors.push(`Parameter '${param.name}' value ${param.value} is above maximum ${max}`);
+            errors.push(
+              `Parameter '${param.name}' value ${param.value} is above maximum ${max}`
+            );
           }
         }
 
         if (typeof param.value === 'string' && pattern) {
           const regex = new RegExp(pattern);
           if (!regex.test(param.value)) {
-            errors.push(`Parameter '${param.name}' value does not match required pattern`);
+            errors.push(
+              `Parameter '${param.name}' value does not match required pattern`
+            );
           }
         }
       }
@@ -1602,7 +1628,7 @@ export class NodeUtils {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }
