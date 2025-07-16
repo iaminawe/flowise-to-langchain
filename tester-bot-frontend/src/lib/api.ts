@@ -203,7 +203,7 @@ export const api = {
   // System health
   health: {
     check: async (): Promise<SystemHealth> => {
-      const response = await apiClient.get('/api/health')
+      const response = await apiClient.get('/health')
       return response.data
     },
 
