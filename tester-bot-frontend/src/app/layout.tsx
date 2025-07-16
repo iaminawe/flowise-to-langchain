@@ -7,10 +7,10 @@ import { ThemeProvider } from '@/components/theme-provider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Tester Bot - Flowise to LangChain Converter',
-  description: 'Test and convert Flowise flows to LangChain applications',
-  keywords: ['flowise', 'langchain', 'testing', 'conversion', 'ai'],
-  authors: [{ name: 'Tester Bot Team' }],
+  title: 'Flowise Converter - Flowise to LangChain',
+  description: 'Convert Flowise flows to LangChain applications',
+  keywords: ['flowise', 'langchain', 'converter', 'conversion', 'ai'],
+  authors: [{ name: 'Flowise Converter Team' }],
 }
 
 export const viewport = {

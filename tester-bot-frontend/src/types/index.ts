@@ -1,4 +1,4 @@
-// Core types for the tester bot application
+// Core types for the Flowise Converter application
 
 export interface FlowiseFlow {
   id: string

@@ -20,7 +20,7 @@ export function AppFooter() {
               <span>for the AI community</span>
             </div>
             <Separator orientation="vertical" className="h-4" />
-            <span>© {currentYear} Tester Bot</span>
+            <span>© {currentYear} Flowise Converter</span>
           </div>
 
           {/* Center section */}
@@ -40,7 +40,7 @@ export function AppFooter() {
               size="sm"
               className="h-8 px-2 text-xs"
               onClick={() =>
-                window.open('https://github.com/your-org/tester-bot', '_blank')
+                window.open('https://github.com/iaminawe/flowise-to-langchain', '_blank')
               }
             >
               <Github className="mr-1 h-3 w-3" />
@@ -51,7 +51,7 @@ export function AppFooter() {
               size="sm"
               className="h-8 px-2 text-xs"
               onClick={() =>
-                window.open('https://docs.tester-bot.com', '_blank')
+                window.open('https://github.com/iaminawe/flowise-to-langchain#readme', '_blank')
               }
             >
               <ExternalLink className="mr-1 h-3 w-3" />

@@ -1,6 +1,6 @@
-# Tester Bot Frontend
+# Flowise Converter Frontend
 
-A Next.js 14 frontend application for testing and converting Flowise flows to LangChain applications.
+A Next.js 14 frontend application for converting Flowise flows to LangChain applications.
 
 ## Features
 

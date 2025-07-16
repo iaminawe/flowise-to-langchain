@@ -61,7 +61,7 @@ export function AppHeader({
       case 'settings':
         return 'Settings'
       default:
-        return 'Tester Bot'
+        return 'Flowise Converter'
     }
   }
 
@@ -81,10 +81,10 @@ export function AppHeader({
 
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
-              <span className="text-sm font-bold text-white">TB</span>
+              <span className="text-sm font-bold text-white">FC</span>
             </div>
             <div>
-              <h1 className="text-lg font-semibold">Tester Bot</h1>
+              <h1 className="text-lg font-semibold">Flowise Converter</h1>
               <p className="hidden text-xs text-muted-foreground sm:block">
                 {getPageTitle(currentPage)}
               </p>

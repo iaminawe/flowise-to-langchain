@@ -6,13 +6,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: tester-bot-frontend
+    container_name: flowise-converter-frontend
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=http://backend:3001
-      - NEXT_PUBLIC_APP_NAME=Tester Bot Frontend
+      - NEXT_PUBLIC_APP_NAME=Flowise Converter
       - NEXT_PUBLIC_APP_VERSION=1.0.0
     depends_on:
       - backend
@@ -29,7 +29,7 @@ services:
   # Backend service (placeholder - adjust to your backend configuration)
   backend:
     image: node:18-alpine
-    container_name: tester-bot-backend
+    container_name: flowise-converter-backend
     ports:
       - "3001:3001"
     environment:
@@ -43,9 +43,9 @@ services:
   # Database service (optional)
   database:
     image: postgres:15-alpine
-    container_name: tester-bot-db
+    container_name: flowise-converter-db
     environment:
-      - POSTGRES_DB=tester_bot
+      - POSTGRES_DB=flowise_converter
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
     ports:
@@ -56,7 +56,7 @@ services:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d tester_bot"]
+      test: ["CMD-SHELL", "pg_isready -U admin -d flowise_converter"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -64,7 +64,7 @@ services:
   # Redis for caching (optional)
   redis:
     image: redis:7-alpine
-    container_name: tester-bot-redis
+    container_name: flowise-converter-redis
     ports:
       - "6379:6379"
     networks:
@@ -79,7 +79,7 @@ services:
   # Nginx reverse proxy (optional)
   nginx:
     image: nginx:alpine
-    container_name: tester-bot-nginx
+    container_name: flowise-converter-nginx
     ports:
       - "80:80"
       - "443:443"

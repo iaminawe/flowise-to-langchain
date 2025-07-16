@@ -59,10 +59,10 @@ export function Dashboard() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="mb-2 text-4xl font-bold text-gray-900">
-            Tester Bot Dashboard
+            Flowise Converter Dashboard
           </h1>
           <p className="text-gray-600">
-            Test and convert your Flowise flows to LangChain applications
+            Convert your Flowise flows to LangChain applications
           </p>
         </div>
 

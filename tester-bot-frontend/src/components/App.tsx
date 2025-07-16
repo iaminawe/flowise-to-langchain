@@ -91,7 +91,7 @@ function ErrorFallback({
 // Main App Component
 export function App() {
   const [appState, setAppState] = useLocalStorage<AppState>(
-    'tester-bot-app-state',
+    'flowise-converter-app-state',
     {
       currentPage: 'dashboard',
       sidebarOpen: true,
@@ -205,7 +205,7 @@ export function App() {
           <CardContent className="flex items-center gap-4">
             <LoadingSpinner size="lg" />
             <div>
-              <h2 className="text-lg font-semibold">Initializing Tester Bot</h2>
+              <h2 className="text-lg font-semibold">Initializing Flowise Converter</h2>
               <p className="text-gray-600">Loading application...</p>
             </div>
           </CardContent>
