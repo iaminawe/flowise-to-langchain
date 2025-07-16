@@ -204,40 +204,22 @@ async function setupAgent() {
 // Initialize agent (will be called in runFlow)
 let ${variableName}: AgentExecutor | null = null;`;
 
-    const fragments: CodeFragment[] = [];
-
-    // Create import fragments
-    imports.forEach((importStatement, index) => {
-      fragments.push({
-        id: `agent-${node.id}-import-${index}`,
-        type: 'import',
-        content: importStatement,
-        dependencies: [],
+    return [
+      {
+        id: `agent-${node.id}`,
+        type: 'initialization',
+        content: setupFunction,
+        dependencies: this.getDependencies(node, _context),
         language: _context.targetLanguage || 'typescript',
         metadata: {
           nodeId: node.id,
-          order: 1 + index,
-          category: 'import',
+          order: 400,
+          category: 'agent',
+          exports: [variableName, 'setupAgent'],
+          imports: imports,
         },
-      });
-    });
-
-    // Create initialization fragment
-    fragments.push({
-      id: `agent-${node.id}`,
-      type: 'initialization',
-      content: setupFunction,
-      dependencies: this.getDependencies(node, _context),
-      language: _context.targetLanguage || 'typescript',
-      metadata: {
-        nodeId: node.id,
-        order: 400,
-        category: 'agent',
-        exports: [variableName, 'setupAgent'],
       },
-    });
-
-    return fragments;
+    ];
   }
 }
 

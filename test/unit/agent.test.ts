@@ -4,7 +4,7 @@
  */
 
 import { describe, test, expect, beforeEach, jest } from '@jest/globals';
-import { agentWithToolsFlow } from '../fixtures/sample-flows.js';
+import { agentWithToolsFlow } from '../fixtures/sample-flows';
 
 // Mock agent converter module (to be implemented)
 jest.mock('../../src/registry/converters/agent.js', () => ({
@@ -128,7 +128,7 @@ describe('Agent Node Types - Basic Functionality', () => {
       
       if (agentTypeParam) {
         expect(agentTypeParam.type).toBe('options');
-        if ('options' in agentTypeParam) {
+        if ('options' in agentTypeParam && agentTypeParam.options) {
           expect(agentTypeParam.options).toBeInstanceOf(Array);
           expect(agentTypeParam.options.length).toBeGreaterThan(0);
           

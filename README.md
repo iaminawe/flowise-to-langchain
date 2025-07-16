@@ -430,8 +430,10 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
+- **Original Creator**: Gregg Coppen <gregg@iaminawe.com>
 - Built for the Flowise and LangChain communities
 - Inspired by the need to convert visual workflows to production code
+- Enhanced by Claude Flow Development Team
 - Special thanks to Claude Code for development assistance
 - Contributors and testers who helped validate the tool
 
@@ -443,6 +445,6 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 ---
 
-**Status**: Production Ready ✅ | **Version**: 1.0.1 | **Node Coverage**: 89+ Types | **TypeScript**: Full Support
+**Status**: Production Ready ✅ | **Version**: 1.0.2 | **Node Coverage**: 89+ Types | **TypeScript**: Full Support
 
 This tool successfully converts Flowise visual workflows into production-ready LangChain TypeScript code with comprehensive node type support, advanced features like streaming, RAG chains, function calling, and enhanced CLI capabilities including watch mode, batch conversion, and direct execution.

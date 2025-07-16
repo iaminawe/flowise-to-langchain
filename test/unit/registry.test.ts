@@ -4,7 +4,7 @@
  */
 
 import { describe, test, expect, beforeEach, jest } from '@jest/globals';
-import { simpleOpenAIFlow, chainFlow } from '../fixtures/sample-flows.js';
+import { simpleOpenAIFlow, chainFlow } from '../fixtures/sample-flows';
 
 // Mock registry module since implementation may not exist yet
 jest.mock('../../src/registry/registry.js', () => ({

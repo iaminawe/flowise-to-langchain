@@ -4,7 +4,7 @@
  */
 
 import { describe, test, expect, beforeEach, jest } from '@jest/globals';
-import { agentWithToolsFlow } from '../fixtures/sample-flows.js';
+import { agentWithToolsFlow } from '../fixtures/sample-flows';
 
 // Mock the main converter and dependencies
 jest.mock('../../src/index.js', () => ({

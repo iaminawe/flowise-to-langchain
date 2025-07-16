@@ -7,7 +7,7 @@ import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globa
 import { writeFile, mkdir, rm, readFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { simpleOpenAIFlow, chainFlow, complexFlow } from '../fixtures/sample-flows.js';
+import { simpleOpenAIFlow, chainFlow, complexFlow } from '../fixtures/sample-flows';
 
 describe('End-to-End Conversion Pipeline', () => {
   let testDir: string;

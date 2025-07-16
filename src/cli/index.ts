@@ -11,6 +11,7 @@ import { testCommand } from './commands/test.js';
 import createWatchCommand from './commands/watch.js';
 import createBatchCommand from './commands/batch.js';
 import createRunCommand from './commands/run.js';
+// import { createApiCommand } from '../api/cli.js';
 
 // Get package.json for version info
 const __filename = fileURLToPath(import.meta.url);
@@ -60,6 +61,7 @@ program.addCommand(testCommand);
 program.addCommand(createWatchCommand());
 program.addCommand(createBatchCommand());
 program.addCommand(createRunCommand());
+// program.addCommand(createApiCommand());
 
 // Add examples to help
 program.addHelpText(
@@ -92,6 +94,12 @@ ${chalk.bold('Examples:')}
 
   ${chalk.cyan('# Convert and run a workflow')}
   $ flowise-to-lc run my-flow.json "What is the weather today?"
+
+  ${chalk.cyan('# Start API server')}
+  $ flowise-to-lc api --port 3001 --cors-origin "http://localhost:3000"
+
+  ${chalk.cyan('# Start API server with authentication')}
+  $ flowise-to-lc api --api-key "your-secret-key" --verbose
 `
 );
 

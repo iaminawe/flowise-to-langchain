@@ -2,8 +2,8 @@
  * Simple test to verify agent converter implementation
  */
 
-import { OpenAIFunctionsAgentConverter, ConversationalAgentConverter, AgentExecutorConverter } from '../src/registry/converters/agent.js';
-import { IRNode, GenerationContext } from '../src/ir/types.js';
+import { OpenAIFunctionsAgentConverter, ConversationalAgentConverter, AgentExecutorConverter } from '../src/registry/converters/agent';
+import { IRNode, GenerationContext } from '../src/ir/types';
 
 describe('Agent Converters', () => {
   const mockContext: GenerationContext = {

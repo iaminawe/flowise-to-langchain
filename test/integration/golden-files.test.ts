@@ -366,7 +366,7 @@ OPENAI_API_KEY=your-openai-api-key
 ## Usage
 
 \`\`\`typescript
-import FlowiseChain from './src/flowise-chain.js';
+import FlowiseChain from './src/flowise-chain';
 
 const chain = new FlowiseChain({
   openAIApiKey: process.env.OPENAI_API_KEY,
