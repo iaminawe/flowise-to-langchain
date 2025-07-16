@@ -47,9 +47,11 @@ npm install
 # Copy environment configuration
 cp .env.example .env.local
 
-# Start development server
+# Start development server (frontend + backend)
 npm run dev
 ```
+
+**Note**: The `npm run dev` command now starts both the Next.js frontend (port 3000) and Express backend (port 3001) concurrently.
 
 ### Environment Configuration
 
@@ -70,9 +72,12 @@ Key environment variables:
 
 ```bash
 # Development
-npm run dev          # Start dev server
+npm run dev          # Start both frontend and backend servers
+npm run dev:next     # Start only Next.js frontend
+npm run dev:server   # Start only Express backend
 npm run build        # Build for production
 npm run start        # Start production server
+npm run start:all    # Start both frontend and backend in production
 
 # Code Quality
 npm run lint         # Run ESLint
