@@ -4,9 +4,13 @@
   "private": true,
   "description": "Frontend for Flowise to LangChain tester bot",
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently \"npm run dev:next\" \"npm run dev:server\"",
+    "dev:next": "next dev",
+    "dev:server": "nodemon server/index.js",
     "build": "next build",
     "start": "next start",
+    "start:all": "concurrently \"npm start\" \"npm run start:server\"",
+    "start:server": "node server/index.js",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
@@ -74,7 +78,10 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.0.0",
     "uuid": "^9.0.0",
-    "zod": "^3.22.0"
+    "zod": "^3.22.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.0",
@@ -89,7 +96,9 @@
     "jest-environment-jsdom": "^29.7.0",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.5.0",
-    "webpack-bundle-analyzer": "^4.9.0"
+    "webpack-bundle-analyzer": "^4.9.0",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.2"
   },
   "engines": {
     "node": ">=18.0.0",
