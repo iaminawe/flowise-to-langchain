@@ -399,7 +399,9 @@ export function ConversionSettings({
                         render={({ field }) => (
                           <input
                             type="checkbox"
-                            {...field}
+                            name={field.name}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
                             checked={field.value as boolean}
                             disabled={disabled}
                             className="rounded border-gray-300 text-primary focus:ring-primary"
@@ -582,7 +584,9 @@ export function ConversionSettings({
                         render={({ field }) => (
                           <input
                             type="checkbox"
-                            {...field}
+                            name={field.name}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
                             checked={field.value as boolean}
                             disabled={disabled}
                             className="rounded border-gray-300 text-primary focus:ring-primary"

@@ -379,8 +379,10 @@ export function TestConfiguration({
                     render={({ field }) => (
                       <input
                         type="checkbox"
-                        {...field}
-                        checked={field.value as boolean}
+                        name={field.name}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        checked={Boolean(field.value)}
                         disabled={disabled}
                         className="rounded border-gray-300 text-primary focus:ring-primary"
                       />
