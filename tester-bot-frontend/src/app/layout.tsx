@@ -11,7 +11,11 @@ export const metadata: Metadata = {
   description: 'Test and convert Flowise flows to LangChain applications',
   keywords: ['flowise', 'langchain', 'testing', 'conversion', 'ai'],
   authors: [{ name: 'Tester Bot Team' }],
-  viewport: 'width=device-width, initial-scale=1',
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
