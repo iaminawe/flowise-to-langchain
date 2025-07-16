@@ -9,11 +9,14 @@ A comprehensive TypeScript CLI tool that converts Flowise visual workflow JSON e
 - **Type Safety**: Generate fully typed TypeScript with ES2022 and ESM modules
 - **Modern LangChain Integration**: Uses latest @langchain/community, @langchain/openai, and @langchain/core packages
 - **Enhanced CLI Interface**: Full-featured CLI with convert, validate, test, watch, batch, and run commands
+- **Web Interface**: Interactive Next.js 14 frontend application for easy conversion and testing
 - **Intermediate Representation**: Uses IR for reliable graph transformation and optimization
 - **Plugin Architecture**: Extensible converter registry system with 47 aliases
 - **Production Ready**: Generates code that compiles and runs successfully
 
 ## 📦 Installation
+
+### CLI Tool Installation
 
 ```bash
 # Clone and install locally
@@ -25,6 +28,24 @@ npm run build
 # Use the CLI
 npm run start -- --help
 ```
+
+### Frontend Application Installation
+
+```bash
+# Navigate to frontend directory
+cd tester-bot-frontend
+
+# Install dependencies
+npm install
+
+# Copy environment configuration
+cp .env.example .env.local
+
+# Start development server (frontend + backend)
+npm run dev
+```
+
+Access the web interface at `http://localhost:3000`
 
 ## 🎯 Quick Start
 
@@ -134,6 +155,280 @@ export async function runFlow(input: string): Promise<string> {
   return result.text || result.output || JSON.stringify(result);
 }
 ```
+
+## 🌐 Flowise Converter Frontend
+
+A modern Next.js 14 frontend application that provides an intuitive web interface for converting Flowise flows to LangChain applications.
+
+### Features
+
+- **🔄 Flow Testing**: Test Flowise flows with comprehensive test suites
+- **🔀 Flow Conversion**: Convert Flowise flows to LangChain code with visual feedback
+- **📊 Analytics Dashboard**: Track test results and performance metrics
+- **🎨 Modern UI**: Built with Tailwind CSS and Framer Motion animations
+- **🌙 Dark Mode**: Toggle between light and dark themes
+- **📱 Responsive**: Works seamlessly on desktop and mobile devices
+- **🧪 Testing**: Comprehensive test coverage with Jest and React Testing Library
+- **⚡ Real-time Updates**: WebSocket integration for live conversion status
+- **💾 Persistent Storage**: Save and manage conversion history
+- **🎯 Type Safety**: Full TypeScript integration with Zod validation
+
+### Tech Stack
+
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript 5.0+
+- **Styling**: Tailwind CSS with custom components
+- **UI Components**: Radix UI primitives with custom styling
+- **State Management**: React Query (TanStack Query) for server state
+- **Forms**: React Hook Form with Zod validation
+- **Charts**: Recharts for analytics visualization
+- **Code Editor**: Monaco Editor with syntax highlighting
+- **Animation**: Framer Motion for smooth interactions
+- **Icons**: Lucide React icon library
+- **Backend**: Express.js with WebSocket support
+
+### Getting Started with Frontend
+
+#### Prerequisites
+- Node.js 18+
+- npm 8+
+- Docker (optional, for containerized deployment)
+
+#### Installation
+
+```bash
+# Navigate to frontend directory
+cd tester-bot-frontend
+
+# Install dependencies
+npm install
+
+# Copy environment configuration
+cp .env.example .env.local
+
+# Start development server (frontend + backend)
+npm run dev
+```
+
+The `npm run dev` command starts both the Next.js frontend (port 3000) and Express backend (port 3001) concurrently.
+
+#### Environment Configuration
+
+Create a `.env.local` file based on `.env.example`:
+
+```bash
+# API Configuration
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_APP_NAME=Flowise Converter
+NODE_ENV=development
+
+# Feature Flags
+NEXT_PUBLIC_ENABLE_ANALYTICS=true
+NEXT_PUBLIC_ENABLE_WEBSOCKET=true
+NEXT_PUBLIC_ENABLE_TESTING=true
+```
+
+#### Available Scripts
+
+```bash
+# Development
+npm run dev          # Start both frontend and backend
+npm run dev:next     # Start only Next.js frontend
+npm run dev:server   # Start only Express backend
+
+# Production
+npm run build        # Build for production
+npm run start        # Start production server
+npm run start:all    # Start both frontend and backend
+
+# Code Quality
+npm run lint         # Run ESLint
+npm run type-check   # Run TypeScript checks
+
+# Testing
+npm run test         # Run tests
+npm run test:watch   # Run tests in watch mode
+npm run test:coverage # Run tests with coverage
+
+# Deployment
+npm run deploy:docker     # Build Docker image
+npm run deploy:docker:run # Run Docker container
+```
+
+### Frontend Architecture
+
+#### Component Structure
+
+```
+src/components/
+├── ui/                  # Basic UI components
+│   ├── Button.tsx       # Customizable button
+│   ├── Input.tsx        # Form inputs
+│   ├── Card.tsx         # Content containers
+│   ├── Modal.tsx        # Modal dialogs
+│   └── Toast.tsx        # Notifications
+├── layout/              # Layout components
+│   ├── Header.tsx       # Application header
+│   ├── Sidebar.tsx      # Navigation sidebar
+│   └── Footer.tsx       # Application footer
+├── forms/               # Form components
+│   ├── FlowUploader.tsx # File upload form
+│   ├── ConversionSettings.tsx # Conversion options
+│   └── TestConfiguration.tsx  # Test settings
+├── testing/             # Testing components
+│   ├── TestRunner.tsx   # Execute tests
+│   ├── TestResults.tsx  # Display results
+│   └── TestSuiteManager.tsx # Manage test suites
+├── conversion/          # Conversion components
+│   ├── FlowConverter.tsx # Main conversion interface
+│   ├── CodeViewer.tsx   # Display generated code
+│   └── ConversionHistory.tsx # Track conversions
+├── charts/              # Analytics components
+│   ├── PerformanceChart.tsx # Performance metrics
+│   ├── TestResultsChart.tsx # Test analytics
+│   └── UsageChart.tsx   # Usage statistics
+└── results/             # Results components
+    ├── ResultsViewer.tsx # View conversion results
+    └── ResultsExporter.tsx # Export results
+```
+
+#### Key Features
+
+**Dashboard View**
+- Overview of recent conversions and tests
+- Performance metrics and analytics
+- Quick actions for common tasks
+- Real-time status updates
+
+**Flow Conversion**
+- Drag-and-drop file upload
+- JSON validation and preview
+- Real-time conversion progress
+- Generated code preview with syntax highlighting
+- Download converted files
+
+**Testing Interface**
+- Interactive test configuration
+- Real-time test execution
+- Detailed test results with metrics
+- Test history and comparison
+
+**Analytics Dashboard**
+- Conversion success rates
+- Performance trends
+- Usage statistics
+- Error analysis
+
+### Backend Integration
+
+The frontend includes an Express.js backend server that provides:
+
+#### API Endpoints
+
+```typescript
+// Health check
+GET /health
+
+// Flow conversion
+POST /api/convert
+{
+  "flowData": {},
+  "settings": {
+    "outputFormat": "typescript",
+    "withLangfuse": false
+  }
+}
+
+// Test execution
+POST /api/test
+{
+  "flowData": {},
+  "testConfig": {
+    "timeout": 30000,
+    "verbose": true
+  }
+}
+
+// Analytics
+GET /api/analytics
+GET /api/analytics/performance
+GET /api/analytics/usage
+```
+
+#### WebSocket Support
+
+Real-time updates for:
+- Conversion progress
+- Test execution status
+- Live error reporting
+- Performance metrics
+
+#### CORS Configuration
+
+Properly configured CORS for frontend-backend communication:
+
+```javascript
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+```
+
+### Deployment Options
+
+#### Docker Deployment (Recommended)
+
+```bash
+# Build and run with Docker
+npm run deploy:docker
+npm run deploy:docker:run
+
+# Or use Docker Compose
+docker-compose up -d
+```
+
+#### Environment-Specific Deployment
+
+**Development**
+```bash
+# Start development server
+npm run dev
+
+# Or with Docker
+docker-compose -f docker-compose.dev.yml up
+```
+
+**Production**
+```bash
+# Build and start production server
+npm run build
+npm run start:all
+
+# Or with Docker
+docker-compose up -d
+```
+
+### Health Checks
+
+The application includes comprehensive health checks:
+
+```bash
+# Check application health
+curl http://localhost:3000/api/health
+
+# Or use npm script
+npm run health-check
+```
+
+### Performance Features
+
+- **Bundle Analysis**: Analyze bundle size with `npm run analyze`
+- **Code Splitting**: Automatic code splitting for optimal loading
+- **Image Optimization**: Next.js Image component for optimized images
+- **Caching**: Intelligent caching strategies for API responses
+- **Progressive Enhancement**: Works without JavaScript for basic functionality
 
 ## 🛠️ Comprehensive Node Support
 
@@ -279,6 +574,16 @@ flowise-to-langchain/
 │   │   └── index.ts         # Registry initialization
 │   ├── emitters/            # Code generation (TypeScript)
 │   └── converter.ts         # Main converter orchestration
+├── tester-bot-frontend/     # Next.js 14 frontend application
+│   ├── src/
+│   │   ├── app/             # Next.js App Router pages
+│   │   ├── components/      # React components
+│   │   ├── lib/             # Utility libraries
+│   │   ├── types/           # TypeScript definitions
+│   │   └── hooks/           # Custom React hooks
+│   ├── server/              # Express backend server
+│   ├── public/              # Static assets
+│   └── package.json         # Frontend dependencies
 ├── examples/                # Example Flowise flows
 ├── test/                    # Test suites
 └── bin/                     # CLI executable
@@ -445,6 +750,6 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 ---
 
-**Status**: Production Ready ✅ | **Version**: 1.0.2 | **Node Coverage**: 89+ Types | **TypeScript**: Full Support
+**Status**: Production Ready ✅ | **Version**: 1.0.2 | **Node Coverage**: 89+ Types | **TypeScript**: Full Support | **Frontend**: Next.js 14 Ready
 
-This tool successfully converts Flowise visual workflows into production-ready LangChain TypeScript code with comprehensive node type support, advanced features like streaming, RAG chains, function calling, and enhanced CLI capabilities including watch mode, batch conversion, and direct execution.
+This comprehensive toolkit successfully converts Flowise visual workflows into production-ready LangChain TypeScript code with 89+ node type support, advanced features like streaming, RAG chains, function calling, enhanced CLI capabilities including watch mode, batch conversion, direct execution, and a modern Next.js 14 frontend application for easy visual conversion and testing.
