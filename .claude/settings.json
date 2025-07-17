@@ -89,16 +89,26 @@
     "claude-flow": {
       "command": "npx",
       "args": [
-        "claude-flow",
+        "claude-flow@alpha",
         "mcp",
         "start"
       ],
+      "type": "stdio",
       "env": {
         "CLAUDE_FLOW_HOOKS_ENABLED": "true",
         "CLAUDE_FLOW_TELEMETRY_ENABLED": "true",
         "CLAUDE_FLOW_REMOTE_READY": "true",
         "CLAUDE_FLOW_GITHUB_INTEGRATION": "true"
       }
+    },
+    "ruv-swarm": {
+      "command": "npx",
+      "args": [
+        "ruv-swarm@latest",
+        "mcp",
+        "start"
+      ],
+      "type": "stdio"
     }
   },
   "includeCoAuthoredBy": true,

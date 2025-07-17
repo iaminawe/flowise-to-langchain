@@ -1,13 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "mcp__ruv-swarm",
-      "mcp__claude-flow",
-      "Bash(npx:*)",
+      "mcp__ruv-swarm__*",
+      "mcp__claude-flow__*",
+      "Bash(npx claude-flow*)",
+      "Bash(npx ruv-swarm*)",
+      "Bash(mkdir *)",
+      "Bash(cd *)",
       "WebFetch(domain:docs.n8n.io)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
-    "deny": []
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(curl * | bash)",
+      "Bash(wget * | sh)"
+    ]
   }
 }
