@@ -1,0 +1,108 @@
+{
+  "name": "flowise-to-langchain",
+  "version": "1.0.3",
+  "description": "A TypeScript tool to convert Flowise flows to LangChain code",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "flowise-to-lc": "bin/flowise-to-lc.js",
+    "flowise-to-langchain": "bin/flowise-to-lc.js"
+  },
+  "scripts": {
+    "build": "npm run clean && tsc -p tsconfig.build.json && npm run build:permissions",
+    "build:watch": "tsc --watch",
+    "build:permissions": "chmod +x bin/flowise-to-lc.js",
+    "build:production": "npm run clean && tsc -p tsconfig.build.json --noEmit && npm run build",
+    "dev": "tsx src/cli/index.ts",
+    "start": "node bin/flowise-to-lc.js",
+    "cli": "node bin/flowise-to-lc.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:cli": "npm run build && node bin/flowise-to-lc.js --help",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run build:production",
+    "type-check": "tsc --noEmit",
+    "install:global": "npm run build && npm link",
+    "uninstall:global": "npm unlink -g flowise-to-langchain",
+    "build:dist": "node scripts/build-dist.js",
+    "test:dist": "node scripts/test-cli.js",
+    "dist": "npm run build:dist && npm run test:dist"
+  },
+  "keywords": [
+    "flowise",
+    "langchain",
+    "converter",
+    "typescript",
+    "cli",
+    "workflow",
+    "automation"
+  ],
+  "author": "Gregg Coppen <gregg@iaminawe.com>",
+  "contributors": [
+    "Claude Flow Development Team"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flowise-langchain/flowise-to-langchain.git"
+  },
+  "homepage": "https://github.com/flowise-langchain/flowise-to-langchain#readme",
+  "bugs": {
+    "url": "https://github.com/flowise-langchain/flowise-to-langchain/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@langchain/community": "^0.2.31",
+    "@langchain/core": "^0.2.30",
+    "@langchain/openai": "^0.2.7",
+    "@langchain/textsplitters": "^0.0.3",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "glob": "^10.4.5",
+    "langchain": "^0.2.17",
+    "multer": "^1.4.5-lts.1",
+    "ora": "^8.0.1",
+    "validator": "^13.15.15",
+    "ws": "^8.18.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.23",
+    "@types/jest": "^29.5.12",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^20.14.15",
+    "@types/validator": "^13.15.2",
+    "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.3.3",
+    "rimraf": "^5.0.10",
+    "ts-jest": "^29.2.4",
+    "tsx": "^4.16.5",
+    "typescript": "^5.5.4"
+  },
+  "prettier": {
+    "semi": true,
+    "trailingComma": "es5",
+    "singleQuote": true,
+    "printWidth": 80,
+    "tabWidth": 2,
+    "useTabs": false
+  }
+}
