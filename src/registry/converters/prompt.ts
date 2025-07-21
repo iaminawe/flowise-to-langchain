@@ -108,7 +108,7 @@ export class ChatPromptTemplateConverter extends BasePromptConverter {
     return 'ChatPromptTemplate';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -145,7 +145,7 @@ export class ChatPromptTemplateConverter extends BasePromptConverter {
     };
   }
 
-  protected generateInstantiation(
+  protected override generateInstantiation(
     variableName: string,
     className: string,
     config: Record<string, unknown>
@@ -172,7 +172,7 @@ export class PromptTemplateConverter extends BasePromptConverter {
     return 'PromptTemplate';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -218,7 +218,7 @@ export class FewShotPromptTemplateConverter extends BasePromptConverter {
     return 'FewShotPromptTemplate';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -256,7 +256,7 @@ export class FewShotPromptTemplateConverter extends BasePromptConverter {
     };
   }
 
-  protected generateInstantiation(
+  protected override generateInstantiation(
     variableName: string,
     className: string,
     config: Record<string, unknown>
@@ -293,7 +293,7 @@ export class SystemMessageConverter extends BasePromptConverter {
     return 'SystemMessage';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -302,7 +302,7 @@ export class SystemMessageConverter extends BasePromptConverter {
     return { content };
   }
 
-  protected generateInstantiation(
+  protected override generateInstantiation(
     variableName: string,
     className: string,
     config: Record<string, unknown>
@@ -329,7 +329,7 @@ export class HumanMessageConverter extends BasePromptConverter {
     return 'HumanMessage';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -338,7 +338,7 @@ export class HumanMessageConverter extends BasePromptConverter {
     return { content };
   }
 
-  protected generateInstantiation(
+  protected override generateInstantiation(
     variableName: string,
     className: string,
     config: Record<string, unknown>
@@ -365,7 +365,7 @@ export class AIMessageConverter extends BasePromptConverter {
     return 'AIMessage';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -374,7 +374,7 @@ export class AIMessageConverter extends BasePromptConverter {
     return { content };
   }
 
-  protected generateInstantiation(
+  protected override generateInstantiation(
     variableName: string,
     className: string,
     config: Record<string, unknown>

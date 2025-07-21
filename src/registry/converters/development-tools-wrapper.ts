@@ -67,7 +67,7 @@ abstract class DevelopmentToolWrapper extends BaseConverter {
     return fragments;
   }
   
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
   

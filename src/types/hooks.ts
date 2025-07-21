@@ -4,16 +4,25 @@
  * This file contains comprehensive TypeScript interfaces for all hooks
  * used throughout the Flowise-to-LangChain converter application.
  */
+// Import from API types directly to avoid circular dependencies
+import type {
+  ValidationResult,
+  ValidationError,
+  ValidationWarning,
+  ValidationSuggestion,
+  ApiError,
+  ApiResponse,
+  WebSocketMessage,
+  UserInfo
+} from './api.js';
+
+// Import remaining types from index
 import {
   FlowiseJSON,
   Node,
   Edge,
   ConversionConfig,
   TestConfig,
-  ValidationResult,
-  ValidationError,
-  ValidationWarning,
-  ValidationSuggestion,
   TestResult,
   TestSuite,
   GeneratedFile,
@@ -24,12 +33,8 @@ import {
   ConversionMetadata,
   PerformanceMetrics,
   ProjectInfo,
-  UserInfo,
   ConfigPreset,
   NodeTemplate,
-  ApiError,
-  ApiResponse,
-  WebSocketMessage,
   NotificationItem,
   FileTreeNode,
   TabItem,

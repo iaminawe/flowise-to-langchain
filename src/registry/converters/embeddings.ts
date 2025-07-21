@@ -37,7 +37,7 @@ abstract class BaseEmbeddingsConverter extends BaseConverter {
     node: IRNode
   ): Record<string, unknown>;
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'embeddings');
     const config = this.generateEmbeddingsConfiguration(node, _context);
     const fragments: CodeFragment[] = [];
@@ -94,19 +94,19 @@ abstract class BaseEmbeddingsConverter extends BaseConverter {
 export class OpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
   readonly flowiseType = 'openAIEmbeddings';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['OpenAIEmbeddings'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/openai';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'OpenAIEmbeddings';
   }
 
-  protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
+  protected override extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
     const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
@@ -136,11 +136,11 @@ export class OpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/openai'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -151,19 +151,19 @@ export class OpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
 export class CohereEmbeddingsConverter extends BaseEmbeddingsConverter {
   readonly flowiseType = 'cohereEmbeddings';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['CohereEmbeddings'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/cohere';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'CohereEmbeddings';
   }
 
-  protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
+  protected override extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
     const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
@@ -184,11 +184,11 @@ export class CohereEmbeddingsConverter extends BaseEmbeddingsConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/cohere'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -199,19 +199,19 @@ export class CohereEmbeddingsConverter extends BaseEmbeddingsConverter {
 export class HuggingFaceEmbeddingsConverter extends BaseEmbeddingsConverter {
   readonly flowiseType = 'huggingFaceEmbeddings';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['HuggingFaceInferenceEmbeddings'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/community/embeddings/hf';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'HuggingFaceInferenceEmbeddings';
   }
 
-  protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
+  protected override extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
     const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
@@ -236,11 +236,11 @@ export class HuggingFaceEmbeddingsConverter extends BaseEmbeddingsConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/embeddings/hf'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -251,19 +251,19 @@ export class HuggingFaceEmbeddingsConverter extends BaseEmbeddingsConverter {
 export class AzureOpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
   readonly flowiseType = 'azureOpenAIEmbeddings';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['AzureOpenAIEmbeddings'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/openai';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'AzureOpenAIEmbeddings';
   }
 
-  protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
+  protected override extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
     const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
@@ -295,11 +295,11 @@ export class AzureOpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/openai'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -310,19 +310,19 @@ export class AzureOpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
 export class GoogleVertexAIEmbeddingsConverter extends BaseEmbeddingsConverter {
   readonly flowiseType = 'googleVertexAIEmbeddings';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['GoogleVertexAIEmbeddings'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/google-vertexai';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'GoogleVertexAIEmbeddings';
   }
 
-  protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
+  protected override extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
     const config: any = {};
 
     const projectId = this.getParameterValue(node, 'projectId');
@@ -345,11 +345,11 @@ export class GoogleVertexAIEmbeddingsConverter extends BaseEmbeddingsConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/google-vertexai'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }

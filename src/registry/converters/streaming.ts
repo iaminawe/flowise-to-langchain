@@ -67,7 +67,7 @@ export class StreamingLLMConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/openai'];
   }
 }
@@ -147,7 +147,7 @@ export class StreamingChainConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain/chains'];
   }
 }
@@ -229,7 +229,7 @@ export class StreamingAgentConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain/agents'];
   }
 }
@@ -298,7 +298,7 @@ export class RealTimeStreamingConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 }
@@ -381,7 +381,7 @@ ${variableName}.on('connection', (ws: WebSocket) => {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['ws', '@types/ws'];
   }
 }
@@ -466,7 +466,7 @@ export class SSEStreamingConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['express', '@types/express'];
   }
 }

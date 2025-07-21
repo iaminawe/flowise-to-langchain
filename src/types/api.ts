@@ -9,7 +9,6 @@ import {
   FlowiseJSON,
   ConversionConfig,
   TestConfig,
-  ValidationResult,
   TestResult,
   GeneratedFile,
   ConversionMetadata,
@@ -1189,3 +1188,28 @@ export interface ApiClient {
 }
 
 // All API types are already exported individually above
+
+// Re-export ConversionResult from flowise.ts for API usage
+export type { ConversionResult } from './flowise.js';
+
+// Export ChatflowMetadata as an alias for FlowMetadata for backward compatibility
+export type ChatflowMetadata = FlowMetadata;
+
+// Create a unified ValidationResult type that matches IR types
+export interface ValidationResult {
+  isValid: boolean;
+  errors: ValidationError[];
+  warnings: ValidationWarning[];
+  suggestions: ValidationSuggestion[];
+  detectedVersion?: string;
+  nodeCount?: number;
+  edgeCount?: number;
+  nodeTypes?: string[];
+  complexity?: 'low' | 'medium' | 'high';
+  supportedFeatures?: string[];
+  unsupportedFeatures?: Array<{
+    name: string;
+    reason: string;
+    workaround?: string;
+  }>;
+}

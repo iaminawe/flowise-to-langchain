@@ -184,7 +184,7 @@ export class GmailToolConverter extends BaseGoogleToolConverter {
     return config;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
       'googleapis', 
       '@langchain/community', 
@@ -241,7 +241,7 @@ export class GoogleCalendarToolConverter extends BaseGoogleToolConverter {
     return config;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
       'googleapis', 
       '@langchain/community', 
@@ -298,7 +298,7 @@ export class GoogleDriveToolConverter extends BaseGoogleToolConverter {
     return config;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
       'googleapis', 
       '@langchain/community', 
@@ -350,7 +350,7 @@ export class GoogleDocsToolConverter extends BaseGoogleToolConverter {
     return config;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
       'googleapis', 
       '@langchain/community', 
@@ -404,7 +404,7 @@ export class GoogleSheetsToolConverter extends BaseGoogleToolConverter {
     return config;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
       'googleapis', 
       '@langchain/community', 

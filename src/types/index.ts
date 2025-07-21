@@ -5,6 +5,24 @@
  * for the converter system, including testing, configuration, and component interfaces.
  */
 
+// Import types for internal use
+import type {
+  FlowiseNode,
+  FlowiseEdge
+} from '../parser/schema.js';
+
+import type {
+  FlowMetadata,
+  ConversionResult as APIConversionResult
+} from './api.js';
+
+import type {
+  ValidationWarning as IRValidationWarning,
+  ValidationSuggestion as IRValidationSuggestion,
+  GenerationContext as IRGenerationContext,
+  ValidationResult as IRValidationResult
+} from '../ir/types.js';
+
 // Re-export core types from existing modules (explicit to avoid ambiguity)
 export type {
   FlowiseNode as FlowiseNodeSchema,
@@ -27,7 +45,7 @@ export type {
 } from '../ir/types.js';
 
 // Re-export specific types to avoid conflicts
-export type { ConversionConfig, ConversionOptions } from '../cli/types.js';
+export type { ConversionOptions } from '../cli/types.js';
 export type { ChatflowMetadata, ConversionResult } from './api.js';
 export type { TestMetrics as APITestMetrics, TestReport as APITestReport } from './api.js';
 export type { UserPreferences as APIUserPreferences } from './api.js';
@@ -38,11 +56,25 @@ export * from './testing.js';
 export * from './utils.js';
 export * from './hooks.js';
 
+// Re-export API types for compatibility
+export type { 
+  ValidationResult,
+  ApiResponse,
+  WebSocketMessage,
+  UserInfo
+} from './api.js';
+
+// Re-export specific validation types
+export type { 
+  ValidationWarning,
+  ValidationSuggestion
+} from './api.js';
+
 // Core Data Interfaces
 export interface FlowiseJSON {
-  nodes: FlowiseNodeSchema[];
-  edges: FlowiseEdgeSchema[];
-  chatflow?: ChatflowMetadata;
+  nodes: FlowiseNode[];
+  edges: FlowiseEdge[];
+  chatflow?: FlowMetadata;
   viewport?: {
     x: number;
     y: number;
@@ -1068,7 +1100,7 @@ export interface UseFlowHook {
   removeEdge: (edgeId: string) => void;
   updateEdge: (edgeId: string, updates: Partial<EdgeData>) => void;
   validate: () => Promise<IRValidationResult>;
-  convert: (config: ConversionConfig) => Promise<ConversionResult>;
+  convert: (config: ConversionConfig) => Promise<APIConversionResult>;
   clear: () => void;
   undo: () => void;
   redo: () => void;
@@ -1223,7 +1255,7 @@ export const DEFAULT_VALIDATION_OPTIONS = {
   minimal: false,
 };
 
-export const DEFAULT_GENERATION_CONTEXT: GenerationContext = {
+export const DEFAULT_GENERATION_CONTEXT: IRGenerationContext = {
   targetLanguage: 'typescript',
   outputPath: './output',
   projectName: 'flowise-converted',

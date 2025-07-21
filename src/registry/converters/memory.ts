@@ -36,7 +36,7 @@ abstract class BaseMemoryConverter extends BaseConverter {
   protected abstract getClassName(): string;
   protected abstract extractMemoryConfig(node: IRNode): Record<string, unknown>;
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'memory');
     const config = this.generateMemoryConfiguration(node, _context);
     const fragments: CodeFragment[] = [];
@@ -100,23 +100,23 @@ abstract class BaseMemoryConverter extends BaseConverter {
 export class BufferMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'bufferMemory';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['BufferMemory'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/core/memory';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'BufferMemory';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
-  protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
     const memoryKey = this.getParameterValue<string>(
       node,
       'memoryKey',
@@ -157,23 +157,23 @@ export class BufferMemoryConverter extends BaseMemoryConverter {
 export class BufferWindowMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'bufferWindowMemory';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['BufferWindowMemory'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/core/memory';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'BufferWindowMemory';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
-  protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
     const k = this.getParameterValue<number>(node, 'k', 5);
     const memoryKey = this.getParameterValue<string>(
       node,
@@ -216,23 +216,23 @@ export class BufferWindowMemoryConverter extends BaseMemoryConverter {
 export class SummaryBufferMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'summaryBufferMemory';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['ConversationSummaryBufferMemory'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/core/memory';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'ConversationSummaryBufferMemory';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
-  protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
     const maxTokenLimit = this.getParameterValue<number>(
       node,
       'maxTokenLimit',
@@ -272,7 +272,7 @@ export class SummaryBufferMemoryConverter extends BaseMemoryConverter {
     };
   }
 
-  protected generateMemoryInstantiation(
+  protected override generateMemoryInstantiation(
     variableName: string,
     className: string,
     config: Record<string, unknown>
@@ -295,23 +295,23 @@ export class SummaryBufferMemoryConverter extends BaseMemoryConverter {
 export class VectorStoreRetrieverMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'vectorStoreRetrieverMemory';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['VectorStoreRetrieverMemory'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/core/memory';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'VectorStoreRetrieverMemory';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
-  protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
     const memoryKey = this.getParameterValue<string>(
       node,
       'memoryKey',
@@ -337,7 +337,7 @@ export class VectorStoreRetrieverMemoryConverter extends BaseMemoryConverter {
     };
   }
 
-  protected generateMemoryInstantiation(
+  protected override generateMemoryInstantiation(
     variableName: string,
     className: string,
     config: Record<string, unknown>
@@ -361,23 +361,23 @@ export class VectorStoreRetrieverMemoryConverter extends BaseMemoryConverter {
 export class ConversationSummaryMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'conversationSummaryMemory';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['ConversationSummaryMemory'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/core/memory';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'ConversationSummaryMemory';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
-  protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
     const memoryKey = this.getParameterValue<string>(
       node,
       'memoryKey',
@@ -411,7 +411,7 @@ export class ConversationSummaryMemoryConverter extends BaseMemoryConverter {
     };
   }
 
-  protected generateMemoryInstantiation(
+  protected override generateMemoryInstantiation(
     variableName: string,
     className: string,
     config: Record<string, unknown>
@@ -434,23 +434,23 @@ export class ConversationSummaryMemoryConverter extends BaseMemoryConverter {
 export class EntityMemoryConverter extends BaseMemoryConverter {
   readonly flowiseType = 'entityMemory';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['EntityMemory'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/core/memory';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'EntityMemory';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
-  protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
     const memoryKey = this.getParameterValue<string>(
       node,
       'memoryKey',
@@ -482,7 +482,7 @@ export class EntityMemoryConverter extends BaseMemoryConverter {
     };
   }
 
-  protected generateMemoryInstantiation(
+  protected override generateMemoryInstantiation(
     variableName: string,
     className: string,
     config: Record<string, unknown>

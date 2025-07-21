@@ -15,7 +15,7 @@ export class RecursiveCharacterTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'recursiveCharacterTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
@@ -58,7 +58,7 @@ export class RecursiveCharacterTextSplitterConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/textsplitters'];
   }
 }
@@ -71,7 +71,7 @@ export class CharacterTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'characterTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
@@ -107,7 +107,7 @@ export class CharacterTextSplitterConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/textsplitters'];
   }
 }
@@ -120,7 +120,7 @@ export class TokenTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'tokenTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
@@ -156,7 +156,7 @@ export class TokenTextSplitterConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/textsplitters'];
   }
 }
@@ -169,7 +169,7 @@ export class MarkdownTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'markdownTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
@@ -203,7 +203,7 @@ export class MarkdownTextSplitterConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/textsplitters'];
   }
 }
@@ -216,7 +216,7 @@ export class LatexTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'latexTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
@@ -250,7 +250,7 @@ export class LatexTextSplitterConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/textsplitters'];
   }
 }
@@ -263,7 +263,7 @@ export class HtmlTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'htmlTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
@@ -297,7 +297,7 @@ export class HtmlTextSplitterConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/textsplitters'];
   }
 }
@@ -310,7 +310,7 @@ export class PythonCodeTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'pythonCodeTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
@@ -344,7 +344,7 @@ export class PythonCodeTextSplitterConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/textsplitters'];
   }
 }
@@ -357,7 +357,7 @@ export class JavaScriptCodeTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'javascriptCodeTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
@@ -391,7 +391,7 @@ export class JavaScriptCodeTextSplitterConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/textsplitters'];
   }
 }
@@ -404,7 +404,7 @@ export class SemanticTextSplitterConverter extends BaseConverter {
   readonly flowiseType = 'semanticTextSplitter';
   readonly category = 'text-splitter';
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'text_splitter');
     const chunkSize = this.getParameterValue(node, 'chunkSize', 1000);
     const chunkOverlap = this.getParameterValue(node, 'chunkOverlap', 200);
@@ -438,7 +438,7 @@ export class SemanticTextSplitterConverter extends BaseConverter {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/textsplitters'];
   }
 }

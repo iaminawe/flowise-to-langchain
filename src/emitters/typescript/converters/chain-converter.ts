@@ -288,7 +288,7 @@ ${config.join(',\n')}
     }
 
     // Prompt (optional for conversation chain)
-    const promptInput = node.inputs.find(
+    const promptInput = node.inputs?.find(
       (input) => input.dataType === 'prompt'
     );
     if (promptInput) {

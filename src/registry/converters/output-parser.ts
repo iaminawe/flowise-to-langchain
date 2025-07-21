@@ -134,7 +134,7 @@ abstract class BaseOutputParserConverter extends BaseConverter {
     }
   }
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'parser');
     const config = this.generateOutputParserConfiguration(node, _context);
     const fragments: CodeFragment[] = [];
@@ -243,7 +243,7 @@ export class StructuredOutputParserConverter extends BaseOutputParserConverter {
     return ['StructuredOutputParser'];
   }
 
-  protected getRequiredZodImports(): string[] {
+  protected override getRequiredZodImports(): string[] {
     return ['z'];
   }
 
@@ -251,7 +251,7 @@ export class StructuredOutputParserConverter extends BaseOutputParserConverter {
     return '@langchain/core/output_parsers';
   }
 
-  protected getZodPackageName(): string {
+  protected override getZodPackageName(): string {
     return 'zod';
   }
 
@@ -259,11 +259,11 @@ export class StructuredOutputParserConverter extends BaseOutputParserConverter {
     return 'StructuredOutputParser';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core', 'zod'];
   }
 
-  protected extractParserConfig(node: IRNode): Record<string, unknown> {
+  protected override extractParserConfig(node: IRNode): Record<string, unknown> {
     const outputKey = this.getParameterValue<string>(node, 'outputKey');
     const formatInstructions = this.getParameterValue<string>(node, 'formatInstructions');
 
@@ -284,7 +284,7 @@ export class JsonOutputParserConverter extends BaseOutputParserConverter {
     return ['JsonOutputParser'];
   }
 
-  protected getRequiredZodImports(): string[] {
+  protected override getRequiredZodImports(): string[] {
     return ['z'];
   }
 
@@ -292,7 +292,7 @@ export class JsonOutputParserConverter extends BaseOutputParserConverter {
     return '@langchain/core/output_parsers';
   }
 
-  protected getZodPackageName(): string {
+  protected override getZodPackageName(): string {
     return 'zod';
   }
 
@@ -300,11 +300,11 @@ export class JsonOutputParserConverter extends BaseOutputParserConverter {
     return 'JsonOutputParser';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core', 'zod'];
   }
 
-  protected extractParserConfig(node: IRNode): Record<string, unknown> {
+  protected override extractParserConfig(node: IRNode): Record<string, unknown> {
     const outputKey = this.getParameterValue<string>(node, 'outputKey');
 
     return {
@@ -312,7 +312,7 @@ export class JsonOutputParserConverter extends BaseOutputParserConverter {
     };
   }
 
-  protected generateParserInstantiation(
+  protected override generateParserInstantiation(
     variableName: string,
     className: string,
     schemaVariableName: string,
@@ -361,11 +361,11 @@ export class ListOutputParserConverter extends BaseConverter {
     return 'CommaSeparatedListOutputParser';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'parser');
     const fragments: CodeFragment[] = [];
 

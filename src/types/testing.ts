@@ -5,12 +5,17 @@
  * functionality, including test configurations, results, runners, and utilities.
  */
 
+// Import ValidationResult from API to avoid circular dependencies
+import type {
+  ValidationResult
+} from './api.js';
+
+// Import remaining types from index
 import {
   FlowiseJSON,
   ConversionConfig,
   GeneratedFile,
   LogEntry,
-  ValidationResult,
   PerformanceMetrics,
 } from './index.js';
 

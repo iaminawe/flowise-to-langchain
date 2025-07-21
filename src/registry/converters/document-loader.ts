@@ -16,7 +16,7 @@ abstract class BaseDocumentLoaderConverter extends BaseConverter {
   /**
    * Override getParameterValue to support data.inputs structure
    */
-  protected getParameterValue<T = unknown>(
+  protected override getParameterValue<T = unknown>(
     node: IRNode,
     paramName: string,
     defaultValue?: T
@@ -193,11 +193,11 @@ export class PDFLoaderConverter extends BaseDocumentLoaderConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/document_loaders/fs/pdf', 'pdf-parse'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -241,11 +241,11 @@ export class CSVLoaderConverter extends BaseDocumentLoaderConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/document_loaders/fs/csv', 'csv-parser'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -284,11 +284,11 @@ export class JSONLoaderConverter extends BaseDocumentLoaderConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/document_loaders/fs/json'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -327,11 +327,11 @@ export class TextLoaderConverter extends BaseDocumentLoaderConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/document_loaders/fs/text'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -365,11 +365,11 @@ export class DocxLoaderConverter extends BaseDocumentLoaderConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/document_loaders/fs/docx', 'mammoth'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -413,11 +413,11 @@ export class DirectoryLoaderConverter extends BaseDocumentLoaderConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/document_loaders/fs/directory'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -462,11 +462,11 @@ export class ExcelLoaderConverter extends BaseDocumentLoaderConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/document_loaders/fs/excel', 'xlsx'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -515,11 +515,11 @@ export class WebBaseLoaderConverter extends BaseDocumentLoaderConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/document_loaders/web/web_base'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -558,19 +558,19 @@ export class WebLoaderConverter extends BaseDocumentLoaderConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/document_loaders/web/cheerio', 'cheerio'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 
-  isDeprecated(): boolean {
+  override isDeprecated(): boolean {
     return true;
   }
 
-  getReplacementType(): string | undefined {
+  override getReplacementType(): string | undefined {
     return 'webBaseLoader';
   }
 }

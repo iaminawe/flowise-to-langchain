@@ -6,6 +6,12 @@
  */
 // React types are optional for this converter
 // import * as React from 'react';
+// Import ValidationResult from API to avoid circular dependencies
+import type {
+  ValidationResult
+} from './api.js';
+
+// Import remaining types from index
 import {
   FlowiseJSON,
   Node,
@@ -14,7 +20,6 @@ import {
   TestConfig,
   TestResult,
   GeneratedFile,
-  ValidationResult,
   LogEntry,
   NodeTemplate,
   ProjectSettings,

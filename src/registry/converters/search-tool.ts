@@ -131,11 +131,11 @@ export class DuckDuckGoSearchConverter extends BaseSearchToolConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2', '0.2.3', '0.2.33'];
   }
 }

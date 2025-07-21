@@ -129,7 +129,7 @@ async function rerankDocuments(docs: any[], query: string, strategy: string) {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 }
@@ -220,7 +220,7 @@ Provide a comprehensive answer based on the context from multiple sources:\`;
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 }
@@ -329,7 +329,7 @@ Follow-up questions:\`;
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain/chains', 'langchain/memory'];
   }
 }
@@ -452,7 +452,7 @@ async function executeGraphQuery(query: string) {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 }
@@ -592,7 +592,7 @@ Use the context as inspiration to provide a creative response:\`
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 }

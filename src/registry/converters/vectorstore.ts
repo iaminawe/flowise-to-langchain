@@ -37,7 +37,7 @@ abstract class BaseVectorStoreConverter extends BaseConverter {
     node: IRNode
   ): Record<string, unknown>;
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'vectorstore');
     const config = this.generateVectorStoreConfiguration(node, _context);
     const fragments: CodeFragment[] = [];
@@ -94,19 +94,19 @@ abstract class BaseVectorStoreConverter extends BaseConverter {
 export class PineconeConverter extends BaseVectorStoreConverter {
   readonly flowiseType = 'pinecone';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['PineconeStore'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/community/vectorstores/pinecone';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'PineconeStore';
   }
 
-  protected extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     const apiKey = this.getParameterValue(_node, 'apiKey');
@@ -131,14 +131,14 @@ export class PineconeConverter extends BaseVectorStoreConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return [
       '@langchain/community/vectorstores/pinecone',
       '@pinecone-database/pinecone',
     ];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -149,19 +149,19 @@ export class PineconeConverter extends BaseVectorStoreConverter {
 export class ChromaConverter extends BaseVectorStoreConverter {
   readonly flowiseType = 'chroma';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['Chroma'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/community/vectorstores/chroma';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'Chroma';
   }
 
-  protected extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     const url = this.getParameterValue(_node, 'url', 'http://localhost:8000');
@@ -183,11 +183,11 @@ export class ChromaConverter extends BaseVectorStoreConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/vectorstores/chroma', 'chromadb'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -198,19 +198,19 @@ export class ChromaConverter extends BaseVectorStoreConverter {
 export class FAISSConverter extends BaseVectorStoreConverter {
   readonly flowiseType = 'faiss';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['FaissStore'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/community/vectorstores/faiss';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'FaissStore';
   }
 
-  protected extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     const directory = this.getParameterValue(_node, 'directory');
@@ -221,11 +221,11 @@ export class FAISSConverter extends BaseVectorStoreConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/vectorstores/faiss', 'faiss-node'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -236,28 +236,28 @@ export class FAISSConverter extends BaseVectorStoreConverter {
 export class MemoryVectorStoreConverter extends BaseVectorStoreConverter {
   readonly flowiseType = 'memoryVectorStore';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['MemoryVectorStore'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return 'langchain/vectorstores/memory';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'MemoryVectorStore';
   }
 
-  protected extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
     // MemoryVectorStore doesn't require configuration
     return {};
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain/vectorstores/memory'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -268,19 +268,19 @@ export class MemoryVectorStoreConverter extends BaseVectorStoreConverter {
 export class SupabaseConverter extends BaseVectorStoreConverter {
   readonly flowiseType = 'supabase';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['SupabaseVectorStore'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/community/vectorstores/supabase';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'SupabaseVectorStore';
   }
 
-  protected extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     const supabaseUrl = this.getParameterValue(_node, 'supabaseUrl');
@@ -303,14 +303,14 @@ export class SupabaseConverter extends BaseVectorStoreConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return [
       '@langchain/community/vectorstores/supabase',
       '@supabase/supabase-js',
     ];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -321,19 +321,19 @@ export class SupabaseConverter extends BaseVectorStoreConverter {
 export class WeaviateConverter extends BaseVectorStoreConverter {
   readonly flowiseType = 'weaviate';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['WeaviateStore'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/community/vectorstores/weaviate';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'WeaviateStore';
   }
 
-  protected extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     // Client configuration
@@ -379,19 +379,19 @@ export class WeaviateConverter extends BaseVectorStoreConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return [
       '@langchain/community/vectorstores/weaviate',
       'weaviate-ts-client',
     ];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 
   // Override to handle custom client initialization
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'vectorstore');
     const config = this.generateVectorStoreConfiguration(node, context);
     const fragments: CodeFragment[] = [];
@@ -465,19 +465,19 @@ export class WeaviateConverter extends BaseVectorStoreConverter {
 export class QdrantConverter extends BaseVectorStoreConverter {
   readonly flowiseType = 'qdrant';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['QdrantVectorStore'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/community/vectorstores/qdrant';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'QdrantVectorStore';
   }
 
-  protected extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     // URL configuration with default
@@ -527,14 +527,14 @@ export class QdrantConverter extends BaseVectorStoreConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return [
       '@langchain/community/vectorstores/qdrant',
       '@qdrant/js-client-rest',
     ];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }

@@ -31,7 +31,7 @@ export class OutputFixingParserConverter extends BaseConverter {
     return 'OutputFixingParser';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 

@@ -43,19 +43,19 @@ abstract class BaseChainConverter extends BaseConverter {
     const inputVariables: string[] = [];
 
     // Check for LLM input
-    const llmInput = node.inputs.find((port) => port.dataType === 'llm');
+    const llmInput = node.inputs?.find((port) => port.dataType === 'llm');
     if (llmInput) {
       inputVariables.push('llm');
     }
 
     // Check for prompt input
-    const promptInput = node.inputs.find((port) => port.dataType === 'prompt');
+    const promptInput = node.inputs?.find((port) => port.dataType === 'prompt');
     if (promptInput) {
       inputVariables.push('prompt');
     }
 
     // Check for memory input
-    const memoryInput = node.inputs.find((port) => port.dataType === 'memory');
+    const memoryInput = node.inputs?.find((port) => port.dataType === 'memory');
     if (memoryInput) {
       inputVariables.push('memory');
     }
@@ -139,7 +139,7 @@ abstract class BaseChainConverter extends BaseConverter {
 export class LLMChainConverter extends BaseChainConverter {
   readonly flowiseType = 'llmChain';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['LLMChain'];
   }
 
@@ -151,7 +151,7 @@ export class LLMChainConverter extends BaseChainConverter {
     return 'LLMChain';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -174,7 +174,7 @@ export class LLMChainConverter extends BaseChainConverter {
 export class ConversationChainConverter extends BaseChainConverter {
   readonly flowiseType = 'conversationChain';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['ConversationChain'];
   }
 
@@ -186,7 +186,7 @@ export class ConversationChainConverter extends BaseChainConverter {
     return 'ConversationChain';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -213,7 +213,7 @@ export class ConversationChainConverter extends BaseChainConverter {
 export class RetrievalQAChainConverter extends BaseChainConverter {
   readonly flowiseType = 'retrievalQAChain';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['RetrievalQAChain'];
   }
 
@@ -225,7 +225,7 @@ export class RetrievalQAChainConverter extends BaseChainConverter {
     return 'RetrievalQAChain';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -249,11 +249,11 @@ export class RetrievalQAChainConverter extends BaseChainConverter {
     };
   }
 
-  protected getInputVariables(node: IRNode): string[] {
+  protected override getInputVariables(node: IRNode): string[] {
     const baseVars = super.getInputVariables(node);
 
     // RetrievalQA also needs a retriever
-    const retrieverInput = node.inputs.find(
+    const retrieverInput = node.inputs?.find(
       (port) => port.dataType === 'retriever'
     );
     if (retrieverInput) {
@@ -270,7 +270,7 @@ export class RetrievalQAChainConverter extends BaseChainConverter {
 export class MultiPromptChainConverter extends BaseChainConverter {
   readonly flowiseType = 'multiPromptChain';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['MultiPromptChain'];
   }
 
@@ -282,7 +282,7 @@ export class MultiPromptChainConverter extends BaseChainConverter {
     return 'MultiPromptChain';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -311,7 +311,7 @@ export class MultiPromptChainConverter extends BaseChainConverter {
 export class SequentialChainConverter extends BaseChainConverter {
   readonly flowiseType = 'sequentialChain';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['SequentialChain'];
   }
 
@@ -323,7 +323,7 @@ export class SequentialChainConverter extends BaseChainConverter {
     return 'SequentialChain';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -355,7 +355,7 @@ export class SequentialChainConverter extends BaseChainConverter {
 export class TransformChainConverter extends BaseChainConverter {
   readonly flowiseType = 'transformChain';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['TransformChain'];
   }
 
@@ -367,7 +367,7 @@ export class TransformChainConverter extends BaseChainConverter {
     return 'TransformChain';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -393,7 +393,7 @@ export class TransformChainConverter extends BaseChainConverter {
     };
   }
 
-  protected generateChainInstantiation(
+  protected override generateChainInstantiation(
     variableName: string,
     className: string,
     config: Record<string, unknown>,
@@ -424,7 +424,7 @@ export class TransformChainConverter extends BaseChainConverter {
 export class MapReduceChainConverter extends BaseChainConverter {
   readonly flowiseType = 'mapReduceChain';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['MapReduceChain'];
   }
 
@@ -436,7 +436,7 @@ export class MapReduceChainConverter extends BaseChainConverter {
     return 'MapReduceChain';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 
@@ -460,7 +460,7 @@ export class MapReduceChainConverter extends BaseChainConverter {
     };
   }
 
-  protected getInputVariables(node: IRNode): string[] {
+  protected override getInputVariables(node: IRNode): string[] {
     const baseVars = super.getInputVariables(node);
 
     // Map-reduce chains might have specific chain inputs
@@ -488,7 +488,7 @@ export class APIChainConverter extends BaseChainConverter {
     return 'APIChain';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain'];
   }
 
@@ -541,7 +541,7 @@ export class APIChainConverter extends BaseChainConverter {
     return config;
   }
 
-  protected generateChainInstantiation(
+  protected override generateChainInstantiation(
     variableName: string,
     className: string,
     config: Record<string, unknown>,
@@ -579,7 +579,7 @@ export class APIChainConverter extends BaseChainConverter {
 export class SQLDatabaseChainConverter extends BaseChainConverter {
   readonly flowiseType = 'sqlDatabaseChain';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['SqlDatabaseChain'];
   }
 
@@ -591,7 +591,7 @@ export class SQLDatabaseChainConverter extends BaseChainConverter {
     return 'SqlDatabaseChain';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain', 'typeorm'];
   }
 
@@ -617,11 +617,11 @@ export class SQLDatabaseChainConverter extends BaseChainConverter {
     };
   }
 
-  protected getInputVariables(node: IRNode): string[] {
+  protected override getInputVariables(node: IRNode): string[] {
     const baseVars = super.getInputVariables(node);
 
     // SQL Database chains need database and llm
-    const databaseInput = node.inputs.find(
+    const databaseInput = node.inputs?.find(
       (port) => port.dataType === 'database' || port.dataType === 'sqlDatabase'
     );
     if (databaseInput) {
@@ -631,7 +631,7 @@ export class SQLDatabaseChainConverter extends BaseChainConverter {
     return baseVars;
   }
 
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'sql_chain');
     const config = this.generateChainConfiguration(node, context);
     const fragments: CodeFragment[] = [];
@@ -690,10 +690,10 @@ export class SQLDatabaseChainConverter extends BaseChainConverter {
 
     // Database setup and configuration
     const databaseSetup = this.generateDatabaseSetup(
-      databaseType,
-      connectionString,
-      includeTables,
-      sampleRows
+      databaseType || '',
+      connectionString || '',
+      includeTables || [],
+      sampleRows || 5
     );
 
     fragments.push(

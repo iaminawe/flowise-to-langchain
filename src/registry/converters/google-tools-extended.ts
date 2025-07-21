@@ -423,7 +423,7 @@ export class GoogleWorkspaceToolConverter extends BaseGoogleToolExtendedConverte
     ];
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
       'googleapis', 
       '@langchain/community', 
@@ -501,7 +501,7 @@ export class GoogleMeetToolConverter extends BaseGoogleToolExtendedConverter {
     ];
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
       'googleapis', 
       '@langchain/community', 
@@ -593,7 +593,7 @@ export class GoogleFormsToolConverter extends BaseGoogleToolExtendedConverter {
     ];
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
       'googleapis', 
       '@langchain/community', 

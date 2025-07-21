@@ -36,7 +36,7 @@ abstract class BaseToolConverter extends BaseConverter {
   protected abstract getClassName(): string;
   protected abstract extractToolConfig(node: IRNode): Record<string, unknown>;
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'tool');
     const config = this.generateToolConfiguration(node, _context);
     const fragments: CodeFragment[] = [];
@@ -93,28 +93,28 @@ abstract class BaseToolConverter extends BaseConverter {
 export class CalculatorConverter extends BaseToolConverter {
   readonly flowiseType = 'calculator';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['Calculator'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/community/tools/calculator';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'Calculator';
   }
 
-  protected extractToolConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractToolConfig(_node: IRNode): Record<string, unknown> {
     // Calculator tool has no configuration parameters
     return {};
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/tools/calculator'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -125,19 +125,19 @@ export class CalculatorConverter extends BaseToolConverter {
 export class SearchAPIConverter extends BaseToolConverter {
   readonly flowiseType = 'serpAPI';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['SerpAPI'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return '@langchain/community/tools/serpapi';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'SerpAPI';
   }
 
-  protected extractToolConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractToolConfig(_node: IRNode): Record<string, unknown> {
     // SerpAPI constructor takes a string parameter (API key), not an object
     const apiKey = this.getParameterValue(_node, 'apiKey');
     if (apiKey) {
@@ -147,16 +147,16 @@ export class SearchAPIConverter extends BaseToolConverter {
     }
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community/tools/serpapi'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 
   // Override to generate string parameter constructor
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const variableName = this.generateVariableName(node, 'tool');
     const fragments: CodeFragment[] = [];
 
@@ -202,19 +202,19 @@ export class SearchAPIConverter extends BaseToolConverter {
 export class WebBrowserConverter extends BaseToolConverter {
   readonly flowiseType = 'webBrowser';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['WebBrowser'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return 'langchain/tools/webbrowser';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'WebBrowser';
   }
 
-  protected extractToolConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractToolConfig(_node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     // Web browser requires model and embeddings from connections
@@ -235,11 +235,11 @@ export class WebBrowserConverter extends BaseToolConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain/tools/webbrowser'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -250,19 +250,19 @@ export class WebBrowserConverter extends BaseToolConverter {
 export class CustomToolConverter extends BaseToolConverter {
   readonly flowiseType = 'customTool';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['Tool'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return 'langchain/tools';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'Tool';
   }
 
-  protected extractToolConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractToolConfig(_node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     const name = this.getParameterValue(_node, 'name');
@@ -288,11 +288,11 @@ export class CustomToolConverter extends BaseToolConverter {
     return config;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain/tools'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -303,28 +303,28 @@ export class CustomToolConverter extends BaseToolConverter {
 export class ShellToolConverter extends BaseToolConverter {
   readonly flowiseType = 'shellTool';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['ShellTool'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return 'langchain/tools/shell';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     return 'ShellTool';
   }
 
-  protected extractToolConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractToolConfig(_node: IRNode): Record<string, unknown> {
     // Shell tool has no configuration parameters
     return {};
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain/tools/shell'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -335,20 +335,20 @@ export class ShellToolConverter extends BaseToolConverter {
 export class RequestToolConverter extends BaseToolConverter {
   readonly flowiseType = 'requestTool';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['RequestsGetTool', 'RequestsPostTool'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return 'langchain/tools';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     // This will be called with actual node in convert method
     return 'RequestsGetTool'; // Default, will be overridden in convert
   }
 
-  protected extractToolConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractToolConfig(_node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     const headers = this.getParameterValue(_node, 'headers');
@@ -359,7 +359,7 @@ export class RequestToolConverter extends BaseToolConverter {
     return config;
   }
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const method = this.getParameterValue(node, 'method', 'GET');
     const className =
       method?.toString().toUpperCase() === 'POST'
@@ -413,11 +413,11 @@ export class RequestToolConverter extends BaseToolConverter {
     return `{\n  ${configPairs.join(',\n  ')}\n}`;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain/tools'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }
@@ -428,20 +428,20 @@ export class RequestToolConverter extends BaseToolConverter {
 export class FileSystemConverter extends BaseToolConverter {
   readonly flowiseType = 'fileSystem';
 
-  protected getRequiredImports(): string[] {
+  protected override getRequiredImports(): string[] {
     return ['ReadFileTool', 'WriteFileTool', 'ListDirectoryTool'];
   }
 
-  protected getPackageName(): string {
+  protected override getPackageName(): string {
     return 'langchain/tools/fs';
   }
 
-  protected getClassName(): string {
+  protected override getClassName(): string {
     // This will be called with actual node in convert method
     return 'ReadFileTool'; // Default, will be overridden in convert
   }
 
-  protected extractToolConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractToolConfig(_node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     const rootDir = this.getParameterValue(_node, 'rootDir');
@@ -452,7 +452,7 @@ export class FileSystemConverter extends BaseToolConverter {
     return config;
   }
 
-  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
+  override convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const operation = this.getParameterValue(node, 'operation', 'read');
     let className = 'ReadFileTool';
     switch (operation?.toString().toLowerCase()) {
@@ -515,11 +515,11 @@ export class FileSystemConverter extends BaseToolConverter {
     return `{\n  ${configPairs.join(',\n  ')}\n}`;
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain/tools/fs'];
   }
 
-  getSupportedVersions(): string[] {
+  override getSupportedVersions(): string[] {
     return ['0.2.0', '0.2.1', '0.2.2'];
   }
 }

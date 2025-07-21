@@ -139,7 +139,7 @@ export class RedisCacheConverter extends BaseCacheConverter {
     return config;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return ['redis', '@langchain/community'];
   }
 }
@@ -185,7 +185,7 @@ export class InMemoryCacheConverter extends BaseCacheConverter {
     return config;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return ['@langchain/core'];
   }
 }
@@ -231,7 +231,7 @@ export class MomentoCacheConverter extends BaseCacheConverter {
     return config;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return ['@gomomento/sdk', '@langchain/community'];
   }
 }
@@ -282,7 +282,7 @@ export class UpstashRedisCacheConverter extends BaseCacheConverter {
     return config;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return ['@upstash/redis', '@langchain/community'];
   }
 }

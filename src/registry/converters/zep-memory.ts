@@ -27,7 +27,7 @@ export class ZepMemoryConverter extends BaseConverter {
     return 'ZepMemory';
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/community'];
   }
 
@@ -197,7 +197,7 @@ export class ZepMemoryConverter extends BaseConverter {
     return fragments;
   }
 
-  protected formatParameterValue(value: unknown): string {
+  protected override formatParameterValue(value: unknown): string {
     if (typeof value === 'string') {
       return `"${value}"`;
     }

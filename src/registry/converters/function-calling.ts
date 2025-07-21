@@ -154,7 +154,7 @@ const ${variableName} = await ${variableName}Setup();`;
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['langchain/agents', 'langchain/hub', '@langchain/core/prompts'];
   }
 }
@@ -265,7 +265,7 @@ const ${variableName} = async (input: string) => {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['zod', '@langchain/openai'];
   }
 }
@@ -403,7 +403,7 @@ Final answer:\`;
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 }
@@ -570,7 +570,7 @@ const ${variableName} = {
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['validator'];
   }
 }
@@ -691,7 +691,7 @@ Response:\`;
     ];
   }
 
-  getDependencies(): string[] {
+  override getDependencies(): string[] {
     return ['@langchain/core'];
   }
 }
