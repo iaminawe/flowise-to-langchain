@@ -39,6 +39,9 @@ import {
   NavigationItem,
 } from '@/types'
 
+// Flowise Integration
+import { FloWiseIntegration } from '@/components/flowise/FloWiseIntegration'
+
 // Create Query Client
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -196,7 +199,24 @@ export function App() {
       case 'results':
         return <TestResults testResults={[]} />
       case 'settings':
-        return <div className="p-6">Settings page (TODO)</div>
+        return (
+          <div className="p-6">
+            <FloWiseIntegration
+              onFlowImport={(flow) => {
+                console.log('Flow imported:', flow)
+                // Handle flow import - could update app state, show notification, etc.
+              }}
+              onFlowUpload={(flow) => {
+                console.log('Flow uploaded:', flow)
+                // Handle flow upload - similar to import
+              }}
+              onError={(error) => {
+                console.error('Flowise integration error:', error)
+                // Handle errors - could show toast notification
+              }}
+            />
+          </div>
+        )
       default:
         return <Dashboard />
     }

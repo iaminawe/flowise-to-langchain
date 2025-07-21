@@ -5,6 +5,7 @@ const { exec } = require('child_process');
 const fs = require('fs').promises;
 const WebSocket = require('ws');
 const http = require('http');
+const multer = require('multer');
 
 const app = express();
 const server = http.createServer(app);
@@ -36,7 +37,311 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Flow conversion endpoint
+// Configure multer for file uploads
+const upload = multer({ 
+  dest: path.join(__dirname, 'temp/uploads'),
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/json' || file.originalname.endsWith('.json')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JSON files are allowed'), false);
+    }
+  },
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  }
+});
+
+// File upload endpoint
+app.post('/api/flows/upload', upload.single('flow'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'No flow file provided'
+      });
+    }
+
+    try {
+      const content = await fs.readFile(req.file.path, 'utf-8');
+      const flow = JSON.parse(content);
+      
+      // Clean up uploaded file
+      await fs.unlink(req.file.path).catch(() => {});
+      
+      const flowId = `flow-${Date.now()}`;
+      
+      res.json({
+        success: true,
+        flowId,
+        flow: {
+          id: flowId,
+          name: flow.name || 'Uploaded Flow',
+          description: flow.description || '',
+          nodes: flow.nodes || [],
+          edges: flow.edges || [],
+          version: flow.version || '1.0.0',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isValid: true
+        }
+      });
+    } catch (parseError) {
+      // Clean up uploaded file on error
+      await fs.unlink(req.file.path).catch(() => {});
+      res.status(400).json({
+        success: false,
+        error: 'Invalid JSON file format'
+      });
+    }
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Flow validation endpoint
+app.post('/api/flows/validate', async (req, res) => {
+  try {
+    const { flow } = req.body;
+    
+    if (!flow) {
+      return res.status(400).json({
+        success: false,
+        error: 'No flow provided for validation'
+      });
+    }
+
+    const errors = [];
+    const warnings = [];
+    const suggestions = [];
+    
+    // Basic validation logic
+    if (!flow.nodes || flow.nodes.length === 0) {
+      errors.push({
+        message: 'Flow must contain at least one node',
+        code: 'EMPTY_FLOW',
+        suggestion: 'Add nodes to your flow before converting'
+      });
+    }
+    
+    // Check for disconnected nodes
+    const connectedNodes = new Set([
+      ...(flow.edges || []).map(edge => edge.source),
+      ...(flow.edges || []).map(edge => edge.target)
+    ]);
+    
+    const disconnectedNodes = (flow.nodes || []).filter(node => !connectedNodes.has(node.id));
+    if (disconnectedNodes.length > 0) {
+      warnings.push({
+        message: `${disconnectedNodes.length} disconnected nodes found`,
+        code: 'DISCONNECTED_NODES'
+      });
+    }
+    
+    // Check for unsupported node types
+    const supportedTypes = ['llm', 'prompt', 'memory', 'tool', 'chain', 'agent'];
+    const unsupportedNodes = (flow.nodes || []).filter(node => !supportedTypes.includes(node.type));
+    
+    if (unsupportedNodes.length > 0) {
+      errors.push({
+        message: `Unsupported node types: ${unsupportedNodes.map(n => n.type).join(', ')}`,
+        code: 'UNSUPPORTED_NODE_TYPES',
+        suggestion: 'Remove or replace unsupported nodes'
+      });
+    }
+    
+    // Add optimization suggestions
+    if ((flow.nodes || []).length > 10) {
+      suggestions.push({
+        type: 'optimization',
+        message: 'Consider breaking down large flows into smaller components',
+        impact: 'medium'
+      });
+    }
+    
+    res.json({
+      success: true,
+      isValid: errors.length === 0,
+      errors,
+      warnings,
+      suggestions,
+      detectedVersion: flow.version || '1.0.0',
+      nodeCount: (flow.nodes || []).length,
+      edgeCount: (flow.edges || []).length,
+      nodeTypes: Array.from(new Set((flow.nodes || []).map(n => n.type))),
+      complexity: (flow.nodes || []).length > 15 ? 'high' : (flow.nodes || []).length > 5 ? 'medium' : 'low',
+      supportedFeatures: supportedTypes.filter(type => (flow.nodes || []).some(n => n.type === type)),
+      unsupportedFeatures: unsupportedNodes.map(node => ({
+        name: node.type,
+        reason: 'Node type not supported in current version',
+        workaround: 'Use alternative node types or custom implementation'
+      }))
+    });
+  } catch (error) {
+    console.error('Validation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Flow conversion endpoint (new API style)
+app.post('/api/flows/convert', async (req, res) => {
+  try {
+    const { flow, options } = req.body;
+    
+    if (!flow) {
+      return res.status(400).json({
+        success: false,
+        error: 'No flow provided for conversion'
+      });
+    }
+
+    // Save flow to temporary file
+    const tempFlowPath = path.join(__dirname, 'temp', `flow-${Date.now()}.json`);
+    await fs.mkdir(path.dirname(tempFlowPath), { recursive: true });
+    await fs.writeFile(tempFlowPath, JSON.stringify(flow, null, 2));
+    
+    // Prepare conversion command
+    const outputLang = options?.format || 'python';
+    const cliPath = path.join(__dirname, '../../index.js');
+    const outputPath = path.join(__dirname, 'temp', `output-${Date.now()}`);
+    
+    const command = `node ${cliPath} --input ${tempFlowPath} --output ${outputPath} --format ${outputLang}`;
+    
+    // Execute conversion
+    exec(command, async (error, stdout, stderr) => {
+      // Clean up temp file
+      await fs.unlink(tempFlowPath).catch(() => {});
+      
+      if (error) {
+        console.error('Conversion error:', error);
+        return res.status(500).json({
+          success: false,
+          error: stderr || error.message,
+        });
+      }
+      
+      try {
+        // Read converted files
+        const files = await fs.readdir(outputPath);
+        const result = {
+          success: true,
+          nodesConverted: (flow.nodes || []).length,
+          filesGenerated: files.map(f => `${outputPath}/${f}`),
+          warnings: [],
+          errors: [],
+          metadata: {
+            inputFile: flow.name || 'flow',
+            outputDirectory: outputPath,
+            format: outputLang,
+            target: options?.target || 'langchain',
+            timestamp: new Date().toISOString()
+          }
+        };
+        
+        // Read file contents
+        if (files.length > 0) {
+          const mainFile = files[0];
+          const content = await fs.readFile(path.join(outputPath, mainFile), 'utf-8');
+          result.generatedCode = content;
+        }
+        
+        // Clean up output directory
+        await fs.rm(outputPath, { recursive: true, force: true }).catch(() => {});
+        
+        res.json(result);
+      } catch (readError) {
+        console.error('Error reading output:', readError);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to read conversion output',
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Conversion error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+// Flow testing endpoint
+app.post('/api/flows/test', async (req, res) => {
+  try {
+    const { flow, conversionResult, testType } = req.body;
+    
+    // Simulate test execution delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const testCounts = {
+      unit: 5,
+      integration: 3,
+      e2e: 2,
+      all: 10
+    };
+    
+    const totalTests = testCounts[testType] || 5;
+    const passedTests = Math.floor(totalTests * (Math.random() * 0.4 + 0.6)); // 60-100% pass rate
+    const failedTests = [];
+    
+    // Generate some mock failed tests
+    for (let i = passedTests; i < totalTests; i++) {
+      failedTests.push({
+        name: `Test ${i + 1}`,
+        error: `Assertion failed: Expected output to match pattern`,
+        suggestion: 'Check the input parameters and expected output format'
+      });
+    }
+    
+    res.json({
+      success: passedTests === totalTests,
+      totalTests,
+      passedTests,
+      failedTests,
+      duration: 1500 + Math.random() * 3000,
+      coverage: testType === 'all' ? '87.5%' : undefined
+    });
+  } catch (error) {
+    console.error('Test error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+// Conversion status endpoint
+app.get('/api/flows/conversion/:conversionId/status', (req, res) => {
+  const { conversionId } = req.params;
+  
+  // Mock status response
+  res.json({
+    success: true,
+    status: 'completed',
+    progress: 100,
+    conversionId
+  });
+});
+
+// Download generated files endpoint
+app.get('/api/flows/conversion/:conversionId/download', (req, res) => {
+  const { conversionId } = req.params;
+  
+  // Mock file download - return empty zip
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', `attachment; filename="${conversionId}.zip"`);
+  res.send(Buffer.from('Mock generated files'));
+});
+
+// Legacy flow conversion endpoint
 app.post('/api/convert', async (req, res) => {
   try {
     const { flow, settings } = req.body;
