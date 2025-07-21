@@ -36,7 +36,7 @@ jobs:
             src:
               - 'src/**'
               - 'frontend/src/**'
-              - 'tester-bot-frontend/src/**'
+              - 'testing-ui/src/**'
             config:
               - '*.json'
               - '*.js'
@@ -74,7 +74,7 @@ jobs:
     
     strategy:
       matrix:
-        workspace: ['.', 'frontend', 'tester-bot-frontend']
+        workspace: ['.', 'frontend', 'testing-ui']
     
     steps:
       - name: Checkout code
@@ -115,7 +115,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        workspace: ['.', 'frontend', 'tester-bot-frontend']
+        workspace: ['.', 'frontend', 'testing-ui']
         node-version: [18, 20]
         
     steps:
@@ -224,7 +224,7 @@ jobs:
           path: |
             dist
             frontend/.next
-            tester-bot-frontend/.next
+            testing-ui/.next
           key: ${{ runner.os }}-build-.-${{ github.sha }}
           
       - name: Install dependencies
@@ -236,7 +236,7 @@ jobs:
       - name: Start application servers
         run: |
           npm run dev &
-          cd tester-bot-frontend && npm run dev &
+          cd testing-ui && npm run dev &
           npx wait-on http://localhost:3000 http://localhost:8080 --timeout 120000
         env:
           CI: true
@@ -283,7 +283,7 @@ jobs:
       - name: Start application servers
         run: |
           npm run dev &
-          cd tester-bot-frontend && npm run dev &
+          cd testing-ui && npm run dev &
           npx wait-on http://localhost:3000 http://localhost:8080 --timeout 120000
           
       - name: Run performance tests
@@ -331,7 +331,7 @@ jobs:
           path: |
             dist
             frontend/.next
-            tester-bot-frontend/.next
+            testing-ui/.next
           key: ${{ runner.os }}-build-.-${{ github.sha }}
           
       - name: Deploy to staging
@@ -367,7 +367,7 @@ jobs:
           path: |
             dist
             frontend/.next
-            tester-bot-frontend/.next
+            testing-ui/.next
           key: ${{ runner.os }}-build-.-${{ github.sha }}
           
       - name: Deploy to production

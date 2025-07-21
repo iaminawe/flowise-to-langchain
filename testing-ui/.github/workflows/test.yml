@@ -4,15 +4,15 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'tester-bot-frontend/**'
+      - 'testing-ui/**'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'tester-bot-frontend/**'
+      - 'testing-ui/**'
 
 defaults:
   run:
-    working-directory: tester-bot-frontend
+    working-directory: testing-ui
 
 jobs:
   test:
@@ -32,7 +32,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: tester-bot-frontend/package-lock.json
+        cache-dependency-path: testing-ui/package-lock.json
 
     - name: Install dependencies
       run: npm ci
@@ -61,8 +61,8 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
-        file: ./tester-bot-frontend/coverage/lcov.info
-        directory: ./tester-bot-frontend/coverage/
+        file: ./testing-ui/coverage/lcov.info
+        directory: ./testing-ui/coverage/
         flags: frontend
         name: frontend-coverage
         fail_ci_if_error: false
@@ -81,7 +81,7 @@ jobs:
       with:
         node-version: '18.x'
         cache: 'npm'
-        cache-dependency-path: tester-bot-frontend/package-lock.json
+        cache-dependency-path: testing-ui/package-lock.json
 
     - name: Install dependencies
       run: npm ci
@@ -96,7 +96,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: build-files
-        path: tester-bot-frontend/.next/
+        path: testing-ui/.next/
         retention-days: 7
 
   docker:
@@ -137,7 +137,7 @@ jobs:
       with:
         node-version: '18.x'
         cache: 'npm'
-        cache-dependency-path: tester-bot-frontend/package-lock.json
+        cache-dependency-path: testing-ui/package-lock.json
 
     - name: Install dependencies
       run: npm ci
@@ -165,7 +165,7 @@ jobs:
       with:
         node-version: '18.x'
         cache: 'npm'
-        cache-dependency-path: tester-bot-frontend/package-lock.json
+        cache-dependency-path: testing-ui/package-lock.json
 
     - name: Install dependencies
       run: npm ci

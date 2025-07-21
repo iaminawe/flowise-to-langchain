@@ -14,7 +14,7 @@ The security audit identified **critical and high-risk vulnerabilities** in the 
 
 ### 1. Command Injection Vulnerabilities (CRITICAL)
 
-**Location:** `tester-bot-frontend/server/index.js`  
+**Location:** `testing-ui/server/index.js`  
 **Lines:** 215, 218, 359, 362  
 **Severity:** Critical  
 **CVSS Score:** 9.8  
@@ -76,7 +76,7 @@ export const apiKeyAuth = (req: Request, res: Response, next: NextFunction) => {
 
 ### 3. Missing Input Validation (HIGH)
 
-**Location:** `tester-bot-frontend/server/index.js`  
+**Location:** `testing-ui/server/index.js`  
 **Lines:** 107-191, 194-274  
 **Severity:** High  
 
@@ -132,7 +132,7 @@ const data = JSON.parse(message);
 ## File Security Issues
 
 ### Upload Security (MEDIUM)
-**Location:** `tester-bot-frontend/server/index.js:41-53`
+**Location:** `testing-ui/server/index.js:41-53`
 
 ```javascript
 const upload = multer({ 

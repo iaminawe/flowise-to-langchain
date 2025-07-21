@@ -38,7 +38,7 @@ jobs:
     
     strategy:
       matrix:
-        workspace: ['.', 'frontend', 'tester-bot-frontend']
+        workspace: ['.', 'frontend', 'testing-ui']
     
     steps:
       - name: Checkout code
@@ -121,7 +121,7 @@ jobs:
       - name: ESLint security analysis
         run: |
           npm install --no-save eslint-plugin-security
-          npx eslint --ext .ts,.js src/ frontend/src/ tester-bot-frontend/src/ \
+          npx eslint --ext .ts,.js src/ frontend/src/ testing-ui/src/ \
             --config '{"extends": ["plugin:security/recommended"], "rules": {"security/detect-object-injection": "error"}}' \
             --format json -o eslint-security-results.json || true
         continue-on-error: true
@@ -209,7 +209,7 @@ jobs:
         run: |
           npm run build
           npm run dev &
-          cd tester-bot-frontend && npm run dev &
+          cd testing-ui && npm run dev &
           
           # Wait for applications to start
           npx wait-on http://localhost:3000 http://localhost:8080 --timeout 120000
@@ -264,7 +264,7 @@ jobs:
     
     strategy:
       matrix:
-        workspace: ['.', 'frontend', 'tester-bot-frontend']
+        workspace: ['.', 'frontend', 'testing-ui']
     
     steps:
       - name: Checkout code

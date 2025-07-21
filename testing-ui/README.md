@@ -1,4 +1,4 @@
-# Flowise Converter Frontend
+# Testing UI
 
 A Next.js 14 frontend application for converting Flowise flows to LangChain applications.
 
@@ -39,7 +39,7 @@ A Next.js 14 frontend application for converting Flowise flows to LangChain appl
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd tester-bot-frontend
+cd testing-ui
 
 # Install dependencies
 npm install
@@ -207,10 +207,10 @@ docker-compose -f docker-compose.dev.yml up
 #### Production
 ```bash
 # Build production image
-docker build -t tester-bot-frontend .
+docker build -t testing-ui .
 
 # Run production container
-docker run -p 3000:3000 tester-bot-frontend
+docker run -p 3000:3000 testing-ui
 ```
 
 ### Health Checks

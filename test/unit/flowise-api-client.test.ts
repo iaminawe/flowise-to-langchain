@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { FlowiseApiClient } from '../../tester-bot-frontend/src/lib/flowise-api-client'
+import { FlowiseApiClient } from '../../testing-ui/src/lib/flowise-api-client'
 
 // Mock fetch globally
 global.fetch = vi.fn()

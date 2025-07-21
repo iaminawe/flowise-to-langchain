@@ -7,7 +7,7 @@
 
 import { describe, beforeAll, afterAll, beforeEach, afterEach, it, expect, jest } from '@jest/globals';
 import { renderHook, waitFor } from '@testing-library/react';
-import { FlowiseApiClient, FlowiseConfig } from '../../tester-bot-frontend/src/lib/flowise-api-client';
+import { FlowiseApiClient, FlowiseConfig } from '../../testing-ui/src/lib/flowise-api-client';
 import { useFlowiseConverter } from '../../frontend/src/hooks/useFlowiseConverter';
 import { createMockServer } from '../utils/mock-server';
 import { createMockFlow, TestData } from '../utils/test-helpers';

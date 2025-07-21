@@ -23,7 +23,7 @@ npm run start -- convert flow.json output --with-langfuse
 ./scripts/deploy-production.sh production docker
 
 # Use web interface with Flowise integration
-cd tester-bot-frontend && npm run dev  # Access at http://localhost:3000
+cd testing-ui && npm run dev  # Access at http://localhost:3000
 
 # Use standalone converters for quick conversions
 node convert-all-chatflows.cjs    # Convert traditional chatflows
@@ -93,7 +93,7 @@ flowise-langchain/
 │   ├── examples/             # 7 real-world multiagent examples
 │   ├── docs/                 # Comprehensive documentation
 │   └── tests/                # Integration & unit tests (800+)
-├── tester-bot-frontend/      # Next.js 14 interface with monitoring
+├── testing-ui/      # Next.js 14 interface with monitoring
 │   ├── src/                  # React components & hooks
 │   │   ├── components/       # UI components with shadcn/ui
 │   │   │   └── flowise/      # Flowise API integration
@@ -117,7 +117,7 @@ Import flows directly from your Flowise instance without manual export/upload:
 
 ```bash
 # Start the web interface
-cd tester-bot-frontend && npm run dev
+cd testing-ui && npm run dev
 
 # Configure your Flowise instance
 # 1. Navigate to Settings → Flowise Configuration

@@ -159,7 +159,7 @@ A team member will review this shortly.`
             
             // File-based labels
             const files = changedFiles.data.map(f => f.filename);
-            if (files.some(f => f.startsWith('frontend/') || f.startsWith('tester-bot-frontend/'))) {
+            if (files.some(f => f.startsWith('frontend/') || f.startsWith('testing-ui/'))) {
               labels.push('frontend');
             }
             if (files.some(f => f.startsWith('src/') && !f.startsWith('frontend/'))) {
