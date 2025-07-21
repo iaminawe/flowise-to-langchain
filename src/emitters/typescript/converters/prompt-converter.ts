@@ -11,14 +11,14 @@ export class PromptConverter implements NodeConverter {
   /**
    * Convert prompt node to code fragments
    */
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Generate import fragment
     fragments.push(this.generateImportFragment(node));
 
     // Generate declaration fragment
-    fragments.push(this.generateDeclarationFragment(node, context));
+    fragments.push(this.generateDeclarationFragment(node, _context));
 
     return fragments;
   }
@@ -26,7 +26,7 @@ export class PromptConverter implements NodeConverter {
   /**
    * Get dependencies for the prompt node
    */
-  getDependencies(node: IRNode, context?: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
     return ['@langchain/core'];
   }
 
@@ -102,7 +102,7 @@ export class PromptConverter implements NodeConverter {
    */
   private generateDeclarationFragment(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ): CodeFragment {
     const variableName = this.sanitizeVariableName(node.label);
 
@@ -175,7 +175,7 @@ ${messages.join(',\n')}
   private generatePromptTemplate(node: IRNode, variableName: string): string {
     const template =
       (this.getParameterValue(node, 'template') as string) || '{input}';
-    const inputVariables = this.extractInputVariables(template);
+    // const _inputVariables = this.extractInputVariables(template);
 
     return `// ${node.label} - ${node.type}
 const ${variableName} = PromptTemplate.fromTemplate(\`${this.escapeTemplate(template)}\`);`;

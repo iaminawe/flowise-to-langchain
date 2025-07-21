@@ -1,11 +1,11 @@
 /**
  * Component Interface Definitions
  * 
- * This file contains TypeScript interfaces for all React components
+ * This file contains TypeScript interfaces for all component types
  * used in the Flowise-to-LangChain converter application.
  */
-
-import React from 'react';
+// React types are optional for this converter
+// import * as React from 'react';
 import {
   FlowiseJSON,
   Node,
@@ -36,17 +36,17 @@ import {
 // Base Component Props
 export interface BaseComponentProps {
   className?: string;
-  style?: React.CSSProperties;
+  style?: Record<string, any>;
   id?: string;
   'data-testid'?: string;
 }
 
 export interface WithChildren<T = {}> extends BaseComponentProps {
-  children?: React.ReactNode;
+  children?: unknown;
 }
 
 export interface WithRequiredChildren<T = {}> extends BaseComponentProps {
-  children: React.ReactNode;
+  children: unknown;
 }
 
 // Main Application Components
@@ -60,11 +60,11 @@ export interface AppProps extends BaseComponentProps {
 }
 
 export interface MainLayoutProps extends BaseComponentProps {
-  sidebar: React.ReactNode;
-  editor: React.ReactNode;
-  panels: React.ReactNode;
-  statusBar: React.ReactNode;
-  toolbar: React.ReactNode;
+  sidebar: unknown;
+  editor: unknown;
+  panels: unknown;
+  statusBar: unknown;
+  toolbar: unknown;
   onLayoutChange?: (layout: LayoutConfig) => void;
 }
 
@@ -164,7 +164,7 @@ export interface FlowControlsProps extends BaseComponentProps {
 export interface NodePaletteProps extends BaseComponentProps {
   categories: NodeCategory[];
   onNodeSelect: (nodeType: string) => void;
-  onNodeDrag?: (nodeType: string, event: React.DragEvent) => void;
+  onNodeDrag?: (nodeType: string, event: DragEvent) => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
   selectedCategory?: string;
@@ -241,7 +241,7 @@ export interface NodeExample {
 export interface NodeItemProps extends BaseComponentProps {
   nodeType: NodeType;
   onSelect: (nodeType: string) => void;
-  onDrag?: (nodeType: string, event: React.DragEvent) => void;
+  onDrag?: (nodeType: string, event: DragEvent) => void;
   selected?: boolean;
   draggable?: boolean;
   showDescription?: boolean;
@@ -263,7 +263,7 @@ export interface NodeSearchProps extends BaseComponentProps {
 export interface NodeCategoryProps extends BaseComponentProps {
   category: NodeCategory;
   onNodeSelect: (nodeType: string) => void;
-  onNodeDrag?: (nodeType: string, event: React.DragEvent) => void;
+  onNodeDrag?: (nodeType: string, event: DragEvent) => void;
   onToggleExpand?: (categoryId: string) => void;
   searchQuery?: string;
   showIcons?: boolean;
@@ -370,7 +370,7 @@ export interface ConfigSectionProps extends BaseComponentProps {
   icon?: string;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
-  children: React.ReactNode;
+  children: unknown;
 }
 
 export interface ConfigFieldProps extends BaseComponentProps {
@@ -667,7 +667,7 @@ export interface ToolbarButtonProps extends BaseComponentProps {
 
 export interface ToolbarGroupProps extends BaseComponentProps {
   title?: string;
-  children: React.ReactNode;
+  children: unknown;
   separator?: boolean;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
@@ -688,11 +688,11 @@ export interface LoadingSpinnerProps extends BaseComponentProps {
 }
 
 export interface ErrorBoundaryProps extends BaseComponentProps {
-  fallback?: React.ComponentType<{ error: Error; reset: () => void }>;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  fallback?: (props: { error: Error; reset: () => void }) => unknown;
+  onError?: (error: Error, errorInfo: unknown) => void;
   showDetails?: boolean;
   showStack?: boolean;
-  children: React.ReactNode;
+  children: unknown;
 }
 
 export interface ErrorMessageProps extends BaseComponentProps {
@@ -720,7 +720,7 @@ export interface NotificationProps extends BaseComponentProps {
 }
 
 export interface TooltipProps extends BaseComponentProps {
-  content: React.ReactNode;
+  content: unknown;
   title?: string;
   placement?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end';
   trigger?: 'hover' | 'click' | 'focus' | 'manual';
@@ -731,11 +731,11 @@ export interface TooltipProps extends BaseComponentProps {
   interactive?: boolean;
   maxWidth?: number;
   zIndex?: number;
-  children: React.ReactNode;
+  children: unknown;
 }
 
 export interface PopoverProps extends BaseComponentProps {
-  content: React.ReactNode;
+  content: unknown;
   title?: string;
   placement?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end';
   trigger?: 'hover' | 'click' | 'focus' | 'manual';
@@ -746,7 +746,7 @@ export interface PopoverProps extends BaseComponentProps {
   interactive?: boolean;
   maxWidth?: number;
   zIndex?: number;
-  children: React.ReactNode;
+  children: unknown;
 }
 
 export interface ModalProps extends BaseComponentProps {
@@ -759,11 +759,11 @@ export interface ModalProps extends BaseComponentProps {
   maskClosable?: boolean;
   keyboard?: boolean;
   destroyOnClose?: boolean;
-  footer?: React.ReactNode;
-  bodyStyle?: React.CSSProperties;
-  maskStyle?: React.CSSProperties;
+  footer?: unknown;
+  bodyStyle?: Record<string, unknown>;
+  maskStyle?: Record<string, unknown>;
   zIndex?: number;
-  children: React.ReactNode;
+  children: unknown;
 }
 
 export interface DrawerProps extends BaseComponentProps {
@@ -777,11 +777,11 @@ export interface DrawerProps extends BaseComponentProps {
   maskClosable?: boolean;
   keyboard?: boolean;
   destroyOnClose?: boolean;
-  footer?: React.ReactNode;
-  bodyStyle?: React.CSSProperties;
-  maskStyle?: React.CSSProperties;
+  footer?: unknown;
+  bodyStyle?: Record<string, unknown>;
+  maskStyle?: Record<string, unknown>;
   zIndex?: number;
-  children: React.ReactNode;
+  children: unknown;
 }
 
 export interface ContextMenuProps extends BaseComponentProps {
@@ -798,7 +798,7 @@ export interface DropdownProps extends BaseComponentProps {
   placement?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end';
   trigger?: 'hover' | 'click' | 'focus';
   disabled?: boolean;
-  children: React.ReactNode;
+  children: unknown;
 }
 
 export interface DropdownItem {
@@ -817,9 +817,9 @@ export interface SplitPaneProps extends BaseComponentProps {
   onSizeChange: (sizes: number[]) => void;
   minSizes?: number[];
   maxSizes?: number[];
-  resizerStyle?: React.CSSProperties;
+  resizerStyle?: Record<string, unknown>;
   disabled?: boolean;
-  children: React.ReactNode[];
+  children: unknown[];
 }
 
 export interface ResizablePanelProps extends BaseComponentProps {
@@ -832,8 +832,8 @@ export interface ResizablePanelProps extends BaseComponentProps {
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   title?: string;
-  actions?: React.ReactNode;
-  children: React.ReactNode;
+  actions?: unknown;
+  children: unknown;
 }
 
 export interface TabsProps extends BaseComponentProps {
@@ -856,7 +856,7 @@ export interface TabPanelProps extends BaseComponentProps {
   active: boolean;
   onClose?: (tabId: string) => void;
   closable?: boolean;
-  children: React.ReactNode;
+  children: unknown;
 }
 
 export interface AccordionProps extends BaseComponentProps {
@@ -872,10 +872,10 @@ export interface AccordionProps extends BaseComponentProps {
 export interface AccordionItem {
   id: string;
   title: string;
-  content: React.ReactNode;
+  content: unknown;
   disabled?: boolean;
   icon?: string;
-  extra?: React.ReactNode;
+  extra?: unknown;
 }
 
 export interface AccordionPanelProps extends BaseComponentProps {
@@ -898,7 +898,7 @@ export interface FormProps extends BaseComponentProps {
   size?: 'small' | 'medium' | 'large';
   layout?: 'horizontal' | 'vertical' | 'inline';
   labelAlign?: 'left' | 'right' | 'top';
-  children: React.ReactNode;
+  children: unknown;
 }
 
 export interface FormItemProps extends BaseComponentProps {
@@ -907,13 +907,13 @@ export interface FormItemProps extends BaseComponentProps {
   required?: boolean;
   rules?: ValidationRule[];
   help?: string;
-  extra?: React.ReactNode;
+  extra?: unknown;
   validateStatus?: 'success' | 'warning' | 'error' | 'validating';
   hasFeedback?: boolean;
   labelAlign?: 'left' | 'right' | 'top';
   labelCol?: { span: number };
   wrapperCol?: { span: number };
-  children: React.ReactNode;
+  children: unknown;
 }
 
 export interface ValidationRule {
@@ -930,18 +930,18 @@ export interface InputProps extends BaseComponentProps {
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
-  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
-  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
-  onPressEnter?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onBlur?: (event: Event) => void;
+  onFocus?: (event: Event) => void;
+  onPressEnter?: (event: Event) => void;
   placeholder?: string;
   disabled?: boolean;
   readOnly?: boolean;
   size?: 'small' | 'medium' | 'large';
   type?: 'text' | 'password' | 'email' | 'number' | 'url' | 'tel' | 'search';
-  prefix?: React.ReactNode;
-  suffix?: React.ReactNode;
-  addonBefore?: React.ReactNode;
-  addonAfter?: React.ReactNode;
+  prefix?: unknown;
+  suffix?: unknown;
+  addonBefore?: unknown;
+  addonAfter?: unknown;
   allowClear?: boolean;
   bordered?: boolean;
   maxLength?: number;
@@ -953,8 +953,8 @@ export interface TextAreaProps extends BaseComponentProps {
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
-  onBlur?: (event: React.FocusEvent<HTMLTextAreaElement>) => void;
-  onFocus?: (event: React.FocusEvent<HTMLTextAreaElement>) => void;
+  onBlur?: (event: Event) => void;
+  onFocus?: (event: Event) => void;
   placeholder?: string;
   disabled?: boolean;
   readOnly?: boolean;
@@ -972,21 +972,21 @@ export interface SelectProps extends BaseComponentProps {
   value?: unknown;
   defaultValue?: unknown;
   onChange?: (value: unknown) => void;
-  onBlur?: (event: React.FocusEvent<HTMLSelectElement>) => void;
-  onFocus?: (event: React.FocusEvent<HTMLSelectElement>) => void;
+  onBlur?: (event: Event) => void;
+  onFocus?: (event: Event) => void;
   onSearch?: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
   size?: 'small' | 'medium' | 'large';
   mode?: 'single' | 'multiple' | 'tags';
   options?: SelectOption[];
-  children?: React.ReactNode;
+  children?: unknown;
   allowClear?: boolean;
   bordered?: boolean;
   showSearch?: boolean;
   filterOption?: (input: string, option: SelectOption) => boolean;
   loading?: boolean;
-  notFoundContent?: React.ReactNode;
+  notFoundContent?: unknown;
   status?: 'error' | 'warning';
 }
 
@@ -995,7 +995,7 @@ export interface SelectOption {
   label: string;
   disabled?: boolean;
   title?: string;
-  children?: React.ReactNode;
+  children?: unknown;
 }
 
 export interface CheckboxProps extends BaseComponentProps {
@@ -1005,7 +1005,7 @@ export interface CheckboxProps extends BaseComponentProps {
   disabled?: boolean;
   size?: 'small' | 'medium' | 'large';
   indeterminate?: boolean;
-  children?: React.ReactNode;
+  children?: unknown;
 }
 
 export interface RadioProps extends BaseComponentProps {
@@ -1015,7 +1015,7 @@ export interface RadioProps extends BaseComponentProps {
   disabled?: boolean;
   size?: 'small' | 'medium' | 'large';
   value?: unknown;
-  children?: React.ReactNode;
+  children?: unknown;
 }
 
 export interface RadioGroupProps extends BaseComponentProps {
@@ -1026,14 +1026,14 @@ export interface RadioGroupProps extends BaseComponentProps {
   size?: 'small' | 'medium' | 'large';
   direction?: 'horizontal' | 'vertical';
   options?: RadioOption[];
-  children?: React.ReactNode;
+  children?: unknown;
 }
 
 export interface RadioOption {
   value: unknown;
   label: string;
   disabled?: boolean;
-  children?: React.ReactNode;
+  children?: unknown;
 }
 
 export interface SwitchProps extends BaseComponentProps {
@@ -1043,8 +1043,8 @@ export interface SwitchProps extends BaseComponentProps {
   disabled?: boolean;
   size?: 'small' | 'medium' | 'large';
   loading?: boolean;
-  checkedChildren?: React.ReactNode;
-  unCheckedChildren?: React.ReactNode;
+  checkedChildren?: unknown;
+  unCheckedChildren?: unknown;
 }
 
 export interface SliderProps extends BaseComponentProps {
@@ -1057,12 +1057,12 @@ export interface SliderProps extends BaseComponentProps {
   min?: number;
   max?: number;
   step?: number;
-  marks?: Record<number, string | React.ReactNode>;
+  marks?: Record<number, string | any>;
   included?: boolean;
   vertical?: boolean;
   reverse?: boolean;
   tooltip?: {
-    formatter?: (value: number) => React.ReactNode;
+    formatter?: (value: number) => any;
     placement?: 'top' | 'bottom' | 'left' | 'right';
     open?: boolean;
   };
@@ -1073,20 +1073,20 @@ export interface ButtonProps extends BaseComponentProps {
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
-  icon?: React.ReactNode;
+  icon?: unknown;
   shape?: 'default' | 'circle' | 'round';
   block?: boolean;
   htmlType?: 'button' | 'submit' | 'reset';
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  onMouseEnter?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  onMouseLeave?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  children?: React.ReactNode;
+  onClick?: (event: Event) => void;
+  onMouseEnter?: (event: Event) => void;
+  onMouseLeave?: (event: Event) => void;
+  children?: unknown;
 }
 
 export interface ButtonGroupProps extends BaseComponentProps {
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
-  children: React.ReactNode;
+  children: unknown;
 }
 
 // Table Components
@@ -1124,7 +1124,7 @@ export interface TableColumn {
   sortable?: boolean;
   filterable?: boolean;
   filters?: TableFilter[];
-  render?: (value: unknown, record: Record<string, unknown>, index: number) => React.ReactNode;
+  render?: (value: unknown, record: Record<string, unknown>, index: number) => any;
   sorter?: (a: Record<string, unknown>, b: Record<string, unknown>) => number;
   filterMultiple?: boolean;
   filterSearch?: boolean;
@@ -1153,7 +1153,7 @@ export interface PaginationProps extends BaseComponentProps {
   pageSizeOptions?: string[];
   showSizeChanger?: boolean;
   showQuickJumper?: boolean;
-  showTotal?: (total: number, range: [number, number]) => React.ReactNode;
+  showTotal?: (total: number, range: [number, number]) => any;
   simple?: boolean;
   size?: 'small' | 'medium' | 'large';
   onChange?: (page: number, pageSize: number) => void;
@@ -1196,14 +1196,14 @@ export interface TreeProps extends BaseComponentProps {
 export interface TreeNode {
   key: string;
   title: string;
-  icon?: React.ReactNode;
+  icon?: unknown;
   disabled?: boolean;
   disableCheckbox?: boolean;
   selectable?: boolean;
   checkable?: boolean;
   isLeaf?: boolean;
   children?: TreeNode[];
-  switcherIcon?: React.ReactNode;
+  switcherIcon?: unknown;
   data?: Record<string, unknown>;
 }
 
@@ -1211,13 +1211,13 @@ export interface TreeSelectInfo {
   node: TreeNode;
   selected: boolean;
   selectedNodes: TreeNode[];
-  nativeEvent: MouseEvent;
+  nativeEvent: Event;
 }
 
 export interface TreeExpandInfo {
   node: TreeNode;
   expanded: boolean;
-  nativeEvent: MouseEvent;
+  nativeEvent: Event;
 }
 
 export interface TreeCheckInfo {
@@ -1226,7 +1226,7 @@ export interface TreeCheckInfo {
   checkedNodes: TreeNode[];
   checkedNodesPositions: { node: TreeNode; pos: string }[];
   halfCheckedKeys: string[];
-  nativeEvent: MouseEvent;
+  nativeEvent: Event;
 }
 
 export interface TreeLoadInfo {
@@ -1269,7 +1269,7 @@ export interface MenuProps extends BaseComponentProps {
 export interface MenuItem {
   key: string;
   label: string;
-  icon?: React.ReactNode;
+  icon?: unknown;
   disabled?: boolean;
   danger?: boolean;
   title?: string;
@@ -1282,127 +1282,15 @@ export interface MenuSelectInfo {
   key: string;
   keyPath: string[];
   selectedKeys: string[];
-  domEvent: MouseEvent;
+  domEvent: Event;
   item: MenuItem;
 }
 
 export interface MenuClickInfo {
   key: string;
   keyPath: string[];
-  domEvent: MouseEvent;
+  domEvent: Event;
   item: MenuItem;
 }
 
-// Export all component interfaces
-export default {
-  // Base
-  BaseComponentProps,
-  WithChildren,
-  WithRequiredChildren,
-  
-  // Main
-  AppProps,
-  MainLayoutProps,
-  
-  // Flow Editor
-  FlowEditorProps,
-  FlowCanvasProps,
-  FlowNodeProps,
-  FlowEdgeProps,
-  MiniMapProps,
-  FlowControlsProps,
-  
-  // Node Palette
-  NodePaletteProps,
-  NodeItemProps,
-  NodeSearchProps,
-  NodeCategoryProps,
-  
-  // Inspector
-  NodeInspectorProps,
-  EdgeInspectorProps,
-  PropertyEditorProps,
-  PropertyGroupProps,
-  PropertyFieldProps,
-  
-  // Configuration
-  ConfigurationPanelProps,
-  ConfigSectionProps,
-  ConfigFieldProps,
-  ConfigPresetManagerProps,
-  
-  // Test
-  TestPanelProps,
-  TestRunnerProps,
-  TestResultsProps,
-  TestResultItemProps,
-  TestCoverageProps,
-  TestConfigEditorProps,
-  
-  // Output
-  OutputPanelProps,
-  FileListProps,
-  FileViewerProps,
-  CodeViewerProps,
-  MetadataViewerProps,
-  
-  // Log
-  LogPanelProps,
-  LogEntryProps,
-  LogViewerProps,
-  
-  // Status
-  StatusBarProps,
-  StatusIndicatorProps,
-  ProgressIndicatorProps,
-  
-  // Toolbar
-  ToolbarProps,
-  ToolbarButtonProps,
-  ToolbarGroupProps,
-  ToolbarSeparatorProps,
-  
-  // Utility
-  LoadingSpinnerProps,
-  ErrorBoundaryProps,
-  ErrorMessageProps,
-  NotificationProps,
-  TooltipProps,
-  PopoverProps,
-  ModalProps,
-  DrawerProps,
-  ContextMenuProps,
-  DropdownProps,
-  
-  // Layout
-  SplitPaneProps,
-  ResizablePanelProps,
-  TabsProps,
-  TabPanelProps,
-  AccordionProps,
-  AccordionPanelProps,
-  
-  // Form
-  FormProps,
-  FormItemProps,
-  InputProps,
-  TextAreaProps,
-  SelectProps,
-  CheckboxProps,
-  RadioProps,
-  RadioGroupProps,
-  SwitchProps,
-  SliderProps,
-  ButtonProps,
-  ButtonGroupProps,
-  
-  // Table
-  TableProps,
-  PaginationProps,
-  
-  // Tree
-  TreeProps,
-  
-  // Menu
-  MenuProps,
-};
+// All component interfaces are already exported individually above

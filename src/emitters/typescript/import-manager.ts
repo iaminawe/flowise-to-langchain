@@ -183,7 +183,7 @@ export class ImportManager {
       /^import\s+(\w+)\s+from\s+['"]([^'"]+)['"];?$/
     );
     if (defaultMatch) {
-      this.addImport(defaultMatch[2], [], { default: defaultMatch[1] });
+      this.addImport(defaultMatch[2]!, [], { default: defaultMatch[1]! });
       return;
     }
 
@@ -192,11 +192,11 @@ export class ImportManager {
       /^import\s+\{\s*([^}]+)\s*\}\s+from\s+['"]([^'"]+)['"];?$/
     );
     if (namedMatch) {
-      const named = namedMatch[1]
+      const named = namedMatch[1]!
         .split(',')
         .map((n) => n.trim())
         .filter((n) => n.length > 0);
-      this.addImport(namedMatch[2], named);
+      this.addImport(namedMatch[2]!, named);
       return;
     }
 
@@ -205,7 +205,7 @@ export class ImportManager {
       /^import\s+\*\s+as\s+(\w+)\s+from\s+['"]([^'"]+)['"];?$/
     );
     if (namespaceMatch) {
-      this.addImport(namespaceMatch[2], [], { namespace: namespaceMatch[1] });
+      this.addImport(namespaceMatch[2]!, [], { namespace: namespaceMatch[1]! });
       return;
     }
 
@@ -214,18 +214,18 @@ export class ImportManager {
       /^import\s+type\s+\{\s*([^}]+)\s*\}\s+from\s+['"]([^'"]+)['"];?$/
     );
     if (typeMatch) {
-      const types = typeMatch[1]
+      const types = typeMatch[1]!
         .split(',')
         .map((t) => t.trim())
         .filter((t) => t.length > 0);
-      this.addImport(typeMatch[2], types, { isType: true });
+      this.addImport(typeMatch[2]!, types, { isType: true });
       return;
     }
 
     // Parse side-effect imports: import 'module';
     const sideEffectMatch = trimmed.match(/^import\s+['"]([^'"]+)['"];?$/);
     if (sideEffectMatch) {
-      this.addImport(sideEffectMatch[1], []);
+      this.addImport(sideEffectMatch[1]!, []);
       return;
     }
   }

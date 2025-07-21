@@ -203,7 +203,7 @@ export const api = {
   // System health
   health: {
     check: async (): Promise<SystemHealth> => {
-      const response = await apiClient.get('/health')
+      const response = await apiClient.get('/health', { timeout: 3000 }) // 3 second timeout
       return response.data
     },
 

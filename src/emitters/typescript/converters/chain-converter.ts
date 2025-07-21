@@ -8,7 +8,6 @@ import {
   IRNode,
   CodeFragment,
   GenerationContext,
-  IRConnection,
 } from '../../../ir/types.js';
 import { NodeConverter } from '../emitter.js';
 
@@ -34,7 +33,7 @@ export class ChainConverter implements NodeConverter {
   /**
    * Get dependencies for the chain node
    */
-  getDependencies(node: IRNode, context?: GenerationContext): string[] {
+  getDependencies(node: IRNode, _context?: GenerationContext): string[] {
     const dependencies = ['@langchain/core'];
 
     switch (node.type) {
@@ -177,7 +176,7 @@ export class ChainConverter implements NodeConverter {
    */
   private generateExecutionFragment(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ): CodeFragment {
     const variableName = this.sanitizeVariableName(node.label);
     const inputKey = this.getParameterValue(
@@ -232,7 +231,7 @@ const result = ${variableName}Result.${outputKey} || ${variableName}Result.text 
     config.push('  prompt: prompt'); // This will need to be resolved from connections
 
     // Memory (optional)
-    const memoryInput = node.inputs.find(
+    const memoryInput = node.inputs?.find(
       (input) => input.dataType === 'memory'
     );
     if (memoryInput) {
@@ -281,7 +280,7 @@ ${config.join(',\n')}
     config.push('  llm: llm');
 
     // Memory
-    const memoryInput = node.inputs.find(
+    const memoryInput = node.inputs?.find(
       (input) => input.dataType === 'memory'
     );
     if (memoryInput) {

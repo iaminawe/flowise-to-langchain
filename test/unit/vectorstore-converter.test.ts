@@ -14,7 +14,7 @@ import {
 } from '../utils/test-helpers';
 
 // Mock the converters since they may not be fully implemented
-jest.mock('../../src/registry/converters/vectorstore.js', () => ({
+jest.mock('../../src/registry/converters/vectorstore', () => ({
   PineconeConverter: jest.fn().mockImplementation(() => ({
     flowiseType: 'pinecone',
     category: 'vectorstore',
@@ -143,17 +143,17 @@ describe('Vector Store Converters - Basic Functionality', () => {
       },
     });
 
-    const { PineconeConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { PineconeConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new PineconeConverter();
     const result = converter.convert(mockNode, {});
 
     expect(result).toHaveLength(2);
     expect(result[0].type).toBe('import');
-    expect(result[0].code).toContain('PineconeStore');
+    expect(result[0].content).toContain('PineconeStore');
     expect(result[1].type).toBe('initialization');
-    expect(result[1].code).toContain('new PineconeStore');
-    expect(result[1].code).toContain('apiKey');
-    expect(result[1].code).toContain('indexName');
+    expect(result[1].content).toContain('new PineconeStore');
+    expect(result[1].content).toContain('apiKey');
+    expect(result[1].content).toContain('indexName');
   });
 
   test('should convert Chroma vector store node', () => {
@@ -168,15 +168,15 @@ describe('Vector Store Converters - Basic Functionality', () => {
       },
     });
 
-    const { ChromaConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { ChromaConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new ChromaConverter();
     const result = converter.convert(mockNode, {});
 
     expect(result).toHaveLength(2);
-    expect(result[0].code).toContain('Chroma');
-    expect(result[1].code).toContain('new Chroma');
-    expect(result[1].code).toContain('url');
-    expect(result[1].code).toContain('collectionName');
+    expect(result[0].content).toContain('Chroma');
+    expect(result[1].content).toContain('new Chroma');
+    expect(result[1].content).toContain('url');
+    expect(result[1].content).toContain('collectionName');
   });
 
   test('should convert FAISS vector store node', () => {
@@ -190,14 +190,14 @@ describe('Vector Store Converters - Basic Functionality', () => {
       },
     });
 
-    const { FAISSConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { FAISSConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new FAISSConverter();
     const result = converter.convert(mockNode, {});
 
     expect(result).toHaveLength(2);
-    expect(result[0].code).toContain('FaissStore');
-    expect(result[1].code).toContain('new FaissStore');
-    expect(result[1].code).toContain('directory');
+    expect(result[0].content).toContain('FaissStore');
+    expect(result[1].content).toContain('new FaissStore');
+    expect(result[1].content).toContain('directory');
   });
 
   test('should convert Memory vector store node', () => {
@@ -209,13 +209,13 @@ describe('Vector Store Converters - Basic Functionality', () => {
       },
     });
 
-    const { MemoryVectorStoreConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { MemoryVectorStoreConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new MemoryVectorStoreConverter();
     const result = converter.convert(mockNode, {});
 
     expect(result).toHaveLength(2);
-    expect(result[0].code).toContain('MemoryVectorStore');
-    expect(result[1].code).toContain('new MemoryVectorStore');
+    expect(result[0].content).toContain('MemoryVectorStore');
+    expect(result[1].content).toContain('new MemoryVectorStore');
   });
 
   test('should convert Supabase vector store node', () => {
@@ -231,21 +231,21 @@ describe('Vector Store Converters - Basic Functionality', () => {
       },
     });
 
-    const { SupabaseConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { SupabaseConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new SupabaseConverter();
     const result = converter.convert(mockNode, {});
 
     expect(result).toHaveLength(2);
-    expect(result[0].code).toContain('SupabaseVectorStore');
-    expect(result[1].code).toContain('new SupabaseVectorStore');
-    expect(result[1].code).toContain('supabaseUrl');
-    expect(result[1].code).toContain('tableName');
+    expect(result[0].content).toContain('SupabaseVectorStore');
+    expect(result[1].content).toContain('new SupabaseVectorStore');
+    expect(result[1].content).toContain('supabaseUrl');
+    expect(result[1].content).toContain('tableName');
   });
 });
 
 describe('Vector Store Converters - Configuration Validation', () => {
   test('should validate Pinecone configuration', () => {
-    const { PineconeConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { PineconeConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new PineconeConverter();
 
     // Test with API key
@@ -260,7 +260,7 @@ describe('Vector Store Converters - Configuration Validation', () => {
     });
 
     const resultWithKey = converter.convert(nodeWithKey, {});
-    expect(resultWithKey[1].code).toContain('pk-test-key');
+    expect(resultWithKey[1].content).toContain('pk-test-key');
 
     // Test without API key (should use env var)
     const nodeWithoutKey = createMockNode({
@@ -272,11 +272,11 @@ describe('Vector Store Converters - Configuration Validation', () => {
     });
 
     const resultWithoutKey = converter.convert(nodeWithoutKey, {});
-    expect(resultWithoutKey[1].code).toContain('process.env.PINECONE_API_KEY');
+    expect(resultWithoutKey[1].content).toContain('process.env.PINECONE_API_KEY');
   });
 
   test('should validate Chroma configuration', () => {
-    const { ChromaConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { ChromaConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new ChromaConverter();
 
     // Test with custom URL
@@ -290,12 +290,12 @@ describe('Vector Store Converters - Configuration Validation', () => {
     });
 
     const result = converter.convert(nodeWithUrl, {});
-    expect(result[1].code).toContain('custom-chroma');
-    expect(result[1].code).toContain('custom-collection');
+    expect(result[1].content).toContain('custom-chroma');
+    expect(result[1].content).toContain('custom-collection');
   });
 
   test('should validate FAISS configuration', () => {
-    const { FAISSConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { FAISSConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new FAISSConverter();
 
     // Test with custom directory
@@ -308,11 +308,11 @@ describe('Vector Store Converters - Configuration Validation', () => {
     });
 
     const result = converter.convert(nodeWithDir, {});
-    expect(result[1].code).toContain('/custom/faiss/path');
+    expect(result[1].content).toContain('/custom/faiss/path');
   });
 
   test('should validate Supabase configuration', () => {
-    const { SupabaseConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { SupabaseConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new SupabaseConverter();
 
     // Test with custom configuration
@@ -327,8 +327,8 @@ describe('Vector Store Converters - Configuration Validation', () => {
     });
 
     const result = converter.convert(nodeWithConfig, {});
-    expect(result[1].code).toContain('custom.supabase.co');
-    expect(result[1].code).toContain('custom_table');
+    expect(result[1].content).toContain('custom.supabase.co');
+    expect(result[1].content).toContain('custom_table');
   });
 });
 
@@ -343,7 +343,7 @@ describe('Vector Store Converters - Dependencies and Versions', () => {
     ];
 
     converters.forEach(({ name, expectedDeps }) => {
-      const { [name]: ConverterClass } = require('../../src/registry/converters/vectorstore.js');
+      const { [name]: ConverterClass } = require('../../src/registry/converters/vectorstore');
       const converter = new ConverterClass();
       const dependencies = converter.getDependencies();
 
@@ -355,7 +355,7 @@ describe('Vector Store Converters - Dependencies and Versions', () => {
     const converterNames = ['PineconeConverter', 'ChromaConverter', 'FAISSConverter', 'MemoryVectorStoreConverter', 'SupabaseConverter'];
 
     converterNames.forEach(name => {
-      const { [name]: ConverterClass } = require('../../src/registry/converters/vectorstore.js');
+      const { [name]: ConverterClass } = require('../../src/registry/converters/vectorstore');
       const converter = new ConverterClass();
       const versions = converter.getSupportedVersions();
 
@@ -377,7 +377,7 @@ describe('Vector Store Converters - Code Generation Quality', () => {
       const result = converter.convert(mockNode, {});
 
       // Combine all code fragments
-      const combinedCode = result.map(fragment => fragment.code).join('\n');
+      const combinedCode = result.map(fragment => fragment.content).join('\n');
 
       // Validate TypeScript patterns
       expect(combinedCode).toMatch(/import\s+\{[^}]+\}\s+from\s+['"][^'"]+['"];?/);
@@ -390,7 +390,7 @@ describe('Vector Store Converters - Code Generation Quality', () => {
   });
 
   test('should generate proper variable names', () => {
-    const { PineconeConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { PineconeConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new PineconeConverter();
     const mockNode = createMockNode({ id: 'test-node-123' });
     const result = converter.convert(mockNode, {});
@@ -400,7 +400,7 @@ describe('Vector Store Converters - Code Generation Quality', () => {
   });
 
   test('should handle environment variables correctly', () => {
-    const { PineconeConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { PineconeConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new PineconeConverter();
     
     // Node without explicit API key
@@ -418,7 +418,7 @@ describe('Vector Store Converters - Code Generation Quality', () => {
 
 describe('Vector Store Converters - Error Handling', () => {
   test('should handle missing configuration gracefully', () => {
-    const { MemoryVectorStoreConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { MemoryVectorStoreConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new MemoryVectorStoreConverter();
     
     // Memory vector store should work without configuration
@@ -430,7 +430,7 @@ describe('Vector Store Converters - Error Handling', () => {
   });
 
   test('should handle invalid node structure', () => {
-    const { PineconeConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { PineconeConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new PineconeConverter();
     
     const invalidNode = {
@@ -442,7 +442,7 @@ describe('Vector Store Converters - Error Handling', () => {
   });
 
   test('should provide fallback values for missing required parameters', () => {
-    const { ChromaConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { ChromaConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new ChromaConverter();
     
     const nodeWithoutUrl = createMockNode({
@@ -459,7 +459,7 @@ describe('Vector Store Converters - Error Handling', () => {
 
 describe('Vector Store Converters - Performance and Memory', () => {
   test('should convert large number of nodes efficiently', async () => {
-    const { PineconeConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { PineconeConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new PineconeConverter();
     
     const timer = new PerformanceTimer();
@@ -494,7 +494,7 @@ describe('Vector Store Converters - Performance and Memory', () => {
   });
 
   test('should handle memory pressure gracefully', () => {
-    const { ChromaConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { ChromaConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new ChromaConverter();
     
     // Simulate memory pressure by creating many large objects
@@ -527,7 +527,7 @@ describe('Vector Store Converters - Performance and Memory', () => {
 
 describe('Vector Store Converters - Integration Patterns', () => {
   test('should work with embeddings integration', () => {
-    const { PineconeConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { PineconeConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new PineconeConverter();
     
     const vectorStoreNode = createMockNode({
@@ -541,7 +541,7 @@ describe('Vector Store Converters - Integration Patterns', () => {
     });
 
     const result = converter.convert(vectorStoreNode, {});
-    const combinedCode = result.map(fragment => fragment.code).join('\n');
+    const combinedCode = result.map(fragment => fragment.content).join('\n');
 
     // Should be compatible with embeddings
     expect(combinedCode).toContain('PineconeStore');
@@ -564,7 +564,7 @@ describe('Vector Store Converters - Integration Patterns', () => {
   });
 
   test('should handle batch operations patterns', () => {
-    const { FAISSConverter } = require('../../src/registry/converters/vectorstore.js');
+    const { FAISSConverter } = require('../../src/registry/converters/vectorstore');
     const converter = new FAISSConverter();
     
     const mockNode = createMockNode({
@@ -576,7 +576,7 @@ describe('Vector Store Converters - Integration Patterns', () => {
     });
 
     const result = converter.convert(mockNode, {});
-    const combinedCode = result.map(fragment => fragment.code).join('\n');
+    const combinedCode = result.map(fragment => fragment.content).join('\n');
 
     // Should generate code suitable for batch operations
     expect(combinedCode).toContain('FaissStore');

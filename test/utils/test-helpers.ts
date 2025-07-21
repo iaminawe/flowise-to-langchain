@@ -46,34 +46,131 @@ export async function createTestFlowFile(testDir: string, flow: TestFlow, filena
 }
 
 /**
- * Mock Flowise node factory
+ * Mock Flowise node factory - Creates proper IRNode structure
  */
-export function createMockNode(overrides: Partial<any> = {}): any {
+/**
+ * Create a proper IRNode for testing with correct parameter structure
+ */
+export function createIRNode(
+  type: string,
+  category: string,
+  parameters: { name: string; value: any; type?: string; required?: boolean; description?: string }[] = [],
+  overrides: Partial<any> = {}
+): any {
+  // Auto-detect parameter type if not specified
+  const detectParameterType = (value: any): string => {
+    if (value === null || value === undefined) return 'string';
+    if (typeof value === 'number') return 'number';
+    if (typeof value === 'boolean') return 'boolean';
+    if (Array.isArray(value)) return 'array';
+    if (value instanceof Date) return 'date';
+    if (typeof value === 'object') {
+      // Check if it's JSON-like
+      try {
+        JSON.stringify(value);
+        return 'json';
+      } catch {
+        return 'object';
+      }
+    }
+    // Check for code-like strings
+    if (typeof value === 'string' && (value.includes('{') || value.includes('function'))) {
+      return 'code';
+    }
+    return 'string';
+  };
+
+  const nodeId = overrides.id || `node-${Math.random().toString(36).substr(2, 9)}`;
+  
   return {
-    id: `node-${Math.random().toString(36).substr(2, 9)}`,
-    position: { x: 100, y: 100 },
-    type: 'customNode',
-    data: {
-      id: `node-${Math.random().toString(36).substr(2, 9)}`,
-      label: 'Test Node',
-      version: 2,
-      name: 'testNode',
-      type: 'openAI',
-      baseClasses: ['BaseLanguageModel'],
-      category: 'LLMs',
-      description: 'A test node',
-      inputParams: [],
-      inputAnchors: [],
-      inputs: {},
-      outputAnchors: [{
-        id: 'output1',
-        name: 'output',
-        label: 'Output',
-        type: 'BaseLanguageModel',
-      }],
-      ...overrides.data,
+    id: nodeId,
+    type,
+    label: overrides.label || `Test_${type}`,
+    category,
+    inputs: overrides.inputs || [],
+    outputs: overrides.outputs || [],
+    parameters: parameters.map(p => ({
+      name: p.name,
+      value: p.value,
+      type: p.type || detectParameterType(p.value),
+      required: p.required !== undefined ? p.required : false,
+      description: p.description || `Parameter ${p.name}`,
+    })),
+    position: overrides.position || { x: 100, y: 100 },
+    metadata: {
+      version: '2.0',
+      description: overrides.metadata?.description || `Test ${type} node`,
+      nodeId,
+      ...overrides.metadata,
     },
     ...overrides,
+  };
+}
+
+export function createMockNode(overrides: Partial<any> = {}): any {
+  // Convert inputs object to parameters array if provided
+  const convertInputsToParameters = (inputs: Record<string, any> = {}): any[] => {
+    return Object.entries(inputs).map(([name, value]) => ({
+      name,
+      value,
+      type: typeof value === 'number' ? 'number' : 
+            typeof value === 'boolean' ? 'boolean' : 
+            Array.isArray(value) ? 'array' :
+            typeof value === 'object' ? 'object' : 'string',
+      required: false,
+    }));
+  };
+
+  // Extract the real node type from various possible locations
+  const nodeType = overrides.type || 
+                   overrides.data?.name || 
+                   overrides.data?.type || 
+                   'openAI';
+  
+  // Extract category
+  const category = overrides.category || 
+                   overrides.data?.category || 
+                   'llm';
+  
+  // Extract label
+  const label = overrides.label || 
+                overrides.data?.label || 
+                `Test ${nodeType}`;
+
+  const baseNode = {
+    id: overrides.id || `node-${Math.random().toString(36).substr(2, 9)}`,
+    position: overrides.position || { x: 100, y: 100 },
+    type: nodeType,
+    label: label,
+    category: category,
+    inputs: overrides.inputs || [],
+    outputs: overrides.outputs || [],
+    parameters: [],
+    metadata: {
+      version: '2.0',
+      description: overrides.metadata?.description || `Test ${nodeType} node`,
+      ...overrides.metadata,
+    },
+  };
+
+  // Handle data.inputs conversion to parameters
+  if (overrides.data?.inputs && !overrides.parameters) {
+    baseNode.parameters = convertInputsToParameters(overrides.data.inputs);
+  }
+
+  // Handle direct parameters override
+  if (overrides.parameters) {
+    baseNode.parameters = overrides.parameters;
+  }
+
+  // Return clean node structure without legacy data field
+  const { data, ...cleanOverrides } = overrides;
+  
+  return {
+    ...baseNode,
+    ...cleanOverrides,
+    // Ensure parameters is always an array
+    parameters: baseNode.parameters || [],
   };
 }
 
@@ -312,16 +409,20 @@ export const TestData = {
    * Generate a large flow for performance testing
    */
   createLargeFlow(nodeCount: number, edgeRatio = 0.8): TestFlow {
-    const nodes = Array.from({ length: nodeCount }, (_, i) => 
-      createMockNode({
-        id: `node-${i}`,
-        data: {
-          id: `node-${i}`,
-          label: `Node ${i}`,
-          type: ['openAI', 'chatOpenAI', 'llmChain'][i % 3],
-        },
-      })
-    );
+    const nodeTypes = ['openAI', 'chatOpenAI', 'llmChain'];
+    const categories = ['llm', 'llm', 'chain'];
+    
+    const nodes = Array.from({ length: nodeCount }, (_, i) => {
+      const typeIndex = i % 3;
+      return createIRNode(
+        nodeTypes[typeIndex],
+        categories[typeIndex],
+        [
+          { name: 'modelName', value: `model-${i}`, type: 'string' },
+          { name: 'temperature', value: 0.7, type: 'number' },
+        ]
+      );
+    });
 
     const edgeCount = Math.floor(nodeCount * edgeRatio);
     const edges = Array.from({ length: edgeCount }, (_, i) => {
@@ -338,39 +439,22 @@ export const TestData = {
    */
   createComplexFlow(): TestFlow {
     const nodes = [
-      createMockNode({
-        id: 'llm-1',
-        data: {
-          type: 'ChatOpenAI',
-          category: 'Chat Models',
-          inputs: { modelName: 'gpt-4' },
-        },
-      }),
-      createMockNode({
-        id: 'prompt-1',
-        data: {
-          type: 'ChatPromptTemplate',
-          category: 'Prompts',
-          inputs: { systemMessage: 'You are helpful', humanMessage: '{input}' },
-        },
-      }),
-      createMockNode({
-        id: 'memory-1',
-        data: {
-          type: 'BufferMemory',
-          category: 'Memory',
-          inputs: {},
-        },
-      }),
-      createMockNode({
-        id: 'chain-1',
-        data: {
-          type: 'ConversationChain',
-          category: 'Chains',
-          inputs: {},
-        },
-      }),
+      createIRNode('chatOpenAI', 'llm', [
+        { name: 'modelName', value: 'gpt-4', type: 'string', required: true },
+      ]),
+      createIRNode('chatPromptTemplate', 'prompt', [
+        { name: 'systemMessage', value: 'You are helpful', type: 'string', required: true },
+        { name: 'humanMessage', value: '{input}', type: 'string', required: true },
+      ]),
+      createIRNode('bufferMemory', 'memory', []),
+      createIRNode('conversationChain', 'chain', []),
     ];
+
+    // Set proper IDs for edge references
+    nodes[0].id = 'llm-1';
+    nodes[1].id = 'prompt-1';
+    nodes[2].id = 'memory-1';
+    nodes[3].id = 'chain-1';
 
     const edges = [
       createMockEdge('llm-1', 'chain-1'),
@@ -463,6 +547,7 @@ export default {
   createTempDir,
   cleanupTempDir,
   createTestFlowFile,
+  createIRNode,
   createMockNode,
   createMockEdge,
   createMockFlow,

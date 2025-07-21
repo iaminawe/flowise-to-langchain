@@ -118,35 +118,40 @@ export function App() {
         setLoading(true)
         setError(null)
 
-        // Check system health
-        const health = await api.health.check()
-        // Map health status to local state
-        const mappedStatus =
-          health.status === 'healthy'
-            ? 'healthy'
-            : health.status === 'degraded'
-              ? 'warning'
-              : 'error'
-        setHealthStatus(mappedStatus)
+        // Try health check with timeout, but don't block app initialization
+        try {
+          const health = await api.health.check()
+          const mappedStatus =
+            health.status === 'healthy'
+              ? 'healthy'
+              : health.status === 'degraded'
+                ? 'warning'
+                : 'error'
+          setHealthStatus(mappedStatus)
+        } catch (healthErr) {
+          console.warn('Backend not available (this is normal in dev mode):', healthErr)
+          setHealthStatus('warning') // Show warning but continue
+        }
 
-        // Update last activity
-        setAppState((prev) => ({
-          ...prev,
-          lastActivity: new Date().toISOString(),
-        }))
-
-        setLoading(false)
+        // Always finish loading after 1 second max
+        setTimeout(() => setLoading(false), 1000)
+        
       } catch (err) {
-        // Don't show error for backend not being available - it's normal in dev
-        console.warn('Backend health check failed (this is normal if backend is starting):', err)
+        console.error('App initialization error:', err)
+        setError(null) // Don't show error, continue with degraded experience
         setHealthStatus('warning')
-        setError(null) // Don't show error to user
         setLoading(false)
       }
     }
 
     initializeApp()
-  }, [setAppState])
+    
+    // Update last activity timestamp once on mount
+    setAppState((prev) => ({
+      ...prev,
+      lastActivity: new Date().toISOString(),
+    }))
+  }, [setAppState]) // Include setAppState but it should now be stable
 
   // Handle page navigation
   const handlePageChange = (page: string) => {

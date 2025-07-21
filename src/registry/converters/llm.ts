@@ -15,7 +15,7 @@ abstract class BaseLLMConverter extends BaseConverter {
 
   protected generateLLMConfiguration(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ): {
     imports: string[];
     packageName: string;
@@ -135,9 +135,9 @@ export class ChatOpenAIConverter extends BaseLLMConverter {
 
   protected override generateLLMConfiguration(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ) {
-    const config = super.generateLLMConfiguration(node, context);
+    const config = super.generateLLMConfiguration(node, _context);
 
     // ChatOpenAI specific parameters
     const streaming = this.getParameterValue<boolean>(node, 'streaming', false);
@@ -187,9 +187,9 @@ export class AnthropicConverter extends BaseLLMConverter {
 
   protected override generateLLMConfiguration(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ) {
-    const config = super.generateLLMConfiguration(node, context);
+    const config = super.generateLLMConfiguration(node, _context);
 
     // Anthropic specific parameters
     const model = this.getParameterValue<string>(
@@ -204,11 +204,11 @@ export class AnthropicConverter extends BaseLLMConverter {
 
     config.config = {
       ...(typeof model === 'string' && model ? { model } : {}),
-      ...(config.config.temperature !== undefined
-        ? { temperature: config.config.temperature }
+      ...(config.config['temperature'] !== undefined
+        ? { temperature: config.config['temperature'] }
         : {}),
-      ...(config.config.maxTokens
-        ? { maxTokens: config.config.maxTokens }
+      ...(config.config['maxTokens']
+        ? { maxTokens: config.config['maxTokens'] }
         : {}),
       ...(typeof anthropicApiKey === 'string' && anthropicApiKey
         ? { anthropicApiKey }
@@ -216,8 +216,8 @@ export class AnthropicConverter extends BaseLLMConverter {
     };
 
     // Remove OpenAI specific fields
-    delete config.config.modelName;
-    delete config.config.openAIApiKey;
+    delete config.config['modelName'];
+    delete config.config['openAIApiKey'];
 
     return config;
   }
@@ -247,9 +247,9 @@ export class AzureOpenAIConverter extends BaseLLMConverter {
 
   protected override generateLLMConfiguration(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ) {
-    const config = super.generateLLMConfiguration(node, context);
+    const config = super.generateLLMConfiguration(node, _context);
 
     // Azure specific parameters
     const azureOpenAIApiKey = this.getParameterValue<string>(
@@ -305,9 +305,9 @@ export class OllamaConverter extends BaseLLMConverter {
 
   protected override generateLLMConfiguration(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ) {
-    const config = super.generateLLMConfiguration(node, context);
+    const config = super.generateLLMConfiguration(node, _context);
 
     // Ollama specific parameters
     const baseUrl = this.getParameterValue<string>(
@@ -320,18 +320,18 @@ export class OllamaConverter extends BaseLLMConverter {
     config.config = {
       ...(typeof model === 'string' && model ? { model } : {}),
       ...(typeof baseUrl === 'string' && baseUrl ? { baseUrl } : {}),
-      ...(config.config.temperature !== undefined
-        ? { temperature: config.config.temperature }
+      ...(config.config['temperature'] !== undefined
+        ? { temperature: config.config['temperature'] }
         : {}),
-      ...(config.config.maxTokens
-        ? { numPredict: config.config.maxTokens }
+      ...(config.config['maxTokens']
+        ? { numPredict: config.config['maxTokens'] }
         : {}),
     };
 
     // Remove OpenAI specific fields
-    delete config.config.modelName;
-    delete config.config.maxTokens;
-    delete config.config.openAIApiKey;
+    delete config.config['modelName'];
+    delete config.config['maxTokens'];
+    delete config.config['openAIApiKey'];
 
     return config;
   }
@@ -361,9 +361,9 @@ export class HuggingFaceConverter extends BaseLLMConverter {
 
   protected override generateLLMConfiguration(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ) {
-    const config = super.generateLLMConfiguration(node, context);
+    const config = super.generateLLMConfiguration(node, _context);
 
     // Hugging Face specific parameters
     const model = this.getParameterValue<string>(node, 'modelName', 'gpt2');
@@ -372,11 +372,11 @@ export class HuggingFaceConverter extends BaseLLMConverter {
 
     config.config = {
       ...(typeof model === 'string' && model ? { model } : {}),
-      ...(config.config.temperature !== undefined
-        ? { temperature: config.config.temperature }
+      ...(config.config['temperature'] !== undefined
+        ? { temperature: config.config['temperature'] }
         : {}),
-      ...(config.config.maxTokens
-        ? { maxTokens: config.config.maxTokens }
+      ...(config.config['maxTokens']
+        ? { maxTokens: config.config['maxTokens'] }
         : {}),
       ...(typeof apiKey === 'string' && apiKey ? { apiKey } : {}),
       ...(typeof endpointUrl === 'string' && endpointUrl
@@ -385,8 +385,8 @@ export class HuggingFaceConverter extends BaseLLMConverter {
     };
 
     // Remove OpenAI specific fields
-    delete config.config.modelName;
-    delete config.config.openAIApiKey;
+    delete config.config['modelName'];
+    delete config.config['openAIApiKey'];
 
     return config;
   }
@@ -416,9 +416,9 @@ export class CohereConverter extends BaseLLMConverter {
 
   protected override generateLLMConfiguration(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ) {
-    const config = super.generateLLMConfiguration(node, context);
+    const config = super.generateLLMConfiguration(node, _context);
 
     // Cohere specific parameters
     const model = this.getParameterValue<string>(node, 'modelName', 'command');
@@ -426,18 +426,18 @@ export class CohereConverter extends BaseLLMConverter {
 
     config.config = {
       ...(typeof model === 'string' && model ? { model } : {}),
-      ...(config.config.temperature !== undefined
-        ? { temperature: config.config.temperature }
+      ...(config.config['temperature'] !== undefined
+        ? { temperature: config.config['temperature'] }
         : {}),
-      ...(config.config.maxTokens
-        ? { maxTokens: config.config.maxTokens }
+      ...(config.config['maxTokens']
+        ? { maxTokens: config.config['maxTokens'] }
         : {}),
       ...(typeof apiKey === 'string' && apiKey ? { apiKey } : {}),
     };
 
     // Remove OpenAI specific fields
-    delete config.config.modelName;
-    delete config.config.openAIApiKey;
+    delete config.config['modelName'];
+    delete config.config['openAIApiKey'];
 
     return config;
   }
@@ -467,9 +467,9 @@ export class ReplicateConverter extends BaseLLMConverter {
 
   protected override generateLLMConfiguration(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ) {
-    const config = super.generateLLMConfiguration(node, context);
+    const config = super.generateLLMConfiguration(node, _context);
 
     // Replicate specific parameters
     const model = this.getParameterValue<string>(
@@ -481,18 +481,85 @@ export class ReplicateConverter extends BaseLLMConverter {
 
     config.config = {
       ...(typeof model === 'string' && model ? { model } : {}),
-      ...(config.config.temperature !== undefined
-        ? { temperature: config.config.temperature }
+      ...(config.config['temperature'] !== undefined
+        ? { temperature: config.config['temperature'] }
         : {}),
-      ...(config.config.maxTokens
-        ? { maxTokens: config.config.maxTokens }
+      ...(config.config['maxTokens']
+        ? { maxTokens: config.config['maxTokens'] }
         : {}),
       ...(typeof apiKey === 'string' && apiKey ? { apiKey } : {}),
     };
 
     // Remove OpenAI specific fields
-    delete config.config.modelName;
-    delete config.config.openAIApiKey;
+    delete config.config['modelName'];
+    delete config.config['openAIApiKey'];
+
+    return config;
+  }
+}
+
+/**
+ * Google Generative AI (Gemini) Converter
+ */
+export class GoogleGenerativeAIConverter extends BaseLLMConverter {
+  readonly flowiseType = 'googleGenerativeAI';
+
+  protected override getRequiredImports(): string[] {
+    return ['GoogleGenerativeAI'];
+  }
+
+  protected override getPackageName(): string {
+    return '@langchain/google-genai';
+  }
+
+  protected override getClassName(): string {
+    return 'GoogleGenerativeAI';
+  }
+
+  override getDependencies(): string[] {
+    return ['@langchain/google-genai', '@langchain/core'];
+  }
+
+  protected override generateLLMConfiguration(
+    node: IRNode,
+    _context: GenerationContext
+  ) {
+    const config = super.generateLLMConfiguration(node, _context);
+
+    // Google Generative AI specific parameters
+    const modelName = this.getParameterValue<string>(
+      node,
+      'modelName',
+      'gemini-pro'
+    );
+    const apiKey = this.getParameterValue<string>(node, 'googleApiKey');
+    const maxOutputTokens = this.getParameterValue<number>(
+      node,
+      'maxOutputTokens'
+    );
+    const topP = this.getParameterValue<number>(node, 'topP');
+    const topK = this.getParameterValue<number>(node, 'topK');
+    const streaming = this.getParameterValue<boolean>(node, 'streaming', false);
+
+    config.config = {
+      ...(typeof modelName === 'string' && modelName ? { modelName } : {}),
+      ...(config.config['temperature'] !== undefined
+        ? { temperature: config.config['temperature'] }
+        : {}),
+      ...(typeof maxOutputTokens === 'number' && maxOutputTokens
+        ? { maxOutputTokens }
+        : {}),
+      ...(typeof topP === 'number' && topP !== undefined ? { topP } : {}),
+      ...(typeof topK === 'number' && topK !== undefined ? { topK } : {}),
+      ...(typeof streaming === 'boolean' && streaming !== undefined
+        ? { streaming }
+        : {}),
+      ...(typeof apiKey === 'string' && apiKey ? { apiKey } : {}),
+    };
+
+    // Remove base LLM fields that don't apply to Google Generative AI
+    delete config.config['maxTokens'];
+    delete config.config['openAIApiKey'];
 
     return config;
   }

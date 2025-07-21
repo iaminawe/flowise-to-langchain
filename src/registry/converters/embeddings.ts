@@ -107,7 +107,7 @@ export class OpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
   }
 
   protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
-    const config: Record<string, unknown> = {};
+    const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
     if (apiKey) {
@@ -164,7 +164,7 @@ export class CohereEmbeddingsConverter extends BaseEmbeddingsConverter {
   }
 
   protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
-    const config: Record<string, unknown> = {};
+    const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
     if (apiKey) {
@@ -212,7 +212,7 @@ export class HuggingFaceEmbeddingsConverter extends BaseEmbeddingsConverter {
   }
 
   protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
-    const config: Record<string, unknown> = {};
+    const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
     if (apiKey) {
@@ -264,7 +264,7 @@ export class AzureOpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
   }
 
   protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
-    const config: Record<string, unknown> = {};
+    const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
     if (apiKey) {
@@ -323,7 +323,7 @@ export class GoogleVertexAIEmbeddingsConverter extends BaseEmbeddingsConverter {
   }
 
   protected extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
-    const config: Record<string, unknown> = {};
+    const config: any = {};
 
     const projectId = this.getParameterValue(node, 'projectId');
     if (projectId) {

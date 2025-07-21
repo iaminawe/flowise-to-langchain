@@ -129,7 +129,7 @@ export class TemplateEngine {
   ): string {
     return template.replace(
       /\{\{#if\s+([^}]+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
-      (match, condition, content) => {
+      (_match, condition, content) => {
         const value = this.getValueFromPath(context, condition.trim());
         return this.isTruthy(value) ? content : '';
       }
@@ -142,7 +142,7 @@ export class TemplateEngine {
   private processLoops(template: string, context: TemplateContext): string {
     return template.replace(
       /\{\{#each\s+([^}]+)\}\}([\s\S]*?)\{\{\/each\}\}/g,
-      (match, arrayPath, content) => {
+      (_match, arrayPath, content) => {
         const array = this.getValueFromPath(context, arrayPath.trim());
         if (!Array.isArray(array)) {
           return '';

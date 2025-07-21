@@ -5,7 +5,7 @@
  */
 
 import { BaseConverter } from '../registry.js';
-import { IRNode, CodeFragment, GenerationContext } from '../../ir/types.js';
+import { IRNode, CodeFragment, GenerationContext, CodeReference } from '../../ir/types.js';
 
 /**
  * Streaming LLM Converter
@@ -84,11 +84,28 @@ export class StreamingChainConverter extends BaseConverter {
     const variableName = this.generateVariableName(node, 'streaming_chain');
     const verbose = this.getParameterValue(node, 'verbose', false);
 
+    // Get references to connected nodes
+    const llmInput = node.inputs?.find(input => input.id === 'llm');
+    const promptInput = node.inputs?.find(input => input.id === 'prompt');
+    
+    const llmRefResult = llmInput ? _context.getReference?.(llmInput) : null;
+    const promptRefResult = promptInput ? _context.getReference?.(promptInput) : null;
+
+    if (!llmRefResult) {
+      throw new Error(`StreamingChain node ${node.id} is missing required llm input`);
+    }
+    if (!promptRefResult) {
+      throw new Error(`StreamingChain node ${node.id} is missing required prompt input`);
+    }
+    
+    const llmRef = llmRefResult as CodeReference;
+    const promptRef = promptRefResult as CodeReference;
+
     const imports = this.generateImport('langchain/chains', ['LLMChain']);
 
     const implementation = `const ${variableName} = new LLMChain({
-  llm: /* LLM reference */,
-  prompt: /* Prompt reference */,
+  llm: ${llmRef.exportedAs},
+  prompt: ${promptRef.exportedAs},
   verbose: ${verbose},
   callbacks: [
     {
@@ -118,9 +135,14 @@ export class StreamingChainConverter extends BaseConverter {
         `${node.id}_implementation`,
         'initialization',
         implementation,
-        [],
+        [llmRef.fragmentId, promptRef.fragmentId],
         node.id,
-        1
+        1,
+        {
+          exports: [variableName],
+          llm: llmRef.exportedAs,
+          prompt: promptRef.exportedAs
+        }
       ),
     ];
   }
@@ -143,11 +165,28 @@ export class StreamingAgentConverter extends BaseConverter {
     const maxIterations = this.getParameterValue(node, 'maxIterations', 10);
     const verbose = this.getParameterValue(node, 'verbose', true);
 
+    // Get references to connected nodes
+    const agentInput = node.inputs?.find(input => input.id === 'agent');
+    const toolsInput = node.inputs?.find(input => input.id === 'tools');
+    
+    const agentRefResult = agentInput ? _context.getReference?.(agentInput) : null;
+    const toolsRefResult = toolsInput ? _context.getReference?.(toolsInput) : null;
+
+    if (!agentRefResult) {
+      throw new Error(`StreamingAgent node ${node.id} is missing required agent input`);
+    }
+    if (!toolsRefResult) {
+      throw new Error(`StreamingAgent node ${node.id} is missing required tools input`);
+    }
+    
+    const agentRef = agentRefResult as CodeReference;
+    const toolsRef = toolsRefResult as CodeReference;
+
     const imports = this.generateImport('langchain/agents', ['AgentExecutor']);
 
     const implementation = `const ${variableName} = new AgentExecutor({
-  agent: /* Agent reference */,
-  tools: /* Tools reference */,
+  agent: ${agentRef.exportedAs},
+  tools: ${toolsRef.exportedAs},
   maxIterations: ${maxIterations},
   verbose: ${verbose},
   callbacks: [
@@ -178,9 +217,14 @@ export class StreamingAgentConverter extends BaseConverter {
         `${node.id}_implementation`,
         'initialization',
         implementation,
-        [],
+        [agentRef.fragmentId, toolsRef.fragmentId],
         node.id,
-        1
+        1,
+        {
+          exports: [variableName],
+          agent: agentRef.exportedAs,
+          tools: toolsRef.exportedAs
+        }
       ),
     ];
   }

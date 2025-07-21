@@ -11,7 +11,7 @@ import { join } from 'path';
 import { writeFile, mkdir, rm } from 'fs/promises';
 import { existsSync } from 'fs';
 import { validateInputFile } from '../../cli/utils/validation.js';
-import { FlowiseJSONFixer } from '../../cli/utils/json-fixer.js';
+import { fixJsonIssues } from '../../cli/utils/json-fixer.js';
 import { logger } from '../../cli/utils/logger.js';
 import {
   ValidateRequest,
@@ -45,12 +45,12 @@ interface ValidationJob {
 export class ValidationService extends EventEmitter {
   private jobs: Map<string, ValidationJob> = new Map();
   private tempDir: string;
-  private fixer: FlowiseJSONFixer;
+  // JSON fixing is done via fixJsonIssues function
 
   constructor() {
     super();
     this.tempDir = join(tmpdir(), 'flowise-api-validation');
-    this.fixer = new FlowiseJSONFixer();
+    // JSON fixing is handled by fixJsonIssues function
     this.ensureTempDir();
   }
 

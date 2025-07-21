@@ -11,7 +11,7 @@ import { join } from 'path';
 import { writeFile, mkdir, rm, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { TestRunner } from '../../cli/utils/test-runner.js';
-import { TestPlanner } from '../../cli/utils/test-planner.js';
+import { planTests } from '../../cli/utils/test-planner.js';
 import { logger } from '../../cli/utils/logger.js';
 import {
   TestRequest,
@@ -117,7 +117,20 @@ export class TestService extends EventEmitter {
           break;
         case 'all':
         default:
-          testResult = await testRunner.runAllTests();
+          // Run all test types sequentially
+          const unitResult = await testRunner.runUnitTests();
+          const integrationResult = await testRunner.runIntegrationTests();
+          const e2eResult = await testRunner.runE2ETests();
+          
+          // Combine results
+          testResult = {
+            success: unitResult.success && integrationResult.success && e2eResult.success,
+            totalTests: unitResult.totalTests + integrationResult.totalTests + e2eResult.totalTests,
+            passedTests: unitResult.passedTests + integrationResult.passedTests + e2eResult.passedTests,
+            failedTests: [...unitResult.failedTests, ...integrationResult.failedTests, ...e2eResult.failedTests],
+            duration: unitResult.duration + integrationResult.duration + e2eResult.duration,
+            coverage: unitResult.coverage || integrationResult.coverage || e2eResult.coverage,
+          };
           break;
       }
 

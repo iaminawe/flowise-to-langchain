@@ -7,12 +7,13 @@
 
 import { Router } from 'express';
 import { convertRouter } from './convert.js';
-import { validateRouter } from './validate.js';
-import { testRouter } from './test.js';
-import { uploadRouter } from './upload.js';
-import { batchRouter } from './batch.js';
-import { jobRouter } from './jobs.js';
-import { statsRouter } from './stats.js';
+// TODO: Create additional route files when needed
+// import { validateRouter } from './validate.js';
+// import { testRouter } from './test.js';
+// import { uploadRouter } from './upload.js';
+// import { batchRouter } from './batch.js';
+// import { jobRouter } from './jobs.js';
+// import { statsRouter } from './stats.js';
 
 /**
  * Main API router
@@ -21,12 +22,13 @@ export const apiRouter = Router();
 
 // Mount sub-routers
 apiRouter.use('/convert', convertRouter);
-apiRouter.use('/validate', validateRouter);
-apiRouter.use('/test', testRouter);
-apiRouter.use('/upload', uploadRouter);
-apiRouter.use('/batch', batchRouter);
-apiRouter.use('/jobs', jobRouter);
-apiRouter.use('/stats', statsRouter);
+// TODO: Implement and enable these routes when the corresponding files are created
+// apiRouter.use('/validate', validateRouter);
+// apiRouter.use('/test', testRouter);
+// apiRouter.use('/upload', uploadRouter);
+// apiRouter.use('/batch', batchRouter);
+// apiRouter.use('/jobs', jobRouter);
+// apiRouter.use('/stats', statsRouter);
 
 // API info endpoint
 apiRouter.get('/', (req, res) => {

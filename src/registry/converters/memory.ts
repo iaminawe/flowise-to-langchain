@@ -16,7 +16,7 @@ abstract class BaseMemoryConverter extends BaseConverter {
 
   protected generateMemoryConfiguration(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ): {
     imports: string[];
     packageName: string;
@@ -498,3 +498,8 @@ export class EntityMemoryConverter extends BaseMemoryConverter {
     return `const ${variableName} = new ${className}({\n${llmComment}\n${configEntries}\n});`;
   }
 }
+
+/**
+ * Zep Memory Converter
+ */
+export { ZepMemoryConverter } from './zep-memory.js';

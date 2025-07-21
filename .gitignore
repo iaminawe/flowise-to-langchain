@@ -154,10 +154,22 @@ debug-*.js
 
 # Test outputs and temporary directories
 test-output*/
+test-outputs/
 output*/
 test-flows/
 temp-*/
 tmp-*/
+*.test-output
+*.test-result
+
+# Converted outputs
+*-converted.ts
+*-converted.js
+*-working.ts
+*-modified.json
+
+# Output folder for converted files
+output/
 
 # Status and report files from development
 *-STATUS.md

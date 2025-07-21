@@ -81,6 +81,8 @@ export interface IRNode {
   id: NodeId;
   type: string; // Flowise node type (e.g., 'llmChain', 'openAI', 'chatPromptTemplate')
   label: string;
+  version?: number; // Node version for backward compatibility
+  name?: string; // Node name for identification
   category:
     | 'llm'
     | 'chain'
@@ -98,11 +100,28 @@ export interface IRNode {
     | 'control_flow';
 
   // Node connectivity
-  inputs: IRPort[];
-  outputs: IRPort[];
+  inputs?: IRPort[];
+  outputs?: IRPort[];
 
   // Node configuration
   parameters: IRParameter[];
+  
+  // Raw Flowise node data (important for converters)
+  data?: {
+    id?: string;
+    label?: string;
+    version?: number;
+    name?: string;
+    type?: string;
+    baseClasses?: string[];
+    category?: string;
+    description?: string;
+    inputs?: Record<string, unknown>;
+    outputs?: Record<string, unknown>;
+    outputAnchors?: any[];
+    selected?: boolean;
+    [key: string]: unknown;
+  };
 
   // Position and UI metadata
   position: {
@@ -290,6 +309,24 @@ export interface FlowiseChatFlow {
 }
 
 /**
+ * Code section for new converter pattern
+ */
+export interface CodeSection {
+  type: 'import' | 'declaration' | 'initialization' | 'execution' | 'export';
+  content: string;
+  dependencies?: string[];
+  metadata?: {
+    nodeId?: NodeId;
+    order?: number;
+    description?: string;
+    category?: string;
+    async?: boolean;
+    exports?: string[];
+    imports?: string[];
+  };
+}
+
+/**
  * Code fragment representing generated code
  */
 export interface CodeFragment {
@@ -365,6 +402,15 @@ export interface ValidationSuggestion {
 }
 
 /**
+ * Reference to a generated code fragment
+ */
+export interface CodeReference {
+  fragmentId: string;
+  exportedAs: string;
+  nodeId: NodeId;
+}
+
+/**
  * Context for code generation
  */
 export interface GenerationContext {
@@ -391,6 +437,14 @@ export interface GenerationContext {
     singleQuotes: boolean;
     trailingCommas: boolean;
   };
+
+  // Reference resolution for connected nodes
+  getReference?: (input: any) => CodeReference | string | null;
+  
+  // Additional context methods for enhanced functionality
+  resolveNodeReference?: (nodeId: NodeId) => string;
+  addDependency?: (dependency: string) => void;
+  addImport?: (importStatement: string) => void;
 }
 
 /**

@@ -140,7 +140,7 @@ export abstract class BaseConverter implements NodeConverter {
    * Helper method to generate variable names
    */
   protected generateVariableName(node: IRNode, suffix: string = ''): string {
-    const baseName = node.label
+    const baseName = (node.label || node.type || node.id)
       .toLowerCase()
       .replace(/[^a-zA-Z0-9]/g, '_')
       .replace(/_+/g, '_')
@@ -157,6 +157,9 @@ export abstract class BaseConverter implements NodeConverter {
     paramName: string,
     defaultValue?: T
   ): T | undefined {
+    if (!node.parameters || !Array.isArray(node.parameters)) {
+      return defaultValue;
+    }
     const param = node.parameters.find((p) => p.name === paramName);
     return (param?.value as T) ?? defaultValue;
   }

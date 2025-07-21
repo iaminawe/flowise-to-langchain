@@ -5,7 +5,9 @@
     "CLAUDE_FLOW_HOOKS_ENABLED": "true",
     "CLAUDE_FLOW_TELEMETRY_ENABLED": "true",
     "CLAUDE_FLOW_REMOTE_EXECUTION": "true",
-    "CLAUDE_FLOW_GITHUB_INTEGRATION": "true"
+    "CLAUDE_FLOW_GITHUB_INTEGRATION": "true",
+    "CLAUDE_FLOW_PARALLEL_EXECUTION": "true",
+    "CLAUDE_FLOW_AUTO_TOPOLOGY": "true"
   },
   "permissions": {
     "allow": [
@@ -98,7 +100,10 @@
         "CLAUDE_FLOW_HOOKS_ENABLED": "true",
         "CLAUDE_FLOW_TELEMETRY_ENABLED": "true",
         "CLAUDE_FLOW_REMOTE_READY": "true",
-        "CLAUDE_FLOW_GITHUB_INTEGRATION": "true"
+        "CLAUDE_FLOW_GITHUB_INTEGRATION": "true",
+        "CLAUDE_FLOW_PARALLEL_EXECUTION": "true",
+        "CLAUDE_FLOW_AUTO_TOPOLOGY": "true",
+        "CLAUDE_FLOW_SWARM_COORDINATION": "true"
       }
     },
     "ruv-swarm": {
@@ -123,11 +128,13 @@
     "githubIntegration": true
   },
   "performance": {
-    "maxAgents": 10,
-    "defaultTopology": "hierarchical",
+    "maxAgents": 12,
+    "defaultTopology": "auto",
     "executionStrategy": "parallel",
     "tokenOptimization": true,
     "cacheEnabled": true,
-    "telemetryLevel": "detailed"
+    "telemetryLevel": "detailed",
+    "batchOperations": true,
+    "concurrentTasks": true
   }
 }

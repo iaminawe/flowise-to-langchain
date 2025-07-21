@@ -37,8 +37,8 @@ export class PythonEmitter {
   }
 
   async generateCode(
-    ir: IRGraph,
-    context: GenerationContext,
+    _ir: IRGraph,
+    _context: GenerationContext,
     fragments: CodeFragment[]
   ): Promise<CodeGenerationResult> {
     // const startTime = Date.now(); // Future performance tracking
@@ -57,14 +57,14 @@ export class PythonEmitter {
       declarationFragments,
       initFragments,
       executionFragments,
-      context
+      _context
     );
 
     // Generate requirements.txt
     const requirements = this.generateRequirements(fragments);
 
     // Generate package files based on package manager
-    const packageFiles = this.generatePackageFiles(fragments, context);
+    const packageFiles = this.generatePackageFiles(fragments, _context);
 
     const files: GeneratedFile[] = [
       {
@@ -90,7 +90,7 @@ export class PythonEmitter {
       files,
       dependencies: this.extractPythonDependenciesAsRecord(fragments),
       metadata: {
-        projectName: context.projectName || 'langchain-workflow',
+        projectName: _context.projectName || 'langchain-workflow',
         targetLanguage: 'python',
         langchainVersion: '0.1.0',
         generatedAt: new Date().toISOString(),
@@ -107,7 +107,7 @@ export class PythonEmitter {
         format: 'black .',
       },
       packageInfo: {
-        name: context.projectName || 'langchain-workflow',
+        name: _context.projectName || 'langchain-workflow',
         version: '1.0.0',
         description: 'Generated LangChain workflow from Flowise',
         main: 'main.py',
@@ -321,7 +321,9 @@ export class PythonEmitter {
         imports.push(defaultImport);
       }
 
-      results.push({ module, imports });
+      if (module) {
+        results.push({ module, imports });
+      }
     }
 
     return results;
@@ -382,7 +384,7 @@ export class PythonEmitter {
       // Convert arrow functions (basic)
       .replace(/(\w+)\s*=>\s*{/g, 'def $1():')
       // Convert object literals to dictionaries
-      .replace(/{\s*([^}]+)\s*}/g, (match, content) => {
+      .replace(/{\s*([^}]+)\s*}/g, (_match, content) => {
         const props = content.split(',').map((prop: string) => {
           const [key, value] = prop.split(':').map((s: string) => s.trim());
           if (key && value) {

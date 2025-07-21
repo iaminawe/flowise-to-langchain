@@ -29,14 +29,12 @@ export type {
 
 // Import main components for pipeline
 import {
-  FlowiseParser,
   parseFlowiseJson,
   type FlowiseChatFlow,
 } from './parser/index.js';
 import { IRProcessor, type GenerationContext } from './ir/index.js';
 import { initializeRegistry, ConverterFactory } from './registry/index.js';
 import {
-  TypeScriptEmitter,
   type CodeGenerationResult,
 } from './emitters/typescript/index.js';
 import { Logger } from './cli/utils/logger.js';
@@ -47,9 +45,7 @@ import { Logger } from './cli/utils/logger.js';
  * Main conversion pipeline that integrates all components
  */
 export class FlowiseToLangChainConverter {
-  private parser: FlowiseParser;
   private irProcessor: IRProcessor;
-  private emitter: TypeScriptEmitter;
   private logger: Logger;
   private initialized: boolean = false;
 
@@ -61,9 +57,7 @@ export class FlowiseToLangChainConverter {
   ) {
     this.logger = new Logger();
 
-    this.parser = new FlowiseParser();
     this.irProcessor = new IRProcessor();
-    this.emitter = new TypeScriptEmitter();
   }
 
   /**

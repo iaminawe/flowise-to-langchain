@@ -554,12 +554,12 @@ function detectCycles(flow: FlowiseChatFlow): string[][] {
 }
 
 function findCriticalPath(
-  flow: FlowiseChatFlow,
+  _flow: FlowiseChatFlow,
   nodeAnalysis: NodeAnalysis[]
 ): string[] {
   // Simple implementation - find longest path by complexity
-  // const _complexityMap = new Map( // Unused variable
-  new Map(nodeAnalysis.map((na) => [na.nodeId, na.complexity]));
+  // Create complexity map for potential future use
+  // const _complexityMap = new Map(nodeAnalysis.map((na) => [na.nodeId, na.complexity]));
 
   // For now, return the path with highest total complexity
   // This is a simplified version - a real critical path would consider dependencies
@@ -570,7 +570,7 @@ function findCriticalPath(
 }
 
 function generateRecommendations(
-  flow: FlowiseChatFlow,
+  _flow: FlowiseChatFlow,
   nodeAnalysis: NodeAnalysis[],
   cycles: string[][],
   orphanedNodes: string[]

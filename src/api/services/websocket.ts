@@ -157,7 +157,7 @@ export class WebSocketService extends EventEmitter {
     // Handle connection error
     ws.on('error', (error) => {
       logger.error('WebSocket error:', { error, connectionId: id });
-      this.handleDisconnection(id, 1011, 'Server error');
+      this.handleDisconnection(id, 1011, Buffer.from('Server error'));
     });
 
     // Handle pong response

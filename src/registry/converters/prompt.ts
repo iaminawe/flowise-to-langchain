@@ -16,7 +16,7 @@ abstract class BasePromptConverter extends BaseConverter {
 
   protected generatePromptConfiguration(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ): {
     imports: string[];
     packageName: string;
@@ -150,7 +150,7 @@ export class ChatPromptTemplateConverter extends BasePromptConverter {
     className: string,
     config: Record<string, unknown>
   ): string {
-    return `const ${variableName} = ${className}.fromMessages(${config.template});`;
+    return `const ${variableName} = ${className}.fromMessages(${config['template']});`;
   }
 }
 
@@ -307,7 +307,7 @@ export class SystemMessageConverter extends BasePromptConverter {
     className: string,
     config: Record<string, unknown>
   ): string {
-    return `const ${variableName} = new ${className}(${this.formatParameterValue(config.content)});`;
+    return `const ${variableName} = new ${className}(${this.formatParameterValue(config['content'])});`;
   }
 }
 
@@ -343,7 +343,7 @@ export class HumanMessageConverter extends BasePromptConverter {
     className: string,
     config: Record<string, unknown>
   ): string {
-    return `const ${variableName} = new ${className}(${this.formatParameterValue(config.content)});`;
+    return `const ${variableName} = new ${className}(${this.formatParameterValue(config['content'])});`;
   }
 }
 
@@ -379,6 +379,6 @@ export class AIMessageConverter extends BasePromptConverter {
     className: string,
     config: Record<string, unknown>
   ): string {
-    return `const ${variableName} = new ${className}(${this.formatParameterValue(config.content)});`;
+    return `const ${variableName} = new ${className}(${this.formatParameterValue(config['content'])});`;
   }
 }

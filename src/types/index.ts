@@ -5,22 +5,43 @@
  * for the converter system, including testing, configuration, and component interfaces.
  */
 
-// Re-export core types from existing modules
-export * from '../parser/schema.js';
-export * from '../ir/types.js';
-export * from '../cli/types.js';
+// Re-export core types from existing modules (explicit to avoid ambiguity)
+export type {
+  FlowiseNode as FlowiseNodeSchema,
+  FlowiseEdge as FlowiseEdgeSchema,
+  FlowiseInputParam,
+  FlowiseChatFlow,
+  FlowiseAnchor
+} from '../parser/schema.js';
 
-// Re-export all new type modules
-export * from './components.js';
-export * from './api.js';
+export type {
+  IRNode,
+  IRConnection,
+  IRGraph,
+  CodeFragment,
+  GenerationContext,
+  ValidationResult as IRValidationResult,
+  ValidationWarning as IRValidationWarning,
+  ValidationSuggestion as IRValidationSuggestion,
+  NodeId
+} from '../ir/types.js';
+
+// Re-export specific types to avoid conflicts
+export type { ConversionConfig, ConversionOptions } from '../cli/types.js';
+export type { ChatflowMetadata, ConversionResult } from './api.js';
+export type { TestMetrics as APITestMetrics, TestReport as APITestReport } from './api.js';
+export type { UserPreferences as APIUserPreferences } from './api.js';
+export type { LogFilter as ComponentLogFilter } from './components.js';
+
+// Export remaining modules without conflicts
 export * from './testing.js';
 export * from './utils.js';
 export * from './hooks.js';
 
 // Core Data Interfaces
 export interface FlowiseJSON {
-  nodes: FlowiseNode[];
-  edges: FlowiseEdge[];
+  nodes: FlowiseNodeSchema[];
+  edges: FlowiseEdgeSchema[];
   chatflow?: ChatflowMetadata;
   viewport?: {
     x: number;
@@ -51,12 +72,12 @@ export interface Edge {
   type?: string;
   animated?: boolean;
   label?: string;
-  labelStyle?: React.CSSProperties;
+  labelStyle?: Record<string, unknown>;
   labelShowBg?: boolean;
-  labelBgStyle?: React.CSSProperties;
+  labelBgStyle?: Record<string, unknown>;
   labelBgPadding?: [number, number];
   labelBgBorderRadius?: number;
-  style?: React.CSSProperties;
+  style?: Record<string, string | number>;
   data?: EdgeData;
 }
 
@@ -220,8 +241,8 @@ export interface ValidateRequest {
 export interface ValidateResponse {
   isValid: boolean;
   errors?: ValidationError[];
-  warnings?: ValidationWarning[];
-  suggestions?: ValidationSuggestion[];
+  warnings?: IRValidationWarning[];
+  suggestions?: IRValidationSuggestion[];
   analysis?: FlowAnalysis;
 }
 
@@ -258,7 +279,7 @@ export interface FlowEditorProps {
   onConvert: (config: ConversionConfig) => void;
   readOnly?: boolean;
   className?: string;
-  style?: React.CSSProperties;
+  style?: Record<string, string | number>;
 }
 
 export interface NodePaletteProps {
@@ -410,9 +431,9 @@ export interface FileExplorerProps {
 }
 
 export interface ErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: React.ComponentType<{ error: Error; reset: () => void }>;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  children: any;
+  fallback?: (props: { error: Error; reset: () => void }) => unknown;
+  onError?: (error: Error, errorInfo: unknown) => void;
   className?: string;
 }
 
@@ -425,8 +446,8 @@ export interface ContextMenuProps {
 }
 
 export interface TooltipProps {
-  content: React.ReactNode;
-  children: React.ReactNode;
+  content: unknown;
+  children: any;
   position?: 'top' | 'bottom' | 'left' | 'right';
   trigger?: 'hover' | 'click' | 'focus';
   delay?: number;
@@ -438,7 +459,7 @@ export interface ModalProps {
   onClose: () => void;
   title?: string;
   size?: 'small' | 'medium' | 'large' | 'fullscreen';
-  children: React.ReactNode;
+  children: any;
   className?: string;
 }
 
@@ -485,7 +506,7 @@ export interface SplitPaneProps {
   direction: 'horizontal' | 'vertical';
   sizes: number[];
   onSizeChange: (sizes: number[]) => void;
-  children: React.ReactNode[];
+  children: unknown[];
   className?: string;
 }
 
@@ -533,8 +554,8 @@ export interface EditorState {
 export interface ValidationState {
   isValid: boolean;
   errors: ValidationError[];
-  warnings: ValidationWarning[];
-  suggestions: ValidationSuggestion[];
+  warnings: IRValidationWarning[];
+  suggestions: IRValidationSuggestion[];
   lastValidation: number;
   autoValidate: boolean;
 }
@@ -684,7 +705,7 @@ export interface TabItem {
   icon?: string;
   closable?: boolean;
   modified?: boolean;
-  content: React.ReactNode;
+  content: unknown;
 }
 
 export interface NotificationItem {
@@ -1021,7 +1042,7 @@ export interface EdgeEvent extends FlowEvent {
 export interface ValidationEvent extends FlowEvent {
   isValid: boolean;
   errors: ValidationError[];
-  warnings: ValidationWarning[];
+  warnings: IRValidationWarning[];
 }
 
 export interface ConversionEvent extends FlowEvent {
@@ -1046,7 +1067,7 @@ export interface UseFlowHook {
   addEdge: (edge: Edge) => void;
   removeEdge: (edgeId: string) => void;
   updateEdge: (edgeId: string, updates: Partial<EdgeData>) => void;
-  validate: () => Promise<ValidationResult>;
+  validate: () => Promise<IRValidationResult>;
   convert: (config: ConversionConfig) => Promise<ConversionResult>;
   clear: () => void;
   undo: () => void;
@@ -1082,11 +1103,11 @@ export interface UseTestingHook {
 
 export interface UseValidationHook {
   errors: ValidationError[];
-  warnings: ValidationWarning[];
-  suggestions: ValidationSuggestion[];
+  warnings: IRValidationWarning[];
+  suggestions: IRValidationSuggestion[];
   isValid: boolean;
   isValidating: boolean;
-  validate: (flow: FlowiseJSON) => Promise<ValidationResult>;
+  validate: (flow: FlowiseJSON) => Promise<IRValidationResult>;
   autoValidate: boolean;
   setAutoValidate: (enabled: boolean) => void;
   clearValidation: () => void;
@@ -1300,93 +1321,46 @@ export type AsyncDisposable = {
   dispose(): Promise<void>;
 };
 
-// React Types
-export type ComponentProps<T extends React.ComponentType<any>> = T extends React.ComponentType<infer P> ? P : never;
-
-export type ComponentRef<T extends React.ComponentType<any>> = T extends React.ForwardRefExoticComponent<React.RefAttributes<infer R>> ? R : never;
-
-export type EventHandlers<T extends React.DOMAttributes<any>> = {
-  [K in keyof T]: T[K] extends React.EventHandler<any> ? T[K] : never;
-};
+// Component Types (Framework-agnostic)
+export type ComponentProps<T extends (...args: unknown[]) => unknown> = T extends (props: infer P) => unknown ? P : never;
 
 export type StyleProps = {
   className?: string;
-  style?: React.CSSProperties;
+  style?: Record<string, string | number>;
 };
 
 export type WithChildren<T = {}> = T & {
-  children?: React.ReactNode;
+  children?: unknown;
 };
 
 export type WithOptionalChildren<T = {}> = T & {
-  children?: React.ReactNode;
+  children?: unknown;
 };
 
 export type WithRequiredChildren<T = {}> = T & {
-  children: React.ReactNode;
+  children: unknown;
 };
 
-export type ComponentWithChildren<T = {}> = React.ComponentType<WithChildren<T>>;
+// Generic component types for various frameworks
+export type ComponentWithChildren<T = {}> = (props: WithChildren<T>) => unknown;
+export type ComponentWithOptionalChildren<T = {}> = (props: WithOptionalChildren<T>) => unknown;
+export type ComponentWithRequiredChildren<T = {}> = (props: WithRequiredChildren<T>) => unknown;
 
-export type ComponentWithOptionalChildren<T = {}> = React.ComponentType<WithOptionalChildren<T>>;
+// Generic ref types
+export type RefObject<T> = { current: T | null };
+export type MutableRefObject<T> = { current: T };
+export type RefCallback<T> = (instance: T | null) => void;
+export type Ref<T> = RefCallback<T> | RefObject<T> | null;
 
-export type ComponentWithRequiredChildren<T = {}> = React.ComponentType<WithRequiredChildren<T>>;
-
-export type ForwardRefComponent<T, P = {}> = React.ForwardRefExoticComponent<P & React.RefAttributes<T>>;
-
-export type MemoComponent<P = {}> = React.MemoExoticComponent<React.ComponentType<P>>;
-
-export type LazyComponent<P = {}> = React.LazyExoticComponent<React.ComponentType<P>>;
-
-export type ContextValue<T> = T extends React.Context<infer U> ? U : never;
-
-export type ProviderProps<T> = React.ProviderProps<T>;
-
-export type ConsumerProps<T> = React.ConsumerProps<T>;
-
-export type RefObject<T> = React.RefObject<T>;
-
-export type MutableRefObject<T> = React.MutableRefObject<T>;
-
-export type RefCallback<T> = React.RefCallback<T>;
-
-export type Ref<T> = React.Ref<T>;
-
-export type LegacyRef<T> = React.LegacyRef<T>;
-
-export type Key = React.Key;
-
-export type ReactElement = React.ReactElement;
-
-export type ReactNode = React.ReactNode;
-
-export type ReactFragment = React.ReactFragment;
-
-export type ReactPortal = React.ReactPortal;
-
-export type ReactText = React.ReactText;
-
-export type ReactChild = React.ReactChild;
-
-export type ReactChildren = React.ReactChildren;
-
-export type JSXElement = JSX.Element;
-
-export type JSXElementConstructor<P> = JSX.ElementType<P>;
-
-export type JSXElementClass = JSX.ElementClass;
-
-export type JSXElementAttributesProperty = JSX.ElementAttributesProperty;
-
-export type JSXElementChildrenAttribute = JSX.ElementChildrenAttribute;
-
-export type JSXLibraryManagedAttributes<C, P> = JSX.LibraryManagedAttributes<C, P>;
-
-export type JSXIntrinsicAttributes = JSX.IntrinsicAttributes;
-
-export type JSXIntrinsicClassAttributes<T> = JSX.IntrinsicClassAttributes<T>;
-
-export type JSXIntrinsicElements = JSX.IntrinsicElements;
+// Generic element types (framework-agnostic)
+export type Key = string | number;
+export type ElementType = unknown;
+export type NodeType = unknown;
+export type FragmentType = unknown;
+export type PortalType = unknown;
+export type TextType = string | number;
+export type ChildType = ElementType | TextType;
+export type ChildrenType = ChildType | ChildType[];
 
 // Error Types
 export class FlowiseConversionError extends Error {
@@ -1498,66 +1472,15 @@ export class UnsupportedError extends Error {
   }
 }
 
-// Export everything
+// Export utilities and constants as default
 export default {
-  // Types
-  FlowiseJSON,
-  Node,
-  Edge,
-  NodeData,
-  EdgeData,
-  InputParam,
-  ParamOption,
-  Anchor,
-  Position,
-  
-  // Configurations
-  ConversionConfig,
-  TestConfig,
+  // Only export actual values, not TypeScript types/interfaces
   DEFAULT_CONVERSION_CONFIG,
   DEFAULT_TEST_CONFIG,
   DEFAULT_VALIDATION_OPTIONS,
   DEFAULT_GENERATION_CONTEXT,
   
-  // API
-  ConvertRequest,
-  ConvertResponse,
-  ValidateRequest,
-  ValidateResponse,
-  TestRequest,
-  TestResponse,
-  ApiError,
-  
-  // Components
-  FlowEditorProps,
-  NodePaletteProps,
-  NodeInspectorProps,
-  ConnectionPanelProps,
-  ConfigurationPanelProps,
-  TestPanelProps,
-  OutputPanelProps,
-  LogPanelProps,
-  StatusBarProps,
-  ToolbarProps,
-  
-  // State
-  AppState,
-  UiState,
-  EditorState,
-  ValidationState,
-  TestingState,
-  GenerationState,
-  ProjectState,
-  SettingsState,
-  
-  // Hooks
-  UseFlowHook,
-  UseConfigHook,
-  UseTestingHook,
-  UseValidationHook,
-  UseGenerationHook,
-  
-  // Utilities
+  // Utilities (actual functions)
   isFlowiseJSON,
   isNode,
   isEdge,
@@ -1565,7 +1488,7 @@ export default {
   isTestResult,
   isGeneratedFile,
   
-  // Errors
+  // Error classes (actual constructors)
   FlowiseConversionError,
   ValidationError,
   TestError,

@@ -122,6 +122,6 @@ export const validateRequest = (schema: ValidationSchema) => {
       });
     }
 
-    next();
+    return next();
   };
 };

@@ -150,11 +150,11 @@ describe('Embeddings Converters - Basic Functionality', () => {
 
     expect(result).toHaveLength(2);
     expect(result[0].type).toBe('import');
-    expect(result[0].code).toContain('OpenAIEmbeddings');
+    expect(result[0].content).toContain('OpenAIEmbeddings');
     expect(result[1].type).toBe('initialization');
-    expect(result[1].code).toContain('new OpenAIEmbeddings');
-    expect(result[1].code).toContain('openAIApiKey');
-    expect(result[1].code).toContain('model');
+    expect(result[1].content).toContain('new OpenAIEmbeddings');
+    expect(result[1].content).toContain('openAIApiKey');
+    expect(result[1].content).toContain('model');
   });
 
   test('should convert Cohere embeddings node', () => {
@@ -175,10 +175,10 @@ describe('Embeddings Converters - Basic Functionality', () => {
     const result = converter.convert(mockNode, {});
 
     expect(result).toHaveLength(2);
-    expect(result[0].code).toContain('CohereEmbeddings');
-    expect(result[1].code).toContain('new CohereEmbeddings');
-    expect(result[1].code).toContain('apiKey');
-    expect(result[1].code).toContain('model');
+    expect(result[0].content).toContain('CohereEmbeddings');
+    expect(result[1].content).toContain('new CohereEmbeddings');
+    expect(result[1].content).toContain('apiKey');
+    expect(result[1].content).toContain('model');
   });
 
   test('should convert HuggingFace embeddings node', () => {
@@ -199,10 +199,10 @@ describe('Embeddings Converters - Basic Functionality', () => {
     const result = converter.convert(mockNode, {});
 
     expect(result).toHaveLength(2);
-    expect(result[0].code).toContain('HuggingFaceInferenceEmbeddings');
-    expect(result[1].code).toContain('new HuggingFaceInferenceEmbeddings');
-    expect(result[1].code).toContain('apiKey');
-    expect(result[1].code).toContain('model');
+    expect(result[0].content).toContain('HuggingFaceInferenceEmbeddings');
+    expect(result[1].content).toContain('new HuggingFaceInferenceEmbeddings');
+    expect(result[1].content).toContain('apiKey');
+    expect(result[1].content).toContain('model');
   });
 
   test('should convert Azure OpenAI embeddings node', () => {
@@ -224,11 +224,11 @@ describe('Embeddings Converters - Basic Functionality', () => {
     const result = converter.convert(mockNode, {});
 
     expect(result).toHaveLength(2);
-    expect(result[0].code).toContain('AzureOpenAIEmbeddings');
-    expect(result[1].code).toContain('new AzureOpenAIEmbeddings');
-    expect(result[1].code).toContain('azureOpenAIApiKey');
-    expect(result[1].code).toContain('azureOpenAIApiInstanceName');
-    expect(result[1].code).toContain('azureOpenAIApiDeploymentName');
+    expect(result[0].content).toContain('AzureOpenAIEmbeddings');
+    expect(result[1].content).toContain('new AzureOpenAIEmbeddings');
+    expect(result[1].content).toContain('azureOpenAIApiKey');
+    expect(result[1].content).toContain('azureOpenAIApiInstanceName');
+    expect(result[1].content).toContain('azureOpenAIApiDeploymentName');
   });
 
   test('should convert Google Vertex AI embeddings node', () => {
@@ -249,11 +249,11 @@ describe('Embeddings Converters - Basic Functionality', () => {
     const result = converter.convert(mockNode, {});
 
     expect(result).toHaveLength(2);
-    expect(result[0].code).toContain('GoogleVertexAIEmbeddings');
-    expect(result[1].code).toContain('new GoogleVertexAIEmbeddings');
-    expect(result[1].code).toContain('projectId');
-    expect(result[1].code).toContain('location');
-    expect(result[1].code).toContain('model');
+    expect(result[0].content).toContain('GoogleVertexAIEmbeddings');
+    expect(result[1].content).toContain('new GoogleVertexAIEmbeddings');
+    expect(result[1].content).toContain('projectId');
+    expect(result[1].content).toContain('location');
+    expect(result[1].content).toContain('model');
   });
 });
 
@@ -452,7 +452,7 @@ describe('Embeddings Converters - Code Generation Quality', () => {
       const result = converter.convert(mockNode, {});
 
       // Combine all code fragments
-      const combinedCode = result.map(fragment => fragment.code).join('\n');
+      const combinedCode = result.map(fragment => fragment.content).join('\n');
 
       // Validate TypeScript patterns
       expect(combinedCode).toMatch(/import\s+\{[^}]+\}\s+from\s+['"][^'"]+['"];?/);
@@ -694,7 +694,7 @@ describe('Embeddings Converters - Integration with Vector Stores', () => {
     const converter = new AzureOpenAIEmbeddingsConverter();
     
     const result = converter.convert(createMockNode(), {});
-    const combinedCode = result.map(fragment => fragment.code).join('\n');
+    const combinedCode = result.map(fragment => fragment.content).join('\n');
 
     // Should be suitable for method chaining with vector operations
     expect(combinedCode).toContain('AzureOpenAIEmbeddings');

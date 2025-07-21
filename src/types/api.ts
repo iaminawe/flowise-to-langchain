@@ -937,7 +937,7 @@ export interface WebSocketMessage {
   type: string;
   id: string;
   timestamp: string;
-  data: unknown;
+  data?: unknown;
 }
 
 export interface WebSocketRequest extends WebSocketMessage {
@@ -1188,114 +1188,4 @@ export interface ApiClient {
   isConnected(): boolean;
 }
 
-// Export all API types
-export default {
-  // Base
-  ApiResponse,
-  ApiError,
-  ResponseMetadata,
-  PaginationParams,
-  PaginationResponse,
-  
-  // Flow Management
-  FlowListRequest,
-  FlowListResponse,
-  FlowGetRequest,
-  FlowGetResponse,
-  FlowCreateRequest,
-  FlowCreateResponse,
-  FlowUpdateRequest,
-  FlowUpdateResponse,
-  FlowDeleteRequest,
-  FlowDeleteResponse,
-  
-  // Validation
-  ValidateRequest,
-  ValidateResponse,
-  BatchValidateRequest,
-  BatchValidateResponse,
-  
-  // Conversion
-  ConvertRequest,
-  ConvertResponse,
-  BatchConvertRequest,
-  BatchConvertResponse,
-  ConversionStatusRequest,
-  ConversionStatusResponse,
-  
-  // Testing
-  TestRequest,
-  TestResponse,
-  TestStatusRequest,
-  TestStatusResponse,
-  
-  // Templates
-  TemplateListRequest,
-  TemplateListResponse,
-  TemplateGetRequest,
-  TemplateGetResponse,
-  TemplateCreateRequest,
-  TemplateCreateResponse,
-  
-  // Projects
-  ProjectListRequest,
-  ProjectListResponse,
-  ProjectGetRequest,
-  ProjectGetResponse,
-  ProjectCreateRequest,
-  ProjectCreateResponse,
-  
-  // Analytics
-  AnalyticsRequest,
-  AnalyticsResponse,
-  UsageAnalyticsRequest,
-  PerformanceAnalyticsRequest,
-  
-  // User
-  UserInfoRequest,
-  UserInfoResponse,
-  UserUpdateRequest,
-  UserUpdateResponse,
-  
-  // Configuration
-  ConfigListRequest,
-  ConfigListResponse,
-  ConfigGetRequest,
-  ConfigGetResponse,
-  ConfigSaveRequest,
-  ConfigSaveResponse,
-  
-  // WebSocket
-  WebSocketMessage,
-  WebSocketRequest,
-  WebSocketResponse,
-  WebSocketNotification,
-  
-  // Events
-  FlowChangeEvent,
-  ConversionProgressEvent,
-  TestProgressEvent,
-  ValidationCompleteEvent,
-  
-  // File Operations
-  FileUploadRequest,
-  FileUploadResponse,
-  FileDownloadRequest,
-  FileDownloadResponse,
-  
-  // Import/Export
-  ExportRequest,
-  ExportResponse,
-  ImportRequest,
-  ImportResponse,
-  
-  // Health
-  HealthCheckRequest,
-  HealthCheckResponse,
-  
-  // Client
-  ApiClientConfig,
-  ApiClient,
-  RequestConfig,
-  Response,
-};
+// All API types are already exported individually above

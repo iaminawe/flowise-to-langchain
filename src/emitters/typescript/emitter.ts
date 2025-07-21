@@ -13,7 +13,6 @@
 import {
   IRGraph,
   IRNode,
-  IRConnection,
   CodeFragment,
   GenerationContext,
   NodeId,
@@ -336,7 +335,7 @@ export class TypeScriptEmitter {
       content: formattedContent,
       type: 'types',
       dependencies: [],
-      exports: interfaces.map((i) => i.split(' ')[2]).filter(Boolean),
+      exports: interfaces.map((i) => i.split(' ')[2]).filter((name): name is string => Boolean(name)),
       size: Buffer.byteLength(formattedContent, 'utf8'),
     };
   }
@@ -421,7 +420,7 @@ export class TypeScriptEmitter {
    */
   private async generateEnvironmentFile(
     graph: IRGraph,
-    context: GenerationContext
+    _context: GenerationContext
   ): Promise<GeneratedFile> {
     const envVars = this.extractEnvironmentVariables(graph);
 
@@ -620,7 +619,7 @@ export class TypeScriptEmitter {
     return 'unknown';
   }
 
-  private generateInterfaces(graph: IRGraph): string[] {
+  private generateInterfaces(_graph: IRGraph): string[] {
     // Generate common interfaces used in the application
     const interfaces = [
       `export interface AppConfig {
@@ -668,7 +667,7 @@ export class TypeScriptEmitter {
     // Extract configuration from nodes
     for (const node of graph.nodes || []) {
       if (node.category === 'llm') {
-        config.llm = {
+        config['llm'] = {
           modelName: this.getParameterValue(node, 'modelName', 'gpt-3.5-turbo'),
           temperature: this.getParameterValue(node, 'temperature', 0.7),
           maxTokens: this.getParameterValue(node, 'maxTokens'),
@@ -869,8 +868,9 @@ export class TypeScriptEmitter {
   }
 
   /**
-   * Calculate complexity of the graph
+   * Calculate complexity of the graph (currently unused)
    */
+  /*
   private calculateComplexity(graph: IRGraph): 'simple' | 'medium' | 'complex' {
     const nodeCount = graph.nodes.length;
     const connectionCount = graph.connections.length;
@@ -880,10 +880,12 @@ export class TypeScriptEmitter {
     if (totalElements <= 15) return 'medium';
     return 'complex';
   }
+  */
 
   /**
-   * Extract features from the graph
+   * Extract features from the graph (currently unused)
    */
+  /*
   private extractFeatures(graph: IRGraph): string[] {
     const features: string[] = [];
     const nodeTypes = new Set(graph.nodes.map((n) => n.category));
@@ -897,10 +899,12 @@ export class TypeScriptEmitter {
 
     return features;
   }
+  */
 
   /**
-   * Extract warnings from the graph
+   * Extract warnings from the graph (currently unused)
    */
+  /*
   private extractWarnings(graph: IRGraph): string[] {
     const warnings: string[] = [];
 
@@ -916,6 +920,7 @@ export class TypeScriptEmitter {
 
     return warnings;
   }
+  */
 
   /**
    * Generate npm scripts

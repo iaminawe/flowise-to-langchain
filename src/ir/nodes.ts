@@ -1441,8 +1441,8 @@ export class ConnectionValidator {
     }
 
     // Validate data types
-    const sourcePortDef = sourceNode.outputs.find((p) => p.id === sourcePort);
-    const targetPortDef = targetNode.inputs.find((p) => p.id === targetPort);
+    const sourcePortDef = sourceNode.outputs?.find((p) => p.id === sourcePort);
+    const targetPortDef = targetNode.inputs?.find((p) => p.id === targetPort);
 
     if (!sourcePortDef || !targetPortDef) {
       return {

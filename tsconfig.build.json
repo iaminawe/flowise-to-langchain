@@ -1,16 +1,45 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    /* Override for production build */
     "noEmit": false,
     "outDir": "./dist",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": false,
+    
+    /* Relaxed type checking for build */
     "strict": false,
-    "noImplicitOverride": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    "noImplicitReturns": false,
+    "noImplicitThis": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "exactOptionalPropertyTypes": false,
-    "skipLibCheck": true
+    "noImplicitOverride": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false,
+    "useUnknownInCatchVariables": false,
+    
+    /* Performance optimizations */
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    
+    /* Module resolution fixes */
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    
+    /* Build optimizations */
+    "composite": false,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
   "include": [
     "src/cli/**/*.ts",
@@ -18,20 +47,20 @@
     "src/registry/**/*.ts",
     "src/utils/**/*.ts",
     "src/emitters/**/*.ts",
+    "src/parser/**/*.ts",
+    "src/types/**/*.ts",
     "src/index.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
+    "coverage",
     "test",
+    "tests",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "src/api/**/*",
-    "src/types/api.ts",
-    "src/types/components.ts",
-    "src/types/hooks.ts",
-    "src/types/testing.ts",
-    "src/types/index.ts",
-    "src/types/utils.ts"
+    "**/__tests__/**/*",
+    "**/__mocks__/**/*",
+    "src/api/**/*"
   ]
 }

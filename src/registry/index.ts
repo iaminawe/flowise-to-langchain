@@ -9,11 +9,11 @@
 export {
   ConverterRegistry,
   BaseConverter,
-  NodeConverter,
   ConverterFactory,
   PluginManager,
   converterRegistry,
 } from './registry.js';
+export type { NodeConverter } from './registry.js';
 
 // LLM Converters
 export {
@@ -25,7 +25,15 @@ export {
   HuggingFaceConverter,
   CohereConverter,
   ReplicateConverter,
+  GoogleGenerativeAIConverter,
 } from './converters/llm.js';
+
+// Bedrock Converters
+export {
+  BedrockChatConverter,
+  BedrockLLMConverter,
+  BedrockEmbeddingConverter,
+} from './converters/bedrock.js';
 
 // Prompt Converters
 export {
@@ -46,6 +54,8 @@ export {
   SequentialChainConverter,
   TransformChainConverter,
   MapReduceChainConverter,
+  APIChainConverter,
+  SQLDatabaseChainConverter,
 } from './converters/chain.js';
 
 // Memory Converters
@@ -56,18 +66,54 @@ export {
   VectorStoreRetrieverMemoryConverter,
   ConversationSummaryMemoryConverter,
   EntityMemoryConverter,
+  ZepMemoryConverter,
 } from './converters/memory.js';
 
 // Tool Converters
 export {
   CalculatorConverter,
-  SearchAPIConverter,
+  SearchAPIConverter as ToolSearchAPIConverter,
   WebBrowserConverter,
   CustomToolConverter,
   ShellToolConverter,
   RequestToolConverter,
   FileSystemConverter,
 } from './converters/tool.js';
+
+// Google Suite Tool Converters
+export {
+  GmailToolConverter,
+  GoogleCalendarToolConverter,
+  GoogleDriveToolConverter,
+  GoogleDocsToolConverter,
+  GoogleSheetsToolConverter,
+} from './converters/google-tools.js';
+
+// Extended Google Suite Tool Converters
+export {
+  GoogleWorkspaceToolConverter,
+  GoogleMeetToolConverter,
+  GoogleFormsToolConverter,
+} from './converters/google-tools-extended.js';
+
+// Search Tool Converters
+export {
+  DuckDuckGoSearchConverter,
+} from './converters/search-tool.js';
+
+// Advanced Search API Converters
+export {
+  TavilySearchConverter,
+  BraveSearchConverter,
+  GoogleSearchConverter,
+  ExaSearchConverter,
+  ArxivSearchConverter,
+  WolframAlphaConverter,
+  SerpAPIConverter,
+  SearchAPIConverter,
+  DataForSEOConverter,
+  SearXNGSearchConverter,
+} from './converters/advanced-search-apis.js';
 
 // Vector Store Converters
 export {
@@ -76,6 +122,8 @@ export {
   FAISSConverter,
   MemoryVectorStoreConverter,
   SupabaseConverter,
+  WeaviateConverter,
+  QdrantConverter,
 } from './converters/vectorstore.js';
 
 // Embeddings Converters
@@ -95,6 +143,8 @@ export {
   TextLoaderConverter,
   DocxLoaderConverter,
   DirectoryLoaderConverter,
+  ExcelLoaderConverter,
+  WebBaseLoaderConverter,
   WebLoaderConverter,
 } from './converters/document-loader.js';
 
@@ -152,6 +202,25 @@ export {
   ChatAgentConverter,
 } from './converters/agent.js';
 
+// Output Parser Converters
+export {
+  StructuredOutputParserConverter,
+  JsonOutputParserConverter,
+  ListOutputParserConverter,
+} from './converters/output-parser.js';
+
+export {
+  OutputFixingParserConverter,
+} from './converters/output-fixing-parser.js';
+
+// AgentFlow V2 Converters
+export {
+  AgentNodeConverter,
+  ToolNodeConverter,
+  CustomFunctionNodeConverter,
+  SubflowNodeConverter,
+} from './converters/agentflow-v2.js';
+
 // Import all converter classes for registration
 import {
   OpenAIConverter,
@@ -162,7 +231,14 @@ import {
   HuggingFaceConverter,
   CohereConverter,
   ReplicateConverter,
+  GoogleGenerativeAIConverter,
 } from './converters/llm.js';
+
+import {
+  BedrockChatConverter,
+  BedrockLLMConverter,
+  BedrockEmbeddingConverter,
+} from './converters/bedrock.js';
 
 import {
   ChatPromptTemplateConverter,
@@ -181,6 +257,8 @@ import {
   SequentialChainConverter,
   TransformChainConverter,
   MapReduceChainConverter,
+  APIChainConverter,
+  SQLDatabaseChainConverter,
 } from './converters/chain.js';
 
 import {
@@ -190,11 +268,12 @@ import {
   VectorStoreRetrieverMemoryConverter,
   ConversationSummaryMemoryConverter,
   EntityMemoryConverter,
+  ZepMemoryConverter,
 } from './converters/memory.js';
 
 import {
   CalculatorConverter,
-  SearchAPIConverter,
+  SearchAPIConverter as ToolSearchAPIConverter,
   WebBrowserConverter,
   CustomToolConverter,
   ShellToolConverter,
@@ -203,11 +282,44 @@ import {
 } from './converters/tool.js';
 
 import {
+  GmailToolConverter,
+  GoogleCalendarToolConverter,
+  GoogleDriveToolConverter,
+  GoogleDocsToolConverter,
+  GoogleSheetsToolConverter,
+} from './converters/google-tools.js';
+
+import {
+  GoogleWorkspaceToolConverter,
+  GoogleMeetToolConverter,
+  GoogleFormsToolConverter,
+} from './converters/google-tools-extended.js';
+
+import {
+  DuckDuckGoSearchConverter,
+} from './converters/search-tool.js';
+
+import {
+  TavilySearchConverter,
+  BraveSearchConverter,
+  GoogleSearchConverter,
+  ExaSearchConverter,
+  ArxivSearchConverter,
+  WolframAlphaConverter,
+  SerpAPIConverter,
+  SearchAPIConverter,
+  DataForSEOConverter,
+  SearXNGSearchConverter,
+} from './converters/advanced-search-apis.js';
+
+import {
   PineconeConverter,
   ChromaConverter,
   FAISSConverter,
   MemoryVectorStoreConverter,
   SupabaseConverter,
+  WeaviateConverter,
+  QdrantConverter,
 } from './converters/vectorstore.js';
 
 import {
@@ -225,6 +337,8 @@ import {
   TextLoaderConverter,
   DocxLoaderConverter,
   DirectoryLoaderConverter,
+  ExcelLoaderConverter,
+  WebBaseLoaderConverter,
   WebLoaderConverter,
 } from './converters/document-loader.js';
 
@@ -277,6 +391,93 @@ import {
   ChatAgentConverter,
 } from './converters/agent.js';
 
+import {
+  StructuredOutputParserConverter,
+  JsonOutputParserConverter,
+  ListOutputParserConverter,
+} from './converters/output-parser.js';
+
+import {
+  OutputFixingParserConverter,
+} from './converters/output-fixing-parser.js';
+
+import {
+  AgentNodeConverter,
+  ToolNodeConverter,
+  CustomFunctionNodeConverter,
+  SubflowNodeConverter,
+} from './converters/agentflow-v2.js';
+
+// Cache Converters
+export {
+  RedisCacheConverter,
+  InMemoryCacheConverter,
+  MomentoCacheConverter,
+  UpstashRedisCacheConverter,
+} from './converters/cache.js';
+
+// Business Tool Converters
+export {
+  JiraToolConverter,
+  StripeToolConverter,
+  AirtableToolConverter,
+  NotionToolConverter,
+  SlackToolConverter,
+  HubSpotToolConverter,
+  SalesforceToolConverter,
+  MicrosoftTeamsToolConverter,
+  AsanaToolConverter,
+} from './converters/business-tools.js';
+
+// Development Tool Converters
+export {
+  CodeInterpreterConverter,
+  OpenAPIConverter,
+  GitHubConverter,
+  DockerConverter,
+  ShellConverter,
+  DatabaseConverter,
+  convertDevelopmentTool,
+  developmentToolConverters,
+} from './converters/development-tools.js';
+
+import {
+  RedisCacheConverter,
+  InMemoryCacheConverter,
+  MomentoCacheConverter,
+  UpstashRedisCacheConverter,
+} from './converters/cache.js';
+
+import {
+  JiraToolConverter,
+  StripeToolConverter,
+  AirtableToolConverter,
+  NotionToolConverter,
+  SlackToolConverter,
+  HubSpotToolConverter,
+  SalesforceToolConverter,
+  MicrosoftTeamsToolConverter,
+  AsanaToolConverter,
+} from './converters/business-tools.js';
+
+import {
+  CodeInterpreterConverter,
+  OpenAPIConverter,
+  GitHubConverter,
+  DockerConverter,
+  ShellConverter,
+  DatabaseConverter,
+} from './converters/development-tools.js';
+
+import {
+  CodeInterpreterWrapper,
+  OpenAPIWrapper,
+  GitHubWrapper,
+  DockerWrapper,
+  ShellWrapper,
+  DatabaseWrapper,
+} from './converters/development-tools-wrapper.js';
+
 import { ConverterFactory, ConverterRegistry } from './registry.js';
 
 /**
@@ -292,6 +493,12 @@ export const BUILT_IN_CONVERTERS = [
   HuggingFaceConverter,
   CohereConverter,
   ReplicateConverter,
+  GoogleGenerativeAIConverter,
+  
+  // Bedrock Converters
+  BedrockChatConverter,
+  BedrockLLMConverter,
+  BedrockEmbeddingConverter,
 
   // Prompt Converters
   ChatPromptTemplateConverter,
@@ -309,6 +516,8 @@ export const BUILT_IN_CONVERTERS = [
   SequentialChainConverter,
   TransformChainConverter,
   MapReduceChainConverter,
+  APIChainConverter,
+  SQLDatabaseChainConverter,
 
   // Memory Converters
   BufferMemoryConverter,
@@ -317,15 +526,43 @@ export const BUILT_IN_CONVERTERS = [
   VectorStoreRetrieverMemoryConverter,
   ConversationSummaryMemoryConverter,
   EntityMemoryConverter,
+  ZepMemoryConverter,
 
   // Tool Converters
   CalculatorConverter,
-  SearchAPIConverter,
+  ToolSearchAPIConverter,
   WebBrowserConverter,
   CustomToolConverter,
   ShellToolConverter,
   RequestToolConverter,
   FileSystemConverter,
+  
+  // Google Suite Tool Converters
+  GmailToolConverter,
+  GoogleCalendarToolConverter,
+  GoogleDriveToolConverter,
+  GoogleDocsToolConverter,
+  GoogleSheetsToolConverter,
+  
+  // Extended Google Suite Tool Converters
+  GoogleWorkspaceToolConverter,
+  GoogleMeetToolConverter,
+  GoogleFormsToolConverter,
+  
+  // Search Tool Converters
+  DuckDuckGoSearchConverter,
+  
+  // Advanced Search API Converters
+  TavilySearchConverter,
+  BraveSearchConverter,
+  GoogleSearchConverter,
+  ExaSearchConverter,
+  ArxivSearchConverter,
+  WolframAlphaConverter,
+  SerpAPIConverter,
+  SearchAPIConverter,
+  DataForSEOConverter,
+  SearXNGSearchConverter,
 
   // Vector Store Converters
   PineconeConverter,
@@ -333,6 +570,8 @@ export const BUILT_IN_CONVERTERS = [
   FAISSConverter,
   MemoryVectorStoreConverter,
   SupabaseConverter,
+  WeaviateConverter,
+  QdrantConverter,
 
   // Embeddings Converters
   OpenAIEmbeddingsConverter,
@@ -348,6 +587,8 @@ export const BUILT_IN_CONVERTERS = [
   TextLoaderConverter,
   DocxLoaderConverter,
   DirectoryLoaderConverter,
+  ExcelLoaderConverter,
+  WebBaseLoaderConverter,
   WebLoaderConverter,
 
   // Text Splitter Converters
@@ -393,6 +634,43 @@ export const BUILT_IN_CONVERTERS = [
   ReactDocstoreAgentConverter,
   ConversationalReactDescriptionAgentConverter,
   ChatAgentConverter,
+
+  // Output Parser Converters
+  StructuredOutputParserConverter,
+  JsonOutputParserConverter,
+  ListOutputParserConverter,
+  OutputFixingParserConverter,
+
+  // AgentFlow V2 Converters
+  AgentNodeConverter,
+  ToolNodeConverter,
+  CustomFunctionNodeConverter,
+  SubflowNodeConverter,
+
+  // Cache Converters
+  RedisCacheConverter,
+  InMemoryCacheConverter,
+  MomentoCacheConverter,
+  UpstashRedisCacheConverter,
+
+  // Business Tool Converters
+  JiraToolConverter,
+  StripeToolConverter,
+  AirtableToolConverter,
+  NotionToolConverter,
+  SlackToolConverter,
+  HubSpotToolConverter,
+  SalesforceToolConverter,
+  MicrosoftTeamsToolConverter,
+  AsanaToolConverter,
+
+  // Development Tool Converters (wrapped)
+  CodeInterpreterWrapper,
+  OpenAPIWrapper,
+  GitHubWrapper,
+  DockerWrapper,
+  ShellWrapper,
+  DatabaseWrapper,
 ];
 
 /**
@@ -413,6 +691,15 @@ export function initializeRegistry(): void {
   registry.registerAlias('gpt', 'chatOpenAI');
   registry.registerAlias('claude', 'anthropic');
   registry.registerAlias('azure', 'azureOpenAI');
+  registry.registerAlias('gemini', 'googleGenerativeAI');
+  registry.registerAlias('google', 'googleGenerativeAI');
+  
+  // Bedrock aliases
+  registry.registerAlias('bedrock', 'bedrockChat');
+  registry.registerAlias('aws', 'bedrockChat');
+  registry.registerAlias('awsBedrock', 'bedrockChat');
+  registry.registerAlias('bedrockLlm', 'bedrockLLM');
+  registry.registerAlias('bedrockEmbeddings', 'bedrockEmbedding');
 
   // Prompt aliases
   registry.registerAlias('chatPrompt', 'chatPromptTemplate');
@@ -423,11 +710,16 @@ export function initializeRegistry(): void {
   registry.registerAlias('llm_chain', 'llmChain');
   registry.registerAlias('conversation_chain', 'conversationChain');
   registry.registerAlias('qa_chain', 'retrievalQAChain');
+  registry.registerAlias('sql_chain', 'sqlDatabaseChain');
+  registry.registerAlias('database_chain', 'sqlDatabaseChain');
+  registry.registerAlias('api_chain', 'apiChain');
+  registry.registerAlias('apiCall', 'apiChain');
 
   // Memory aliases
   registry.registerAlias('buffer', 'bufferMemory');
   registry.registerAlias('window', 'bufferWindowMemory');
   registry.registerAlias('summary', 'summaryBufferMemory');
+  registry.registerAlias('zep', 'zepMemory');
 
   // Tool aliases
   registry.registerAlias('calc', 'calculator');
@@ -437,6 +729,54 @@ export function initializeRegistry(): void {
   registry.registerAlias('shell', 'shellTool');
   registry.registerAlias('request', 'requestTool');
   registry.registerAlias('fs', 'fileSystem');
+  
+  // Search Tool aliases
+  registry.registerAlias('duckduckgo', 'duckDuckGoSearch');
+  registry.registerAlias('ddg', 'duckDuckGoSearch');
+  registry.registerAlias('duckDuckGo', 'duckDuckGoSearch');
+  registry.registerAlias('duck', 'duckDuckGoSearch');
+  
+  // Google Suite Tool aliases
+  registry.registerAlias('gmail', 'gmailTool');
+  registry.registerAlias('googleGmail', 'gmailTool');
+  registry.registerAlias('calendar', 'googleCalendarTool');
+  registry.registerAlias('googleCalendar', 'googleCalendarTool');
+  registry.registerAlias('gcal', 'googleCalendarTool');
+  registry.registerAlias('drive', 'googleDriveTool');
+  registry.registerAlias('googleDrive', 'googleDriveTool');
+  registry.registerAlias('gdrive', 'googleDriveTool');
+  registry.registerAlias('docs', 'googleDocsTool');
+  registry.registerAlias('googleDocs', 'googleDocsTool');
+  registry.registerAlias('gdocs', 'googleDocsTool');
+  registry.registerAlias('sheets', 'googleSheetsTool');
+  registry.registerAlias('googleSheets', 'googleSheetsTool');
+  registry.registerAlias('gsheets', 'googleSheetsTool');
+  registry.registerAlias('spreadsheet', 'googleSheetsTool');
+  registry.registerAlias('workspace', 'googleWorkspaceTool');
+  registry.registerAlias('googleWorkspace', 'googleWorkspaceTool');
+  registry.registerAlias('admin', 'googleWorkspaceTool');
+  registry.registerAlias('meet', 'googleMeetTool');
+  registry.registerAlias('googleMeet', 'googleMeetTool');
+  registry.registerAlias('video', 'googleMeetTool');
+  registry.registerAlias('forms', 'googleFormsTool');
+  registry.registerAlias('googleForms', 'googleFormsTool');
+  registry.registerAlias('gforms', 'googleFormsTool');
+  
+  // Advanced Search API aliases
+  registry.registerAlias('tavily', 'tavilySearch');
+  registry.registerAlias('brave', 'braveSearch');
+  registry.registerAlias('google', 'googleSearchAPI');
+  registry.registerAlias('googleSearch', 'googleSearchAPI');
+  registry.registerAlias('exa', 'exaSearch');
+  registry.registerAlias('arxiv', 'arxivSearch');
+  registry.registerAlias('wolfram', 'wolframAlpha');
+  registry.registerAlias('wolframalpha', 'wolframAlpha');
+  registry.registerAlias('serpapi', 'serpAPI');
+  registry.registerAlias('serp', 'serpAPI');
+  registry.registerAlias('searchapi', 'searchAPI');
+  registry.registerAlias('dataforseo', 'dataForSEO');
+  registry.registerAlias('searxng', 'searxngSearch');
+  registry.registerAlias('searx', 'searxngSearch');
 
   // Vector Store aliases
   registry.registerAlias('vectorstore', 'memoryVectorStore');
@@ -445,6 +785,8 @@ export function initializeRegistry(): void {
   registry.registerAlias('chromaVectorStore', 'chroma');
   registry.registerAlias('faissVectorStore', 'faiss');
   registry.registerAlias('supabaseVectorStore', 'supabase');
+  registry.registerAlias('weaviateVectorStore', 'weaviate');
+  registry.registerAlias('qdrantVectorStore', 'qdrant');
 
   // Embeddings aliases
   registry.registerAlias('openaiEmbeddings', 'openAIEmbeddings');
@@ -512,6 +854,105 @@ export function initializeRegistry(): void {
   registry.registerAlias('zeroShotAgent', 'zeroShotReactDescriptionAgent');
   registry.registerAlias('chatAgent', 'chatAgent');
   registry.registerAlias('structuredAgent', 'structuredChatAgent');
+
+  // Output Parser aliases
+  registry.registerAlias('structuredParser', 'structuredOutputParser');
+  registry.registerAlias('jsonParser', 'jsonOutputParser');
+  registry.registerAlias('listParser', 'listOutputParser');
+  registry.registerAlias('outputParser', 'structuredOutputParser');
+  registry.registerAlias('parser', 'structuredOutputParser');
+
+  // AgentFlow V2 aliases
+  registry.registerAlias('agentNode', 'agentNode');
+  registry.registerAlias('agent', 'agentNode');
+  registry.registerAlias('agentflowAgent', 'agentNode');
+  registry.registerAlias('toolNode', 'toolNode');
+  registry.registerAlias('tool', 'toolNode');
+  registry.registerAlias('agentflowTool', 'toolNode');
+  registry.registerAlias('customFunctionNode', 'customFunctionNode');
+  registry.registerAlias('customFunction', 'customFunctionNode');
+  registry.registerAlias('function', 'customFunctionNode');
+  registry.registerAlias('agentflowFunction', 'customFunctionNode');
+  registry.registerAlias('subflowNode', 'subflowNode');
+  registry.registerAlias('subflow', 'subflowNode');
+  registry.registerAlias('nestedWorkflow', 'subflowNode');
+  registry.registerAlias('agentflowSubflow', 'subflowNode');
+
+  // Cache aliases
+  registry.registerAlias('cache', 'inMemoryCache');
+  registry.registerAlias('redis', 'redisCache');
+  registry.registerAlias('redisCache', 'redisCache');
+  registry.registerAlias('memory', 'inMemoryCache');
+  registry.registerAlias('memoryCache', 'inMemoryCache');
+  registry.registerAlias('momento', 'momentoCache');
+  registry.registerAlias('momentoCache', 'momentoCache');
+  registry.registerAlias('upstash', 'upstashRedisCache');
+  registry.registerAlias('upstashCache', 'upstashRedisCache');
+  registry.registerAlias('upstashRedis', 'upstashRedisCache');
+
+  // Development Tool aliases
+  registry.registerAlias('code', 'codeInterpreter');
+  registry.registerAlias('codeExecution', 'codeInterpreter');
+  registry.registerAlias('python', 'codeInterpreter');
+  registry.registerAlias('javascript', 'codeInterpreter');
+  registry.registerAlias('jupyter', 'codeInterpreter');
+  registry.registerAlias('notebook', 'codeInterpreter');
+  registry.registerAlias('openapi', 'openAPITool');
+  registry.registerAlias('restapi', 'openAPITool');
+  registry.registerAlias('api', 'openAPITool');
+  registry.registerAlias('swagger', 'openAPITool');
+  registry.registerAlias('github', 'githubTool');
+  registry.registerAlias('git', 'githubTool');
+  registry.registerAlias('repository', 'githubTool');
+  registry.registerAlias('repo', 'githubTool');
+  registry.registerAlias('docker', 'dockerTool');
+  registry.registerAlias('container', 'dockerTool');
+  registry.registerAlias('containerization', 'dockerTool');
+  registry.registerAlias('terminal', 'shellTool');
+  registry.registerAlias('bash', 'shellTool');
+  registry.registerAlias('command', 'shellTool');
+  registry.registerAlias('cli', 'shellTool');
+  registry.registerAlias('database', 'databaseTool');
+  registry.registerAlias('db', 'databaseTool');
+  registry.registerAlias('sql', 'databaseTool');
+  registry.registerAlias('postgres', 'databaseTool');
+  registry.registerAlias('postgresql', 'databaseTool');
+  registry.registerAlias('mysql', 'databaseTool');
+  registry.registerAlias('sqlite', 'databaseTool');
+  registry.registerAlias('mongodb', 'databaseTool');
+  registry.registerAlias('mongo', 'databaseTool');
+  registry.registerAlias('nosql', 'databaseTool');
+
+  // Business Tool aliases
+  registry.registerAlias('jira', 'jiraTool');
+  registry.registerAlias('atlassian', 'jiraTool');
+  registry.registerAlias('projectManagement', 'jiraTool');
+  registry.registerAlias('stripe', 'stripeTool');
+  registry.registerAlias('payment', 'stripeTool');
+  registry.registerAlias('payments', 'stripeTool');
+  registry.registerAlias('billing', 'stripeTool');
+  registry.registerAlias('airtable', 'airtableTool');
+  registry.registerAlias('database', 'airtableTool');
+  registry.registerAlias('crm', 'airtableTool');
+  registry.registerAlias('notion', 'notionTool');
+  registry.registerAlias('knowledge', 'notionTool');
+  registry.registerAlias('knowledgeBase', 'notionTool');
+  registry.registerAlias('docs', 'notionTool');
+  registry.registerAlias('slack', 'slackTool');
+  registry.registerAlias('chat', 'slackTool');
+  registry.registerAlias('messaging', 'slackTool');
+  registry.registerAlias('communication', 'slackTool');
+  registry.registerAlias('hubspot', 'hubspotTool');
+  registry.registerAlias('hubSpot', 'hubspotTool');
+  registry.registerAlias('marketing', 'hubspotTool');
+  registry.registerAlias('salesforce', 'salesforceTool');
+  registry.registerAlias('sfdc', 'salesforceTool');
+  registry.registerAlias('enterpriseCrm', 'salesforceTool');
+  registry.registerAlias('teams', 'microsoftTeamsTool');
+  registry.registerAlias('microsoftTeams', 'microsoftTeamsTool');
+  registry.registerAlias('msteams', 'microsoftTeamsTool');
+  registry.registerAlias('asana', 'asanaTool');
+  registry.registerAlias('taskManagement', 'asanaTool');
 }
 
 /**
@@ -631,6 +1072,18 @@ export function getConverterRecommendations(
       suggestions.push(
         ...registeredTypes.filter(
           (t) => registry.getConverter(t)?.['category'] === 'agent'
+        )
+      );
+    }
+
+    if (
+      type.toLowerCase().includes('parser') ||
+      type.toLowerCase().includes('output') ||
+      type.toLowerCase().includes('structured')
+    ) {
+      suggestions.push(
+        ...registeredTypes.filter(
+          (t) => registry.getConverter(t)?.['category'] === 'output-parser'
         )
       );
     }

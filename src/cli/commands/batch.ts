@@ -108,7 +108,7 @@ async function batchConvert(
           results.push(result.value);
         } else {
           results.push({
-            file: batch[index],
+            file: batch[index] || '',
             success: false,
             duration: 0,
             errors: [result.reason?.message || 'Unknown error'],
@@ -219,6 +219,11 @@ async function convertSingleFile(
       const mainFile =
         result.result.files.find((f) => f.path.endsWith('.ts')) ||
         result.result.files[0];
+      
+      if (!mainFile) {
+        throw new Error('No output file generated');
+      }
+      
       await fs.writeFile(outputPath, mainFile.content, 'utf-8');
 
       return {

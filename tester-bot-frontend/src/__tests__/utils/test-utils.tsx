@@ -53,7 +53,7 @@ export const mockUseSearchParams = {
 }
 
 // Helper to create mock API responses
-export const createMockApiResponse = <T>(data: T, status = 200) => ({
+export const createMockApiResponse = <T,>(data: T, status = 200) => ({
   data,
   status,
   statusText: 'OK',

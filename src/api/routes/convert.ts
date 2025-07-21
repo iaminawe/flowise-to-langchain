@@ -66,25 +66,28 @@ convertRouter.post(
       // If streaming is enabled, set up WebSocket progress updates
       if (request.stream && request.connectionId) {
         // Subscribe to conversion progress
-        const unsubscribe = conversionService.on('job:progress', (progress) => {
+        const progressHandler = (progress: any) => {
           websocketService.broadcastProgress(progress.jobId, progress);
-        });
+        };
+        conversionService.on('job:progress', progressHandler);
 
         // Subscribe to conversion completion
-        const unsubscribeComplete = conversionService.on('conversion:completed', (event) => {
+        const completeHandler = (event: any) => {
           websocketService.broadcastResult(event.jobId, event.result, 'convert');
-        });
+        };
+        conversionService.on('conversion:completed', completeHandler);
 
         // Subscribe to conversion failure
-        const unsubscribeFailed = conversionService.on('conversion:failed', (event) => {
+        const failedHandler = (event: any) => {
           websocketService.broadcastError(event.jobId, event.error, 'convert');
-        });
+        };
+        conversionService.on('conversion:failed', failedHandler);
 
         // Clean up listeners after some time
         setTimeout(() => {
-          unsubscribe();
-          unsubscribeComplete();
-          unsubscribeFailed();
+          conversionService.off('job:progress', progressHandler);
+          conversionService.off('conversion:completed', completeHandler);
+          conversionService.off('conversion:failed', failedHandler);
         }, 5 * 60 * 1000); // 5 minutes
       }
 
@@ -160,7 +163,7 @@ convertRouter.get(
       requestId: req.headers['x-request-id'] as string,
     };
 
-    res.json(response);
+    return res.json(response);
   })
 );
 
@@ -194,7 +197,7 @@ convertRouter.delete(
       requestId: req.headers['x-request-id'] as string,
     };
 
-    res.json(response);
+    return res.json(response);
   })
 );
 
@@ -219,7 +222,7 @@ convertRouter.get(
       requestId: req.headers['x-request-id'] as string,
     };
 
-    res.json(response);
+    return res.json(response);
   })
 );
 
@@ -285,6 +288,6 @@ convertRouter.post(
       requestId: req.headers['x-request-id'] as string,
     };
 
-    res.json(response);
+    return res.json(response);
   })
 );

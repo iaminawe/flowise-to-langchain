@@ -16,7 +16,7 @@ abstract class BaseToolConverter extends BaseConverter {
 
   protected generateToolConfiguration(
     node: IRNode,
-    context: GenerationContext
+    _context: GenerationContext
   ): {
     imports: string[];
     packageName: string;
@@ -219,17 +219,17 @@ export class WebBrowserConverter extends BaseToolConverter {
 
     // Web browser requires model and embeddings from connections
     // This would need to be handled by the connection system
-    config.model = `\${${this.generateVariableName(_node, 'llm')}}`;
-    config.embeddings = `\${${this.generateVariableName(_node, 'embeddings')}}`;
+    config['model'] = `\${${this.generateVariableName(_node, 'llm')}}`;
+    config['embeddings'] = `\${${this.generateVariableName(_node, 'embeddings')}}`;
 
     const headless = this.getParameterValue(_node, 'headless');
     if (headless !== undefined) {
-      config.headless = headless;
+      config['headless'] = headless;
     }
 
     const timeout = this.getParameterValue(_node, 'timeout');
     if (timeout !== undefined) {
-      config.timeout = timeout;
+      config['timeout'] = timeout;
     }
 
     return config;
@@ -267,22 +267,22 @@ export class CustomToolConverter extends BaseToolConverter {
 
     const name = this.getParameterValue(_node, 'name');
     if (name) {
-      config.name = name;
+      config['name'] = name;
     }
 
     const description = this.getParameterValue(_node, 'description');
     if (description) {
-      config.description = description;
+      config['description'] = description;
     }
 
     const schema = this.getParameterValue(_node, 'schema');
     if (schema) {
-      config.schema = schema;
+      config['schema'] = schema;
     }
 
     const func = this.getParameterValue(_node, 'func');
     if (func) {
-      config.func = func;
+      config['func'] = func;
     }
 
     return config;
@@ -353,7 +353,7 @@ export class RequestToolConverter extends BaseToolConverter {
 
     const headers = this.getParameterValue(_node, 'headers');
     if (headers) {
-      config.headers = headers;
+      config['headers'] = headers;
     }
 
     return config;
@@ -446,7 +446,7 @@ export class FileSystemConverter extends BaseToolConverter {
 
     const rootDir = this.getParameterValue(_node, 'rootDir');
     if (rootDir) {
-      config.rootDir = rootDir;
+      config['rootDir'] = rootDir;
     }
 
     return config;

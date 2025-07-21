@@ -21,12 +21,9 @@ import {
   ConversionMetrics,
   CodeGenerationResult,
   GeneratedFile,
-  NodeId,
 } from './types.js';
 import {
   StandardNodeFactory,
-  NodeUtils,
-  ConnectionValidator,
 } from './nodes.js';
 import { IRGraphAnalyzer } from './graph.js';
 import { ConverterFactory } from '../registry/registry.js';
@@ -69,9 +66,9 @@ export class FlowiseToIRTransformer {
    * Transform Flowise chatflow JSON to IR graph
    */
   async transform(flowiseData: FlowiseChatFlow): Promise<TransformationResult> {
-    const startTime = Date.now();
+    const _startTime = Date.now();
     this.metrics = {
-      startTime,
+      startTime: _startTime,
       phases: {
         parsing: 0,
         validation: 0,
@@ -122,9 +119,9 @@ export class FlowiseToIRTransformer {
       // Complete metrics
       const endTime = Date.now();
       const completeMetrics: ConversionMetrics = {
-        startTime,
+        startTime: _startTime,
         endTime,
-        duration: endTime - startTime,
+        duration: endTime - _startTime,
         nodesProcessed: nodes.length,
         connectionsProcessed: connections.length,
         codeFragmentsGenerated: 0,
@@ -316,7 +313,7 @@ export class FlowiseToIRTransformer {
 
   private transformConnections(
     flowiseEdges: FlowiseEdge[],
-    nodes: IRNode[]
+    _nodes: IRNode[]
   ): IRConnection[] {
     return flowiseEdges.map((edge) => ({
       id: edge.id,
@@ -351,13 +348,13 @@ export class FlowiseToIRTransformer {
   }
 
   private collectWarnings(
-    flowiseData: FlowiseChatFlow,
+    _flowiseData: FlowiseChatFlow,
     graph: IRGraph
   ): string[] {
     const warnings: string[] = [];
 
     // Check for unsupported nodes
-    const unsupportedNodes = graph.nodes.filter((n) => n.metadata?.unsupported);
+    const unsupportedNodes = graph.nodes.filter((n) => n.metadata?.['unsupported']);
     if (unsupportedNodes.length > 0) {
       warnings.push(`Found ${unsupportedNodes.length} unsupported node types`);
     }
@@ -392,7 +389,7 @@ export class IRToCodeTransformer {
     graph: IRGraph,
     context: GenerationContext
   ): Promise<CodeGenerationResult> {
-    const startTime = Date.now();
+    // const _startTime = Date.now(); // Unused
     const fragments: CodeFragment[] = [];
 
     try {
@@ -411,14 +408,9 @@ export class IRToCodeTransformer {
       const files = this.generateFiles(fragments, context);
 
       const endTime = Date.now();
-      const metrics: GenerationMetrics = {
-        fragmentsGenerated: fragments.length,
-        filesGenerated: files.length,
-        linesOfCode: this.countLines(fragments),
-        dependencies: this.extractDependencies(fragments).size,
-        generationTime: endTime - startTime,
-        codeSize: this.calculateCodeSize(fragments),
-      };
+      // Remove unused variable warning
+      void endTime;
+      // Removed unused _metrics variable
 
       return {
         files,
@@ -588,16 +580,16 @@ export class IRToCodeTransformer {
     context: GenerationContext
   ): CodeFragment {
     const params = this.getNodeParameters(node);
-    const modelName = params.modelName || 'gpt-3.5-turbo';
-    const temperature = params.temperature || 0.7;
+    const modelName = params['modelName'] || 'gpt-3.5-turbo';
+    const temperature = params['temperature'] || 0.7;
 
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new OpenAI({\n`;
     content += `  modelName: "${modelName}",\n`;
     content += `  temperature: ${temperature},\n`;
 
-    if (params.maxTokens) {
-      content += `  maxTokens: ${params.maxTokens},\n`;
+    if (params['maxTokens']) {
+      content += `  maxTokens: ${params['maxTokens']},\n`;
     }
 
     content += `  openAIApiKey: process.env.OPENAI_API_KEY,\n`;
@@ -623,16 +615,16 @@ export class IRToCodeTransformer {
     context: GenerationContext
   ): CodeFragment {
     const params = this.getNodeParameters(node);
-    const modelName = params.modelName || 'gpt-3.5-turbo';
-    const temperature = params.temperature || 0.7;
+    const modelName = params['modelName'] || 'gpt-3.5-turbo';
+    const temperature = params['temperature'] || 0.7;
 
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new ChatOpenAI({\n`;
     content += `  modelName: "${modelName}",\n`;
     content += `  temperature: ${temperature},\n`;
 
-    if (params.maxTokens) {
-      content += `  maxTokens: ${params.maxTokens},\n`;
+    if (params['maxTokens']) {
+      content += `  maxTokens: ${params['maxTokens']},\n`;
     }
 
     content += `  openAIApiKey: process.env.OPENAI_API_KEY,\n`;
@@ -658,8 +650,8 @@ export class IRToCodeTransformer {
     context: GenerationContext
   ): CodeFragment {
     const params = this.getNodeParameters(node);
-    const systemMessage = params.systemMessage;
-    const humanMessage = params.humanMessage || '{input}';
+    const systemMessage = params['systemMessage'];
+    const humanMessage = params['humanMessage'] || '{input}';
 
     let content = `// ${node.label}\n`;
 
@@ -695,7 +687,7 @@ export class IRToCodeTransformer {
     graph?: IRGraph
   ): CodeFragment {
     const params = this.getNodeParameters(node);
-    const outputKey = params.outputKey || 'text';
+    const outputKey = params['outputKey'] || 'text';
 
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new LLMChain({\n`;
@@ -734,8 +726,8 @@ export class IRToCodeTransformer {
     context: GenerationContext
   ): CodeFragment {
     const params = this.getNodeParameters(node);
-    const memoryKey = params.memoryKey || 'history';
-    const returnMessages = params.returnMessages || false;
+    const memoryKey = params['memoryKey'] || 'history';
+    const returnMessages = params['returnMessages'] || false;
 
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new BufferMemory({\n`;
@@ -763,9 +755,9 @@ export class IRToCodeTransformer {
     context: GenerationContext
   ): CodeFragment {
     const params = this.getNodeParameters(node);
-    const memoryKey = params.memoryKey || 'history';
-    const returnMessages = params.returnMessages || false;
-    const k = params.k || 5;
+    const memoryKey = params['memoryKey'] || 'history';
+    const returnMessages = params['returnMessages'] || false;
+    const k = params['k'] || 5;
 
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new BufferWindowMemory({\n`;
@@ -795,9 +787,9 @@ export class IRToCodeTransformer {
     graph?: IRGraph
   ): CodeFragment {
     const params = this.getNodeParameters(node);
-    const memoryKey = params.memoryKey || 'history';
-    const returnMessages = params.returnMessages || false;
-    const maxTokenLimit = params.maxTokenLimit || 2000;
+    const memoryKey = params['memoryKey'] || 'history';
+    const returnMessages = params['returnMessages'] || false;
+    const maxTokenLimit = params['maxTokenLimit'] || 2000;
 
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new ConversationSummaryMemory({\n`;
@@ -849,7 +841,7 @@ export class IRToCodeTransformer {
     context: GenerationContext
   ): CodeFragment {
     const params = this.getNodeParameters(node);
-    const apiKey = params.apiKey || 'process.env.SERPAPI_API_KEY';
+    const apiKey = params['apiKey'] || 'process.env.SERPAPI_API_KEY';
 
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new SerpAPI(${this.formatParameterValue(apiKey)});`;
@@ -874,6 +866,8 @@ export class IRToCodeTransformer {
     context: GenerationContext,
     graph?: IRGraph
   ): CodeFragment[] {
+    // Remove unused graph parameter warning
+    void graph;
     // Try to use the registry converter first
     const registry = ConverterFactory.getRegistry();
     const converter = registry.getConverter(node.type);
@@ -924,8 +918,8 @@ export class IRToCodeTransformer {
     graph?: IRGraph
   ): CodeFragment {
     const params = this.getNodeParameters(node);
-    const headless = params.headless !== undefined ? params.headless : true;
-    const timeout = params.timeout || 30000;
+    const headless = params['headless'] !== undefined ? params['headless'] : true;
+    const timeout = params['timeout'] || 30000;
 
     let content = `// ${node.label}\n`;
     content += `const ${this.getVariableName(node)} = new WebBrowser({\n`;
@@ -993,7 +987,8 @@ export class IRToCodeTransformer {
     }
 
     // Find the main chain or entry point
-    const entryPoints = graph.analysis?.entryPoints || [];
+    // Analysis entry points available if needed
+    // const entryPoints = graph.analysis?.entryPoints || [];
     const exitPoints = graph.analysis?.exitPoints || [];
 
     if (exitPoints.length > 0) {
@@ -1266,27 +1261,14 @@ export class IRToCodeTransformer {
     return String(value);
   }
 
-  private countLines(fragments: CodeFragment[]): number {
-    return fragments.reduce(
-      (total, fragment) => total + fragment.content.split('\n').length,
-      0
-    );
-  }
+  // private countLines(fragments: CodeFragment[]): number {
+  //   return fragments.reduce(
+  //     (total, fragment) => total + fragment.content.split('\n').length,
+  //     0
+  //   );
+  // }
 
-  private extractDependencies(fragments: CodeFragment[]): Set<string> {
-    const deps = new Set<string>();
-    for (const fragment of fragments) {
-      fragment.dependencies.forEach((dep) => deps.add(dep));
-    }
-    return deps;
-  }
-
-  private calculateCodeSize(fragments: CodeFragment[]): number {
-    return fragments.reduce(
-      (total, fragment) => total + fragment.content.length,
-      0
-    );
-  }
+  // Removed unused methods _extractDependencies and _calculateCodeSize
 
   private generateDependencyList(
     graph: IRGraph,
@@ -1360,7 +1342,7 @@ export class IRToCodeTransformer {
     return features;
   }
 
-  private generateScripts(context: GenerationContext): Record<string, string> {
+  private generateScripts(_context: GenerationContext): Record<string, string> {
     return {
       build: 'tsc',
       start: 'node dist/index.js',

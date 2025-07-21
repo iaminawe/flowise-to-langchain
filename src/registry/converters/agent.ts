@@ -129,7 +129,7 @@ export abstract class BaseAgentConverter extends BaseConverter {
   }
 
   override getDependencies(
-    node: IRNode,
+    _node: IRNode,
     _context?: GenerationContext
   ): string[] {
     const dependencies = [this.langchainModule];

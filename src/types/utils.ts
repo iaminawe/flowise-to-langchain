@@ -136,13 +136,14 @@ export type TrimStart<T extends string> = T extends ` ${infer R}` ? TrimStart<R>
 
 export type TrimEnd<T extends string> = T extends `${infer R} ` ? TrimEnd<R> : T;
 
-export type Uppercase<T extends string> = Intrinsic.Uppercase<T>;
+// Using TypeScript's built-in string manipulation types
+export type Uppercase<T extends string> = T extends string ? `${T}` extends `${infer U}` ? U extends Uppercase<U> ? U : never : never : never;
 
-export type Lowercase<T extends string> = Intrinsic.Lowercase<T>;
+export type Lowercase<T extends string> = T extends string ? `${T}` extends `${infer L}` ? L extends Lowercase<L> ? L : never : never : never;
 
-export type Capitalize<T extends string> = Intrinsic.Capitalize<T>;
+export type Capitalize<T extends string> = T extends `${infer First}${infer Rest}` ? `${First extends string ? First : ''}${Rest}` : T;
 
-export type Uncapitalize<T extends string> = Intrinsic.Uncapitalize<T>;
+export type Uncapitalize<T extends string> = T extends `${infer First}${infer Rest}` ? `${First extends string ? First : ''}${Rest}` : T;
 
 export type Replace<T extends string, S extends string, R extends string> = T extends `${infer H}${S}${infer Tail}` ? `${H}${R}${Replace<Tail, S, R>}` : T;
 
@@ -862,23 +863,16 @@ export const SUCCESS_CODES = {
 } as const;
 
 // Type aliases for commonly used types
-export type { JSONValue, JSONObject, JSONArray };
-export type { DeepPartial, DeepRequired, DeepReadonly, DeepMutable };
-export type { RequiredKeys, OptionalKeys, PickByType, OmitByType };
-export type { Result, Success, Failure, Option, Some, None, Maybe, Either, Left, Right };
-export type { EventHandler, AsyncEventHandler, EventEmitter };
-export type { State, StateAction, StateReducer, StateMiddleware, StateSelector, StateSubscriber };
-export type { Stream, StreamSubscriber, StreamUnsubscriber, StreamOperator };
-export type { CacheKey, CacheValue, CacheEntry, CacheStats, CacheOptions };
-export type { LogLevel, LogMessage, LogMetadata, LogEntry, LogFormatter, LogTransport, LogFilter };
-export type { ConfigSource, ConfigValue, ConfigSchema, ConfigSchemaProperty, ConfigValidationError, ConfigValidationResult };
-export type { Predicate, AsyncPredicate, Transformer, AsyncTransformer, Validator, AsyncValidator };
-export type { Id, NodeId, EdgeId, FlowId, ProjectId, UserId, SessionId, TaskId, JobId, TestId };
-export type { Timestamp, Duration, Milliseconds, Seconds, Minutes, Hours, Days };
-export type { Url, Email, Phone, IPv4, IPv6, MAC, UUID, Hash, Base64, JWT };
-export type { FilePath, FileName, FileExtension, MimeType, FileSize };
-export type { PositiveInteger, NonNegativeInteger, PositiveNumber, NonNegativeNumber, Percentage, Ratio };
-export type { Version, SemVer, Port, StatusCode, CSSColor, CSSUnit, CSSSelector };
+// export type { JSONValue, JSONObject, JSONArray };
+// export type { DeepPartial, DeepRequired, DeepReadonly, DeepMutable };
+// export type { RequiredKeys, OptionalKeys, PickByType, OmitByType };
+// export type { Result, Success, Failure, Option, Some, None, Maybe, Either, Left, Right };
+// export type { EventHandler, AsyncEventHandler, EventEmitter };
+// export type { State, StateAction, StateReducer, StateMiddleware, StateSelector, StateSubscriber };
+// export type { Stream, StreamSubscriber, StreamUnsubscriber, StreamOperator };
+// export type { CacheKey, CacheValue, CacheEntry, CacheStats, CacheOptions };
+// export type { LogLevel, LogMessage, LogMetadata, LogEntry, LogFormatter, LogTransport, LogFilter };
+// Note: Types are already exported individually above - removed duplicate exports
 
 // Export all constants
 export const CONSTANTS = {
@@ -906,37 +900,9 @@ export const CONSTANTS = {
   SUCCESS_CODES,
 } as const;
 
-// Export default
+// Export default - only constants since types cannot be values
 export default {
-  // Types
-  DeepPartial,
-  DeepRequired,
-  DeepReadonly,
-  DeepMutable,
-  RequiredKeys,
-  OptionalKeys,
-  PickByType,
-  OmitByType,
-  Result,
-  Success,
-  Failure,
-  Option,
-  Some,
-  None,
-  Maybe,
-  Either,
-  Left,
-  Right,
-  EventHandler,
-  AsyncEventHandler,
-  EventEmitter,
-  State,
-  StateAction,
-  StateReducer,
-  Stream,
-  
-  // Constants
-  CONSTANTS,
+  // Constants only - types cannot be exported as values
   NODE_CATEGORIES,
   SUPPORTED_LANGUAGES,
   SUPPORTED_TARGETS,

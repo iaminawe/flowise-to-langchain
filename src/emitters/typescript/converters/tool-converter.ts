@@ -14,8 +14,8 @@ import type {
 import { BaseConverter } from './base-converter.js';
 
 export interface ToolConverter {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[];
-  getDependencies(node: IRNode, context: GenerationContext): string[];
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[];
+  getDependencies(node: IRNode, _context: GenerationContext): string[];
   canConvert(node: IRNode): boolean;
 }
 
@@ -26,7 +26,7 @@ export class CalculatorConverter
   extends BaseConverter
   implements ToolConverter
 {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragment
@@ -53,7 +53,7 @@ export class CalculatorConverter
     return fragments;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context: GenerationContext): string[] {
     return ['langchain/tools/calculator'];
   }
 
@@ -69,9 +69,9 @@ export class WebBrowserConverter
   extends BaseConverter
   implements ToolConverter
 {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     // Get connections from context or graph if available
-    const connections: IRConnection[] = (context as any).connections || [];
+    const connections: IRConnection[] = (_context as any).connections || [];
     const fragments: CodeFragment[] = [];
 
     // Import fragments
@@ -120,7 +120,7 @@ export class WebBrowserConverter
     return fragments;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context: GenerationContext): string[] {
     return ['langchain/tools/webbrowser'];
   }
 
@@ -136,7 +136,7 @@ export class CustomToolConverter
   extends BaseConverter
   implements ToolConverter
 {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragments
@@ -182,7 +182,7 @@ export class CustomToolConverter
     return fragments;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context: GenerationContext): string[] {
     return ['langchain/tools'];
   }
 
@@ -195,7 +195,7 @@ export class CustomToolConverter
  * Shell Tool Converter
  */
 export class ShellToolConverter extends BaseConverter implements ToolConverter {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragments
@@ -222,7 +222,7 @@ export class ShellToolConverter extends BaseConverter implements ToolConverter {
     return fragments;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context: GenerationContext): string[] {
     return ['langchain/tools/shell'];
   }
 
@@ -235,7 +235,7 @@ export class ShellToolConverter extends BaseConverter implements ToolConverter {
  * Search API Tool Converter (SerpAPI)
  */
 export class SearchAPIConverter extends BaseConverter implements ToolConverter {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragments
@@ -273,7 +273,7 @@ export class SearchAPIConverter extends BaseConverter implements ToolConverter {
     return fragments;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context: GenerationContext): string[] {
     return ['@langchain/community/tools/serpapi'];
   }
 
@@ -294,7 +294,7 @@ export class RequestToolConverter
   extends BaseConverter
   implements ToolConverter
 {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragments
@@ -329,7 +329,7 @@ export class RequestToolConverter
     return fragments;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context: GenerationContext): string[] {
     return ['langchain/tools'];
   }
 
@@ -345,7 +345,7 @@ export class FileSystemConverter
   extends BaseConverter
   implements ToolConverter
 {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragments
@@ -390,7 +390,7 @@ export class FileSystemConverter
     return fragments;
   }
 
-  getDependencies(node: IRNode, context: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context: GenerationContext): string[] {
     return ['langchain/tools/fs'];
   }
 
@@ -449,7 +449,7 @@ export function getSupportedToolTypes(): string[] {
  */
 export function createToolArray(
   toolNodes: IRNode[],
-  context: GenerationContext
+  _context: GenerationContext
 ): CodeFragment {
   const toolVars = toolNodes.map(
     (node) => `node_${node.id.replace(/[^a-zA-Z0-9]/g, '_')}`

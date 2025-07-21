@@ -26,7 +26,7 @@ export class LLMConverter implements NodeConverter {
   /**
    * Get dependencies for the LLM node
    */
-  getDependencies(node: IRNode, context?: GenerationContext): string[] {
+  getDependencies(node: IRNode, _context?: GenerationContext): string[] {
     const dependencies: string[] = [];
 
     switch (node.type) {

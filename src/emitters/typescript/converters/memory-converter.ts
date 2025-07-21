@@ -22,7 +22,7 @@ export class BufferMemoryConverter
   extends BaseConverter
   implements NodeConverter
 {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragment
@@ -64,7 +64,7 @@ export class BufferMemoryConverter
     return fragments;
   }
 
-  getDependencies(node: IRNode, context?: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
     return ['langchain/memory'];
   }
 
@@ -80,9 +80,9 @@ export class ConversationSummaryMemoryConverter
   extends BaseConverter
   implements NodeConverter
 {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     // Get connections from context or graph if available
-    const connections: IRConnection[] = (context as any).connections || [];
+    const connections: IRConnection[] = (_context as any).connections || [];
     const fragments: CodeFragment[] = [];
 
     // Import fragments
@@ -135,7 +135,7 @@ export class ConversationSummaryMemoryConverter
     return fragments;
   }
 
-  getDependencies(node: IRNode, context?: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
     return ['langchain/memory'];
   }
 
@@ -154,7 +154,7 @@ export class BufferWindowMemoryConverter
   extends BaseConverter
   implements NodeConverter
 {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     const fragments: CodeFragment[] = [];
 
     // Import fragment
@@ -198,7 +198,7 @@ export class BufferWindowMemoryConverter
     return fragments;
   }
 
-  getDependencies(node: IRNode, context?: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
     return ['langchain/memory'];
   }
 
@@ -216,9 +216,9 @@ export class ConversationSummaryBufferMemoryConverter
   extends BaseConverter
   implements NodeConverter
 {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     // Get connections from context or graph if available
-    const connections: IRConnection[] = (context as any).connections || [];
+    const connections: IRConnection[] = (_context as any).connections || [];
     const fragments: CodeFragment[] = [];
 
     // Import fragments
@@ -271,7 +271,7 @@ export class ConversationSummaryBufferMemoryConverter
     return fragments;
   }
 
-  getDependencies(node: IRNode, context?: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
     return ['langchain/memory'];
   }
 
@@ -290,9 +290,9 @@ export class VectorStoreRetrieverMemoryConverter
   extends BaseConverter
   implements NodeConverter
 {
-  convert(node: IRNode, context: GenerationContext): CodeFragment[] {
+  convert(node: IRNode, _context: GenerationContext): CodeFragment[] {
     // Get connections from context or graph if available
-    const connections: IRConnection[] = (context as any).connections || [];
+    const connections: IRConnection[] = (_context as any).connections || [];
     const fragments: CodeFragment[] = [];
 
     // Import fragments
@@ -342,7 +342,7 @@ export class VectorStoreRetrieverMemoryConverter
     return fragments;
   }
 
-  getDependencies(node: IRNode, context?: GenerationContext): string[] {
+  getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
     return ['langchain/memory'];
   }
 

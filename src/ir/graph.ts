@@ -614,7 +614,7 @@ export class IRGraphAnalyzer {
       const outgoing = graph.connections.filter(
         (c) => c.source === currentNode
       );
-      if (outgoing.length === 1) {
+      if (outgoing.length === 1 && outgoing[0]) {
         currentNode = outgoing[0].target;
       } else {
         break;

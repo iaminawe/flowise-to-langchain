@@ -99,8 +99,8 @@ export class LangFuseIntegrator {
    * Generate configuration fragment
    */
   private generateConfigFragment(
-    graph: IRGraph,
-    context: GenerationContext
+    _graph: IRGraph,
+    _context: GenerationContext
   ): CodeFragment {
     const config = {
       apiKey: 'process.env.LANGFUSE_API_KEY',
@@ -225,7 +225,7 @@ const mainTrace = langfuse?.trace({
 const llmGenerations = new Map();
 
 ${llmNodes
-  .map((node, index) => {
+  .map((node, _index) => {
     const variableName = this.sanitizeVariableName(node.label);
     const modelName = this.getParameterValue(node, 'modelName', 'unknown');
 
@@ -262,7 +262,7 @@ llmGenerations.set('${node.id}', ${variableName}Generation);`;
 const chainSpans = new Map();
 
 ${chainNodes
-  .map((node, index) => {
+  .map((node, _index) => {
     const variableName = this.sanitizeVariableName(node.label);
 
     return `// Track ${node.label} execution
@@ -301,7 +301,7 @@ chainSpans.set('${node.id}', ${variableName}Span);`;
 const toolSpans = new Map();
 
 ${toolNodes
-  .map((node, index) => {
+  .map((node, _index) => {
     const variableName = this.sanitizeVariableName(node.label);
 
     return `// Track ${node.label} usage
@@ -380,7 +380,7 @@ if (mainTrace) {
   /**
    * Generate callback wrapper for LangChain components
    */
-  generateCallbackWrapper(nodeId: string, nodeType: string): string {
+  generateCallbackWrapper(nodeId: string, _nodeType: string): string {
     return `// LangFuse callback for ${nodeId}
 const ${this.sanitizeVariableName(nodeId)}Callback = langfuse ? {
   handleLLMStart: (llm, prompts) => {

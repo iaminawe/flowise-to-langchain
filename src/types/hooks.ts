@@ -1,11 +1,9 @@
 /**
- * React Hooks Interface Definitions
+ * Hook Interface Definitions
  * 
- * This file contains comprehensive TypeScript interfaces for all React hooks
+ * This file contains comprehensive TypeScript interfaces for all hooks
  * used throughout the Flowise-to-LangChain converter application.
  */
-
-import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   FlowiseJSON,
   Node,
@@ -13,7 +11,11 @@ import {
   ConversionConfig,
   TestConfig,
   ValidationResult,
+  ValidationError,
+  ValidationWarning,
+  ValidationSuggestion,
   TestResult,
+  TestSuite,
   GeneratedFile,
   TestSummary,
   CoverageReport,
@@ -630,9 +632,9 @@ export interface UseUIStateHook {
   setGlobalError: (error: Error | null) => void;
   
   // Settings
-  settings: Record<string, any>;
-  getSetting: (key: string) => any;
-  setSetting: (key: string, value: any) => void;
+  settings: Record<string, unknown>;
+  getSetting: (key: string) => unknown;
+  setSetting: (key: string, value: unknown) => void;
   
   // Persistence
   saveState: () => void;
@@ -873,20 +875,20 @@ export interface UseGeolocationHook {
 }
 
 export interface UseIntersectionObserverHook {
-  ref: React.RefObject<Element>;
+  ref: { current: Element | null };
   isIntersecting: boolean;
   entry: IntersectionObserverEntry | null;
 }
 
 export interface UseResizeObserverHook {
-  ref: React.RefObject<Element>;
+  ref: { current: Element | null };
   width: number;
   height: number;
   entry: ResizeObserverEntry | null;
 }
 
 export interface UseMutationObserverHook {
-  ref: React.RefObject<Element>;
+  ref: { current: Element | null };
   mutations: MutationRecord[];
   observe: () => void;
   disconnect: () => void;
@@ -998,7 +1000,7 @@ export interface UseFormHook<T> {
   setValue: (name: keyof T, value: any) => void;
   setError: (name: keyof T, error: string) => void;
   setTouched: (name: keyof T, touched: boolean) => void;
-  handleSubmit: (onSubmit: (values: T) => void) => (event: React.FormEvent) => void;
+  handleSubmit: (onSubmit: (values: T) => void) => (event: Event) => void;
   handleReset: () => void;
   validate: () => boolean;
   reset: (values?: T) => void;
@@ -1068,93 +1070,4 @@ export interface UsePaginationHook<T> {
   goToPage: (page: number) => void;
 }
 
-// Export all hook types
-export default {
-  // Base
-  HookState,
-  AsyncHookState,
-  MutationHookState,
-  PaginationHookState,
-  InfiniteScrollHookState,
-  
-  // Flow
-  UseFlowHook,
-  UseFlowOptionsHook,
-  UseFlowSelectionHook,
-  UseFlowHistoryHook,
-  UseFlowClipboardHook,
-  UseFlowValidationHook,
-  
-  // Configuration
-  UseConfigHook,
-  UseConfigOptionsHook,
-  UseConfigPresetsHook,
-  
-  // Testing
-  UseTestingHook,
-  UseTestingOptionsHook,
-  UseTestRunnerHook,
-  UseTestGeneratorHook,
-  
-  // Validation
-  UseValidationHook,
-  UseValidationOptionsHook,
-  
-  // Generation
-  UseGenerationHook,
-  UseGenerationOptionsHook,
-  
-  // API
-  UseApiHook,
-  UseApiOptionsHook,
-  UseMutationHook,
-  UseMutationOptionsHook,
-  UseWebSocketHook,
-  UseWebSocketOptionsHook,
-  
-  // UI State
-  UseUIStateHook,
-  UseUIStateOptionsHook,
-  
-  // Project
-  UseProjectHook,
-  UseProjectOptionsHook,
-  
-  // User
-  UseUserHook,
-  UseUserOptionsHook,
-  
-  // Utility
-  UseLocalStorageHook,
-  UseSessionStorageHook,
-  UseDebounceHook,
-  UseThrottleHook,
-  UseAsyncHook,
-  UseIntervalHook,
-  UseTimeoutHook,
-  UseKeyboardHook,
-  UseClipboardHook,
-  UseFileHook,
-  UseMediaQueryHook,
-  UseOnlineHook,
-  UseGeolocationHook,
-  UseIntersectionObserverHook,
-  UseResizeObserverHook,
-  UseMutationObserverHook,
-  UseEventListenerHook,
-  UsePreviousHook,
-  UseToggleHook,
-  UseCounterHook,
-  UseArrayHook,
-  UseMapHook,
-  UseSetHook,
-  UseQueueHook,
-  UseStackHook,
-  UseUndoRedoHook,
-  UseFormHook,
-  UseFieldHook,
-  UseSearchHook,
-  UseFilterHook,
-  UseSortHook,
-  UsePaginationHook,
-};
+// All hook types are already exported individually above
