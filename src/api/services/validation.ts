@@ -448,10 +448,10 @@ export class ValidationService extends EventEmitter {
   private async autoFixFlow(inputContent: string, validationResult: ValidationResult): Promise<string> {
     try {
       // Use the existing JSON fixer
-      const fixResult = await this.fixer.fixJSON(inputContent);
+      const fixedJson = await fixJsonIssues(inputContent);
       
-      if (fixResult.wasFixed) {
-        return fixResult.fixedContent;
+      if (fixedJson !== null) {
+        return JSON.stringify(fixedJson, null, 2);
       }
       
       return inputContent;

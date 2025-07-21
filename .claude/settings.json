@@ -113,7 +113,10 @@
         "mcp",
         "start"
       ],
-      "type": "stdio"
+      "type": "stdio",
+      "env": {
+        "NODE_ENV": "production"
+      }
     }
   },
   "includeCoAuthoredBy": true,
