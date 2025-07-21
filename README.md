@@ -22,6 +22,9 @@ npm run start -- convert flow.json output --with-langfuse
 # Deploy to production
 ./scripts/deploy-production.sh production docker
 
+# Use web interface with Flowise integration
+cd tester-bot-frontend && npm run dev  # Access at http://localhost:3000
+
 # Use standalone converters for quick conversions
 node convert-all-chatflows.cjs    # Convert traditional chatflows
 node convert-all-agentflows.cjs   # Convert multi-agent workflows
@@ -70,6 +73,7 @@ node convert-all-agentflows.cjs   # Convert multi-agent workflows
 
 ### 🛠️ **Enhanced Developer Experience**
 - **Interactive Web Interface**: Next.js 14 with real-time monitoring
+- **Flowise Integration**: Direct API import from Flowise instances
 - **Professional CLI**: Convert, validate, test, watch, batch, and run commands
 - **Package Distribution**: Complete release packaging with validation
 - **Integration Tests**: Comprehensive test suites for all components
@@ -92,7 +96,8 @@ flowise-langchain/
 ├── tester-bot-frontend/      # Next.js 14 interface with monitoring
 │   ├── src/                  # React components & hooks
 │   │   ├── components/       # UI components with shadcn/ui
-│   │   ├── lib/              # Langfuse integration
+│   │   │   └── flowise/      # Flowise API integration
+│   │   ├── lib/              # Langfuse & Flowise integration
 │   │   └── hooks/            # React hooks for tracing
 │   └── public/               # Static assets
 ├── scripts/                  # Production deployment scripts
@@ -104,6 +109,35 @@ flowise-langchain/
 ```
 
 📖 **Detailed Guide**: See [./flowise-to-langchain/README.md](./flowise-to-langchain/README.md) for comprehensive documentation.
+
+## 🔗 Flowise Integration (NEW!)
+
+### Direct Flow Import
+Import flows directly from your Flowise instance without manual export/upload:
+
+```bash
+# Start the web interface
+cd tester-bot-frontend && npm run dev
+
+# Configure your Flowise instance
+# 1. Navigate to Settings → Flowise Configuration
+# 2. Enter your Flowise URL (e.g., http://localhost:3000)
+# 3. Add your API key for authentication
+# 4. Test connection and save
+
+# Browse and import flows
+# 1. Go to Workspace → Flowise Integration
+# 2. Browse available flows with search and filtering
+# 3. Preview flow details and compatibility
+# 4. Import single flows or bulk import multiple flows
+```
+
+### Features
+- **Secure API Integration**: Encrypted API key storage
+- **Flow Browser**: Search, filter, and preview flows
+- **Bulk Import**: Import multiple flows simultaneously
+- **Real-time Status**: Connection monitoring and health checks
+- **Error Recovery**: Robust error handling with retry mechanisms
 
 ## 🔍 Observability & Monitoring
 
