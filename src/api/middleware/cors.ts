@@ -1,6 +1,6 @@
 /**
  * CORS Middleware
- * 
+ *
  * Custom CORS middleware for API security.
  */
 
@@ -21,7 +21,12 @@ export const cors = (options: CorsOptions = {}) => {
   const {
     origin = true,
     methods = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders = ['Content-Type', 'Authorization', 'X-API-Key', 'X-Request-ID'],
+    allowedHeaders = [
+      'Content-Type',
+      'Authorization',
+      'X-API-Key',
+      'X-Request-ID',
+    ],
     credentials = false,
     optionsSuccessStatus = 204,
   } = options;

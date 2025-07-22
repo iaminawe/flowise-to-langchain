@@ -1,6 +1,6 @@
 /**
  * API Interface Definitions
- * 
+ *
  * This file contains TypeScript interfaces for all API endpoints,
  * request/response types, and related networking types.
  */
@@ -503,7 +503,8 @@ export interface TemplateListRequest extends PaginationParams {
   featured?: boolean;
 }
 
-export interface TemplateListResponse extends PaginationResponse<TemplateInfo> {}
+export interface TemplateListResponse
+  extends PaginationResponse<TemplateInfo> {}
 
 export interface TemplateInfo {
   id: string;
@@ -977,7 +978,13 @@ export interface FlowChangeEvent {
 }
 
 export interface FlowChange {
-  type: 'node.add' | 'node.remove' | 'node.update' | 'edge.add' | 'edge.remove' | 'edge.update';
+  type:
+    | 'node.add'
+    | 'node.remove'
+    | 'node.update'
+    | 'edge.add'
+    | 'edge.remove'
+    | 'edge.update';
   nodeId?: string;
   edgeId?: string;
   before?: unknown;
@@ -1173,11 +1180,27 @@ export interface Response<T = unknown> {
 // API Client Interface
 export interface ApiClient {
   get<T>(url: string, config?: Partial<RequestConfig>): Promise<Response<T>>;
-  post<T>(url: string, data?: unknown, config?: Partial<RequestConfig>): Promise<Response<T>>;
-  put<T>(url: string, data?: unknown, config?: Partial<RequestConfig>): Promise<Response<T>>;
+  post<T>(
+    url: string,
+    data?: unknown,
+    config?: Partial<RequestConfig>
+  ): Promise<Response<T>>;
+  put<T>(
+    url: string,
+    data?: unknown,
+    config?: Partial<RequestConfig>
+  ): Promise<Response<T>>;
   delete<T>(url: string, config?: Partial<RequestConfig>): Promise<Response<T>>;
-  patch<T>(url: string, data?: unknown, config?: Partial<RequestConfig>): Promise<Response<T>>;
-  upload<T>(url: string, file: File, config?: Partial<RequestConfig>): Promise<Response<T>>;
+  patch<T>(
+    url: string,
+    data?: unknown,
+    config?: Partial<RequestConfig>
+  ): Promise<Response<T>>;
+  upload<T>(
+    url: string,
+    file: File,
+    config?: Partial<RequestConfig>
+  ): Promise<Response<T>>;
   download(url: string, config?: Partial<RequestConfig>): Promise<Blob>;
   stream(url: string, config?: Partial<RequestConfig>): Promise<ReadableStream>;
   subscribe(event: string, callback: (data: unknown) => void): void;

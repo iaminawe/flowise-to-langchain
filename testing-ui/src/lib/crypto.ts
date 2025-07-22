@@ -10,6 +10,12 @@ class SimpleCrypto {
   }
 
   private generateKey(): string {
+    // Check if running in browser environment
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      // Server-side fallback key
+      return 'fallback-server-key-' + Math.random().toString(36).substr(2, 9)
+    }
+    
     // Generate a simple key based on browser fingerprint
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
@@ -51,7 +57,12 @@ class SimpleCrypto {
         .join('')
       
       // Base64 encode to make it safe for storage
-      return btoa(encrypted)
+      if (typeof btoa !== 'undefined') {
+        return btoa(encrypted)
+      } else {
+        // Node.js fallback
+        return Buffer.from(encrypted, 'binary').toString('base64')
+      }
     } catch (error) {
       console.warn('Encryption failed, storing plain text:', error)
       return text
@@ -63,7 +74,9 @@ class SimpleCrypto {
     
     try {
       // Base64 decode
-      const encrypted = atob(encryptedText)
+      const encrypted = typeof atob !== 'undefined' 
+        ? atob(encryptedText)
+        : Buffer.from(encryptedText, 'base64').toString('binary')
       
       // XOR decrypt (same operation as encrypt)
       const decrypted = Array.from(encrypted)
@@ -85,7 +98,9 @@ class SimpleCrypto {
     
     try {
       // Try to base64 decode
-      const decoded = atob(text)
+      const decoded = typeof atob !== 'undefined' 
+        ? atob(text)
+        : Buffer.from(text, 'base64').toString('binary')
       // If it contains non-printable characters, it's likely encrypted
       return /[\x00-\x1F\x7F-\x9F]/.test(decoded)
     } catch {

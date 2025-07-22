@@ -106,7 +106,9 @@ export class OpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
     return 'OpenAIEmbeddings';
   }
 
-  protected override extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
+  protected override extractEmbeddingsConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
@@ -163,7 +165,9 @@ export class CohereEmbeddingsConverter extends BaseEmbeddingsConverter {
     return 'CohereEmbeddings';
   }
 
-  protected override extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
+  protected override extractEmbeddingsConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
@@ -211,7 +215,9 @@ export class HuggingFaceEmbeddingsConverter extends BaseEmbeddingsConverter {
     return 'HuggingFaceInferenceEmbeddings';
   }
 
-  protected override extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
+  protected override extractEmbeddingsConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
@@ -263,7 +269,9 @@ export class AzureOpenAIEmbeddingsConverter extends BaseEmbeddingsConverter {
     return 'AzureOpenAIEmbeddings';
   }
 
-  protected override extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
+  protected override extractEmbeddingsConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const config: any = {};
 
     const apiKey = this.getParameterValue(node, 'apiKey');
@@ -322,7 +330,9 @@ export class GoogleVertexAIEmbeddingsConverter extends BaseEmbeddingsConverter {
     return 'GoogleVertexAIEmbeddings';
   }
 
-  protected override extractEmbeddingsConfig(node: IRNode): Record<string, unknown> {
+  protected override extractEmbeddingsConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const config: any = {};
 
     const projectId = this.getParameterValue(node, 'projectId');

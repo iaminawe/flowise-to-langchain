@@ -1,6 +1,6 @@
 /**
  * Error Handler Middleware
- * 
+ *
  * Centralized error handling for the API.
  */
 
@@ -75,7 +75,8 @@ export const errorHandler = (
     apiError = {
       code: 'INTERNAL_SERVER_ERROR',
       message: 'An unexpected error occurred',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      details:
+        process.env.NODE_ENV === 'development' ? error.message : undefined,
     };
   }
 

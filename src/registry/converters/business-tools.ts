@@ -1,16 +1,16 @@
 /**
  * Business Tools Converters - Enterprise workflow integration tools
- * 
+ *
  * Comprehensive business tool converters for project management,
- * payment processing, database/CRM, knowledge management, 
+ * payment processing, database/CRM, knowledge management,
  * team communication, and enterprise CRM systems.
  */
 
 import { BaseConverter } from '../registry.js';
-import type { 
+import type {
   IRNode,
   CodeFragment,
-  GenerationContext
+  GenerationContext,
 } from '../../ir/types.js';
 
 // ============================================================================
@@ -23,24 +23,34 @@ import type {
 abstract class BaseBusinessToolConverter extends BaseConverter {
   readonly category = 'business-tool';
   readonly priority = 5;
-  
+
   abstract readonly toolType: string;
-  abstract readonly businessCategory: 'project-management' | 'payment' | 'database' | 'knowledge' | 'communication' | 'crm';
+  abstract readonly businessCategory:
+    | 'project-management'
+    | 'payment'
+    | 'database'
+    | 'knowledge'
+    | 'communication'
+    | 'crm';
 
   /**
    * Common business tool validation
    */
   protected validateBusinessToolConfig(node: IRNode): boolean {
     const data = node.parameters;
-    
+
     if (!data || !Array.isArray(data)) {
       return false;
     }
 
     // Check for essential business tool properties
-    const hasApiKey = data.some(p => ['apiKey', 'api_key', 'token', 'credentials'].includes(p.name));
-    const hasConfiguration = data.some(p => ['configuration', 'config'].includes(p.name));
-    const hasName = data.some(p => ['name', 'toolName'].includes(p.name));
+    const hasApiKey = data.some((p) =>
+      ['apiKey', 'api_key', 'token', 'credentials'].includes(p.name)
+    );
+    const hasConfiguration = data.some((p) =>
+      ['configuration', 'config'].includes(p.name)
+    );
+    const hasName = data.some((p) => ['name', 'toolName'].includes(p.name));
 
     return hasApiKey || hasConfiguration || hasName;
   }
@@ -50,13 +60,13 @@ abstract class BaseBusinessToolConverter extends BaseConverter {
    */
   protected extractInputs(node: IRNode): Record<string, any> {
     const inputs: Record<string, any> = {};
-    
+
     if (node.parameters && Array.isArray(node.parameters)) {
-      node.parameters.forEach(param => {
+      node.parameters.forEach((param) => {
         inputs[param.name] = param.value;
       });
     }
-    
+
     return inputs;
   }
 
@@ -65,7 +75,7 @@ abstract class BaseBusinessToolConverter extends BaseConverter {
    */
   protected getBusinessToolDependencies(toolType: string): string[] {
     const baseDeps = ['@langchain/core', '@langchain/community'];
-    
+
     switch (toolType) {
       case 'jira':
         return [...baseDeps, 'jira-client', 'node-jira-client'];
@@ -90,7 +100,7 @@ abstract class BaseBusinessToolConverter extends BaseConverter {
    * Generate common business tool configuration
    */
   protected generateBusinessToolConfig(
-    node: IRNode, 
+    node: IRNode,
     _context: GenerationContext,
     toolSpecificConfig: any = {}
   ): Record<string, any> {
@@ -99,7 +109,8 @@ abstract class BaseBusinessToolConverter extends BaseConverter {
     return {
       _type: this.toolType,
       name: inputs['name'] || inputs['toolName'] || this.toolType,
-      description: inputs['description'] || `${this.toolType} business tool integration`,
+      description:
+        inputs['description'] || `${this.toolType} business tool integration`,
       ...toolSpecificConfig,
       // Authentication
       apiKey: inputs['apiKey'] || inputs['api_key'] || inputs['token'],
@@ -111,8 +122,8 @@ abstract class BaseBusinessToolConverter extends BaseConverter {
         category: this.businessCategory,
         toolType: this.toolType,
         enterprise: true,
-        businessTool: true
-      }
+        businessTool: true,
+      },
     };
   }
 
@@ -127,37 +138,43 @@ abstract class BaseBusinessToolConverter extends BaseConverter {
   ): CodeFragment[] {
     const fragments: CodeFragment[] = [];
     const nodeId = node.id;
-    
+
     // Import fragment
-    fragments.push(this.createCodeFragment(
-      `import-${nodeId}`,
-      'import',
-      `import { ${toolClass} } from '${importPath}';`,
-      [importPath],
-      nodeId,
-      0
-    ));
-    
+    fragments.push(
+      this.createCodeFragment(
+        `import-${nodeId}`,
+        'import',
+        `import { ${toolClass} } from '${importPath}';`,
+        [importPath],
+        nodeId,
+        0
+      )
+    );
+
     // Configuration fragment
-    fragments.push(this.createCodeFragment(
-      `config-${nodeId}`,
-      'declaration',
-      `const ${node.id}Config = ${JSON.stringify(config, null, 2)};`,
-      [],
-      nodeId,
-      1
-    ));
-    
+    fragments.push(
+      this.createCodeFragment(
+        `config-${nodeId}`,
+        'declaration',
+        `const ${node.id}Config = ${JSON.stringify(config, null, 2)};`,
+        [],
+        nodeId,
+        1
+      )
+    );
+
     // Initialization fragment
-    fragments.push(this.createCodeFragment(
-      `init-${nodeId}`,
-      'initialization',
-      `const ${node.id} = new ${toolClass}(${node.id}Config);`,
-      [],
-      nodeId,
-      2
-    ));
-    
+    fragments.push(
+      this.createCodeFragment(
+        `init-${nodeId}`,
+        'initialization',
+        `const ${node.id} = new ${toolClass}(${node.id}Config);`,
+        [],
+        nodeId,
+        2
+      )
+    );
+
     return fragments;
   }
 }
@@ -173,9 +190,11 @@ class JiraToolConverter extends BaseBusinessToolConverter {
   readonly businessCategory = 'project-management' as const;
 
   override canConvert(node: IRNode): boolean {
-    return node.type === 'jiraTool' || 
-           node.type === 'jira' ||
-           (this.validateBusinessToolConfig(node));
+    return (
+      node.type === 'jiraTool' ||
+      node.type === 'jira' ||
+      this.validateBusinessToolConfig(node)
+    );
   }
 
   override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
@@ -187,7 +206,7 @@ class JiraToolConverter extends BaseBusinessToolConverter {
       username: inputs['username'] || inputs['email'],
       apiToken: inputs['apiToken'] || inputs['token'],
       projectKey: inputs['projectKey'] || inputs['project'],
-      
+
       // Jira capabilities
       capabilities: {
         createIssue: inputs['canCreateIssue'] !== false,
@@ -196,23 +215,26 @@ class JiraToolConverter extends BaseBusinessToolConverter {
         getIssue: inputs['canGetIssue'] || false,
         deleteIssue: inputs['canDeleteIssue'] || false,
         manageProjects: inputs['canManageProjects'] || false,
-        manageUsers: inputs['canManageUsers'] || false
+        manageUsers: inputs['canManageUsers'] || false,
       },
 
       // Issue type mappings
       issueTypes: inputs['issueTypes'] || ['Task', 'Bug', 'Story', 'Epic'],
-      
+
       // Custom fields
       customFields: inputs['customFields'] || {},
-      
+
       // Workflow configuration
       workflows: inputs['workflows'] || [],
-      
+
       // Notification settings
       notifications: {
         enabled: inputs['notificationsEnabled'] !== false,
-        events: inputs['notificationEvents'] || ['issue_created', 'issue_updated']
-      }
+        events: inputs['notificationEvents'] || [
+          'issue_created',
+          'issue_updated',
+        ],
+      },
     });
 
     return this.createBusinessToolFragments(
@@ -223,7 +245,10 @@ class JiraToolConverter extends BaseBusinessToolConverter {
     );
   }
 
-  override getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
+  override getDependencies(
+    _node: IRNode,
+    _context?: GenerationContext
+  ): string[] {
     return this.getBusinessToolDependencies('jira');
   }
 }
@@ -239,9 +264,11 @@ class StripeToolConverter extends BaseBusinessToolConverter {
   readonly businessCategory = 'payment' as const;
 
   override canConvert(node: IRNode): boolean {
-    return node.type === 'stripeTool' || 
-           node.type === 'stripe' ||
-           this.validateBusinessToolConfig(node);
+    return (
+      node.type === 'stripeTool' ||
+      node.type === 'stripe' ||
+      this.validateBusinessToolConfig(node)
+    );
   }
 
   override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
@@ -253,7 +280,7 @@ class StripeToolConverter extends BaseBusinessToolConverter {
       publishableKey: inputs['publishableKey'],
       webhookSecret: inputs['webhookSecret'],
       apiVersion: inputs['apiVersion'] || '2023-10-16',
-      
+
       // Stripe capabilities
       capabilities: {
         createPayment: inputs['canCreatePayment'] !== false,
@@ -263,27 +290,27 @@ class StripeToolConverter extends BaseBusinessToolConverter {
         manageCustomers: inputs['canManageCustomers'] !== false,
         manageProducts: inputs['canManageProducts'] || false,
         manageSubscriptions: inputs['canManageSubscriptions'] || false,
-        handleWebhooks: inputs['canHandleWebhooks'] || false
+        handleWebhooks: inputs['canHandleWebhooks'] || false,
       },
 
       // Payment configuration
       currency: inputs['defaultCurrency'] || 'usd',
       paymentMethods: inputs['paymentMethods'] || ['card', 'bank_transfer'],
-      
+
       // Customer settings
       customerDefaults: {
         taxExempt: inputs['customerTaxExempt'] || 'none',
-        invoiceSettings: inputs['customerInvoiceSettings'] || {}
+        invoiceSettings: inputs['customerInvoiceSettings'] || {},
       },
-      
+
       // Webhook configuration
       webhookEndpoints: inputs['webhookEndpoints'] || [],
-      
+
       // Security settings
       security: {
         validateWebhooks: inputs['validateWebhooks'] !== false,
-        allowedOrigins: inputs['allowedOrigins'] || []
-      }
+        allowedOrigins: inputs['allowedOrigins'] || [],
+      },
     });
 
     return this.createBusinessToolFragments(
@@ -294,7 +321,10 @@ class StripeToolConverter extends BaseBusinessToolConverter {
     );
   }
 
-  override getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
+  override getDependencies(
+    _node: IRNode,
+    _context?: GenerationContext
+  ): string[] {
     return this.getBusinessToolDependencies('stripe');
   }
 }
@@ -310,9 +340,11 @@ class AirtableToolConverter extends BaseBusinessToolConverter {
   readonly businessCategory = 'database' as const;
 
   override canConvert(node: IRNode): boolean {
-    return node.type === 'airtableTool' || 
-           node.type === 'airtable' ||
-           this.validateBusinessToolConfig(node);
+    return (
+      node.type === 'airtableTool' ||
+      node.type === 'airtable' ||
+      this.validateBusinessToolConfig(node)
+    );
   }
 
   override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
@@ -323,7 +355,7 @@ class AirtableToolConverter extends BaseBusinessToolConverter {
       apiKey: inputs['personalAccessToken'] || inputs['apiKey'],
       baseId: inputs['baseId'] || inputs['base'],
       tableId: inputs['tableId'] || inputs['table'],
-      
+
       // Airtable capabilities
       capabilities: {
         createRecord: inputs['canCreateRecord'] !== false,
@@ -331,29 +363,29 @@ class AirtableToolConverter extends BaseBusinessToolConverter {
         deleteRecord: inputs['canDeleteRecord'] || false,
         listRecords: inputs['canListRecords'] !== false,
         getRecord: inputs['canGetRecord'] !== false,
-        bulkOperations: inputs['canBulkOperations'] || false
+        bulkOperations: inputs['canBulkOperations'] || false,
       },
 
       // Field mappings
       fieldMappings: inputs['fieldMappings'] || {},
-      
+
       // View configuration
       view: inputs['view'] || inputs['viewName'],
-      
+
       // Filtering and sorting
       filterFormula: inputs['filterFormula'],
       sort: inputs['sort'] || [],
-      
+
       // Pagination
       maxRecords: inputs['maxRecords'] || 100,
       pageSize: inputs['pageSize'] || 20,
-      
+
       // Data transformation
       transformations: {
         dateFormat: inputs['dateFormat'] || 'YYYY-MM-DD',
         timeZone: inputs['timeZone'] || 'UTC',
-        numberFormat: inputs['numberFormat'] || 'decimal'
-      }
+        numberFormat: inputs['numberFormat'] || 'decimal',
+      },
     });
 
     return this.createBusinessToolFragments(
@@ -364,7 +396,10 @@ class AirtableToolConverter extends BaseBusinessToolConverter {
     );
   }
 
-  override getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
+  override getDependencies(
+    _node: IRNode,
+    _context?: GenerationContext
+  ): string[] {
     return this.getBusinessToolDependencies('airtable');
   }
 }
@@ -380,9 +415,11 @@ class NotionToolConverter extends BaseBusinessToolConverter {
   readonly businessCategory = 'knowledge' as const;
 
   override canConvert(node: IRNode): boolean {
-    return node.type === 'notionTool' || 
-           node.type === 'notion' ||
-           this.validateBusinessToolConfig(node);
+    return (
+      node.type === 'notionTool' ||
+      node.type === 'notion' ||
+      this.validateBusinessToolConfig(node)
+    );
   }
 
   override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
@@ -392,7 +429,7 @@ class NotionToolConverter extends BaseBusinessToolConverter {
       // Notion-specific configuration
       auth: inputs['integrationToken'] || inputs['apiKey'],
       notionVersion: inputs['notionVersion'] || '2022-06-28',
-      
+
       // Notion capabilities
       capabilities: {
         createPage: inputs['canCreatePage'] !== false,
@@ -402,32 +439,32 @@ class NotionToolConverter extends BaseBusinessToolConverter {
         createDatabase: inputs['canCreateDatabase'] || false,
         updateDatabase: inputs['canUpdateDatabase'] || false,
         searchPages: inputs['canSearchPages'] !== false,
-        manageBlocks: inputs['canManageBlocks'] || false
+        manageBlocks: inputs['canManageBlocks'] || false,
       },
 
       // Database configuration
       databaseId: inputs['databaseId'],
-      
+
       // Page configuration
       pageId: inputs['pageId'],
       parentPageId: inputs['parentPageId'],
-      
+
       // Content formatting
       formatting: {
         richText: inputs['useRichText'] !== false,
         markdown: inputs['convertToMarkdown'] || false,
-        codeBlocks: inputs['preserveCodeBlocks'] !== false
+        codeBlocks: inputs['preserveCodeBlocks'] !== false,
       },
-      
+
       // Query configuration
       filter: inputs['filter'] || {},
       sorts: inputs['sorts'] || [],
-      
+
       // Workspace settings
       workspace: {
         id: inputs['workspaceId'],
-        type: inputs['workspaceType'] || 'workspace'
-      }
+        type: inputs['workspaceType'] || 'workspace',
+      },
     });
 
     return this.createBusinessToolFragments(
@@ -438,7 +475,10 @@ class NotionToolConverter extends BaseBusinessToolConverter {
     );
   }
 
-  override getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
+  override getDependencies(
+    _node: IRNode,
+    _context?: GenerationContext
+  ): string[] {
     return this.getBusinessToolDependencies('notion');
   }
 }
@@ -454,9 +494,11 @@ class SlackToolConverter extends BaseBusinessToolConverter {
   readonly businessCategory = 'communication' as const;
 
   override canConvert(node: IRNode): boolean {
-    return node.type === 'slackTool' || 
-           node.type === 'slack' ||
-           this.validateBusinessToolConfig(node);
+    return (
+      node.type === 'slackTool' ||
+      node.type === 'slack' ||
+      this.validateBusinessToolConfig(node)
+    );
   }
 
   override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
@@ -467,7 +509,7 @@ class SlackToolConverter extends BaseBusinessToolConverter {
       token: inputs['botToken'] || inputs['apiKey'],
       signingSecret: inputs['signingSecret'],
       appToken: inputs['appToken'],
-      
+
       // Slack capabilities
       capabilities: {
         sendMessage: inputs['canSendMessage'] !== false,
@@ -477,35 +519,35 @@ class SlackToolConverter extends BaseBusinessToolConverter {
         manageChannels: inputs['canManageChannels'] || false,
         manageUsers: inputs['canManageUsers'] || false,
         fileUpload: inputs['canUploadFiles'] || false,
-        reactions: inputs['canReact'] || false
+        reactions: inputs['canReact'] || false,
       },
 
       // Channel configuration
       defaultChannel: inputs['defaultChannel'] || '#general',
       allowedChannels: inputs['allowedChannels'] || [],
-      
+
       // Message formatting
       formatting: {
         markdown: inputs['useMarkdown'] !== false,
         mentions: inputs['allowMentions'] !== false,
         threads: inputs['supportThreads'] !== false,
-        attachments: inputs['supportAttachments'] !== false
+        attachments: inputs['supportAttachments'] !== false,
       },
-      
+
       // Bot configuration
       botSettings: {
         name: inputs['botName'] || 'LangChain Bot',
         emoji: inputs['botEmoji'] || ':robot_face:',
         unfurlLinks: inputs['unfurlLinks'] !== false,
-        unfurlMedia: inputs['unfurlMedia'] !== false
+        unfurlMedia: inputs['unfurlMedia'] !== false,
       },
-      
+
       // Event handling
       events: {
         messageEvents: inputs['messageEvents'] || ['message'],
         appMentions: inputs['handleAppMentions'] !== false,
-        reactions: inputs['handleReactions'] || false
-      }
+        reactions: inputs['handleReactions'] || false,
+      },
     });
 
     return this.createBusinessToolFragments(
@@ -516,7 +558,10 @@ class SlackToolConverter extends BaseBusinessToolConverter {
     );
   }
 
-  override getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
+  override getDependencies(
+    _node: IRNode,
+    _context?: GenerationContext
+  ): string[] {
     return this.getBusinessToolDependencies('slack');
   }
 }
@@ -532,9 +577,11 @@ class HubSpotToolConverter extends BaseBusinessToolConverter {
   readonly businessCategory = 'crm' as const;
 
   override canConvert(node: IRNode): boolean {
-    return node.type === 'hubspotTool' || 
-           node.type === 'hubspot' ||
-           this.validateBusinessToolConfig(node);
+    return (
+      node.type === 'hubspotTool' ||
+      node.type === 'hubspot' ||
+      this.validateBusinessToolConfig(node)
+    );
   }
 
   override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
@@ -544,7 +591,7 @@ class HubSpotToolConverter extends BaseBusinessToolConverter {
       // HubSpot-specific configuration
       accessToken: inputs['accessToken'] || inputs['apiKey'],
       portalId: inputs['portalId'] || inputs['hubId'],
-      
+
       // HubSpot capabilities
       capabilities: {
         manageContacts: inputs['canManageContacts'] !== false,
@@ -554,7 +601,7 @@ class HubSpotToolConverter extends BaseBusinessToolConverter {
         manageLists: inputs['canManageLists'] || false,
         manageEmails: inputs['canManageEmails'] || false,
         runReports: inputs['canRunReports'] || false,
-        manageWorkflows: inputs['canManageWorkflows'] || false
+        manageWorkflows: inputs['canManageWorkflows'] || false,
       },
 
       // CRM configuration
@@ -562,32 +609,32 @@ class HubSpotToolConverter extends BaseBusinessToolConverter {
         defaultOwner: inputs['defaultOwner'],
         pipeline: inputs['defaultPipeline'],
         leadStatus: inputs['defaultLeadStatus'],
-        contactLifecycle: inputs['defaultContactLifecycle']
+        contactLifecycle: inputs['defaultContactLifecycle'],
       },
-      
+
       // Marketing configuration
       marketingSettings: {
         emailCampaigns: inputs['enableEmailCampaigns'] || false,
         leadScoring: inputs['enableLeadScoring'] || false,
-        automation: inputs['enableAutomation'] || false
+        automation: inputs['enableAutomation'] || false,
       },
-      
+
       // Data synchronization
       sync: {
         bidirectional: inputs['bidirectionalSync'] || false,
         realTime: inputs['realTimeSync'] || false,
-        batchSize: inputs['batchSize'] || 100
+        batchSize: inputs['batchSize'] || 100,
       },
-      
+
       // Custom properties
       customProperties: inputs['customProperties'] || {},
-      
+
       // Webhooks
       webhooks: {
         enabled: inputs['webhooksEnabled'] || false,
         url: inputs['webhookUrl'],
-        events: inputs['webhookEvents'] || []
-      }
+        events: inputs['webhookEvents'] || [],
+      },
     });
 
     return this.createBusinessToolFragments(
@@ -598,7 +645,10 @@ class HubSpotToolConverter extends BaseBusinessToolConverter {
     );
   }
 
-  override getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
+  override getDependencies(
+    _node: IRNode,
+    _context?: GenerationContext
+  ): string[] {
     return this.getBusinessToolDependencies('hubspot');
   }
 }
@@ -614,9 +664,11 @@ class SalesforceToolConverter extends BaseBusinessToolConverter {
   readonly businessCategory = 'crm' as const;
 
   override canConvert(node: IRNode): boolean {
-    return node.type === 'salesforceTool' || 
-           node.type === 'salesforce' ||
-           this.validateBusinessToolConfig(node);
+    return (
+      node.type === 'salesforceTool' ||
+      node.type === 'salesforce' ||
+      this.validateBusinessToolConfig(node)
+    );
   }
 
   override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
@@ -631,7 +683,7 @@ class SalesforceToolConverter extends BaseBusinessToolConverter {
       clientSecret: inputs['clientSecret'] || inputs['consumerSecret'],
       loginUrl: inputs['loginUrl'] || 'https://login.salesforce.com',
       apiVersion: inputs['apiVersion'] || '58.0',
-      
+
       // Salesforce capabilities
       capabilities: {
         manageAccounts: inputs['canManageAccounts'] !== false,
@@ -641,39 +693,39 @@ class SalesforceToolConverter extends BaseBusinessToolConverter {
         manageCases: inputs['canManageCases'] || false,
         runReports: inputs['canRunReports'] || false,
         executeApex: inputs['canExecuteApex'] || false,
-        bulkOperations: inputs['canBulkOperations'] || false
+        bulkOperations: inputs['canBulkOperations'] || false,
       },
 
       // SOQL configuration
       soql: {
         maxResults: inputs['maxQueryResults'] || 2000,
         defaultFields: inputs['defaultFields'] || [],
-        includeDeleted: inputs['includeDeleted'] || false
+        includeDeleted: inputs['includeDeleted'] || false,
       },
-      
+
       // Sandbox configuration
       sandbox: {
         enabled: inputs['useSandbox'] || false,
-        url: inputs['sandboxUrl']
+        url: inputs['sandboxUrl'],
       },
-      
+
       // Custom objects
       customObjects: inputs['customObjects'] || {},
-      
+
       // Field mappings
       fieldMappings: {
         account: inputs['accountFieldMappings'] || {},
         contact: inputs['contactFieldMappings'] || {},
         lead: inputs['leadFieldMappings'] || {},
-        opportunity: inputs['opportunityFieldMappings'] || {}
+        opportunity: inputs['opportunityFieldMappings'] || {},
       },
-      
+
       // Metadata configuration
       metadata: {
         retrieveCustomFields: inputs['retrieveCustomFields'] !== false,
         retrievePicklistValues: inputs['retrievePicklistValues'] !== false,
-        retrieveValidationRules: inputs['retrieveValidationRules'] || false
-      }
+        retrieveValidationRules: inputs['retrieveValidationRules'] || false,
+      },
     });
 
     return this.createBusinessToolFragments(
@@ -684,7 +736,10 @@ class SalesforceToolConverter extends BaseBusinessToolConverter {
     );
   }
 
-  override getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
+  override getDependencies(
+    _node: IRNode,
+    _context?: GenerationContext
+  ): string[] {
     return this.getBusinessToolDependencies('salesforce');
   }
 }
@@ -703,10 +758,12 @@ class MicrosoftTeamsToolConverter extends BaseBusinessToolConverter {
   readonly businessCategory = 'communication' as const;
 
   override canConvert(node: IRNode): boolean {
-    return node.type === 'microsoftTeamsTool' || 
-           node.type === 'microsoftTeams' ||
-           node.type === 'teams' ||
-           this.validateBusinessToolConfig(node);
+    return (
+      node.type === 'microsoftTeamsTool' ||
+      node.type === 'microsoftTeams' ||
+      node.type === 'teams' ||
+      this.validateBusinessToolConfig(node)
+    );
   }
 
   override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
@@ -717,14 +774,14 @@ class MicrosoftTeamsToolConverter extends BaseBusinessToolConverter {
       tenantId: inputs['tenantId'],
       clientId: inputs['clientId'],
       clientSecret: inputs['clientSecret'],
-      
+
       // Teams capabilities
       capabilities: {
         sendMessage: inputs['canSendMessage'] !== false,
         createChannel: inputs['canCreateChannel'] || false,
         manageMembers: inputs['canManageMembers'] || false,
-        scheduleCallS: inputs['canScheduleCalls'] || false
-      }
+        scheduleCallS: inputs['canScheduleCalls'] || false,
+      },
     });
 
     return this.createBusinessToolFragments(
@@ -735,7 +792,10 @@ class MicrosoftTeamsToolConverter extends BaseBusinessToolConverter {
     );
   }
 
-  override getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
+  override getDependencies(
+    _node: IRNode,
+    _context?: GenerationContext
+  ): string[] {
     return [...this.getBusinessToolDependencies('teams'), '@azure/msal-node'];
   }
 }
@@ -750,9 +810,11 @@ class AsanaToolConverter extends BaseBusinessToolConverter {
   readonly businessCategory = 'project-management' as const;
 
   override canConvert(node: IRNode): boolean {
-    return node.type === 'asanaTool' || 
-           node.type === 'asana' ||
-           this.validateBusinessToolConfig(node);
+    return (
+      node.type === 'asanaTool' ||
+      node.type === 'asana' ||
+      this.validateBusinessToolConfig(node)
+    );
   }
 
   override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
@@ -761,14 +823,14 @@ class AsanaToolConverter extends BaseBusinessToolConverter {
     const config = this.generateBusinessToolConfig(node, context, {
       // Asana-specific configuration
       accessToken: inputs['accessToken'] || inputs['apiKey'],
-      
+
       // Asana capabilities
       capabilities: {
         createTask: inputs['canCreateTask'] !== false,
         updateTask: inputs['canUpdateTask'] !== false,
         createProject: inputs['canCreateProject'] || false,
-        manageTeams: inputs['canManageTeams'] || false
-      }
+        manageTeams: inputs['canManageTeams'] || false,
+      },
     });
 
     return this.createBusinessToolFragments(
@@ -779,7 +841,10 @@ class AsanaToolConverter extends BaseBusinessToolConverter {
     );
   }
 
-  override getDependencies(_node: IRNode, _context?: GenerationContext): string[] {
+  override getDependencies(
+    _node: IRNode,
+    _context?: GenerationContext
+  ): string[] {
     return [...this.getBusinessToolDependencies('asana'), 'asana'];
   }
 }
@@ -797,7 +862,7 @@ export const BUSINESS_TOOL_CONVERTERS = [
   HubSpotToolConverter,
   SalesforceToolConverter,
   MicrosoftTeamsToolConverter,
-  AsanaToolConverter
+  AsanaToolConverter,
 ];
 
 // Export all converters
@@ -811,5 +876,5 @@ export {
   HubSpotToolConverter,
   SalesforceToolConverter,
   MicrosoftTeamsToolConverter,
-  AsanaToolConverter
+  AsanaToolConverter,
 };

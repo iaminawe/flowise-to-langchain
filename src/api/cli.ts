@@ -1,6 +1,6 @@
 /**
  * CLI Integration for API Server
- * 
+ *
  * This module provides CLI commands to start and manage the API server.
  */
 
@@ -13,7 +13,7 @@ import { logger } from '../cli/utils/logger.js';
  */
 export const createApiCommand = (): Command => {
   const apiCommand = new Command('api');
-  
+
   apiCommand
     .description('Start the API server')
     .option('-p, --port <port>', 'server port', '3001')
@@ -21,7 +21,11 @@ export const createApiCommand = (): Command => {
     .option('--max-file-size <size>', 'maximum file upload size in MB', '10')
     .option('--max-connections <count>', 'maximum WebSocket connections', '100')
     .option('--rate-limit <requests>', 'requests per 15 minutes per IP', '100')
-    .option('--cors-origin <origins>', 'allowed CORS origins (comma-separated)', 'http://localhost:3000')
+    .option(
+      '--cors-origin <origins>',
+      'allowed CORS origins (comma-separated)',
+      'http://localhost:3000'
+    )
     .option('--api-key <key>', 'API key for authentication (optional)')
     .option('--verbose', 'enable verbose logging')
     .option('--silent', 'suppress all output except errors')
@@ -31,7 +35,7 @@ export const createApiCommand = (): Command => {
         if (options.apiKey) {
           process.env.API_KEY = options.apiKey;
         }
-        
+
         if (options.verbose) {
           process.env.FLOWISE_LOG_LEVEL = 'debug';
         } else if (options.silent) {
@@ -70,7 +74,7 @@ export const createApiCommand = (): Command => {
         // Handle graceful shutdown
         const gracefulShutdown = async (signal: string) => {
           logger.info(`Received ${signal}, shutting down gracefully...`);
-          
+
           try {
             await server.stop();
             logger.info('Server stopped successfully');
@@ -87,7 +91,6 @@ export const createApiCommand = (): Command => {
         process.on('SIGUSR2', () => gracefulShutdown('SIGUSR2')); // nodemon restart
 
         logger.info('API server started successfully');
-        
       } catch (error) {
         logger.error('Failed to start API server:', { error });
         process.exit(1);

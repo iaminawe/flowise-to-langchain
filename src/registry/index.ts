@@ -97,9 +97,7 @@ export {
 } from './converters/google-tools-extended.js';
 
 // Search Tool Converters
-export {
-  DuckDuckGoSearchConverter,
-} from './converters/search-tool.js';
+export { DuckDuckGoSearchConverter } from './converters/search-tool.js';
 
 // Advanced Search API Converters
 export {
@@ -209,9 +207,7 @@ export {
   ListOutputParserConverter,
 } from './converters/output-parser.js';
 
-export {
-  OutputFixingParserConverter,
-} from './converters/output-fixing-parser.js';
+export { OutputFixingParserConverter } from './converters/output-fixing-parser.js';
 
 // AgentFlow V2 Converters
 export {
@@ -295,9 +291,7 @@ import {
   GoogleFormsToolConverter,
 } from './converters/google-tools-extended.js';
 
-import {
-  DuckDuckGoSearchConverter,
-} from './converters/search-tool.js';
+import { DuckDuckGoSearchConverter } from './converters/search-tool.js';
 
 import {
   TavilySearchConverter,
@@ -397,9 +391,7 @@ import {
   ListOutputParserConverter,
 } from './converters/output-parser.js';
 
-import {
-  OutputFixingParserConverter,
-} from './converters/output-fixing-parser.js';
+import { OutputFixingParserConverter } from './converters/output-fixing-parser.js';
 
 import {
   AgentNodeConverter,
@@ -494,7 +486,7 @@ export const BUILT_IN_CONVERTERS = [
   CohereConverter,
   ReplicateConverter,
   GoogleGenerativeAIConverter,
-  
+
   // Bedrock Converters
   BedrockChatConverter,
   BedrockLLMConverter,
@@ -536,22 +528,22 @@ export const BUILT_IN_CONVERTERS = [
   ShellToolConverter,
   RequestToolConverter,
   FileSystemConverter,
-  
+
   // Google Suite Tool Converters
   GmailToolConverter,
   GoogleCalendarToolConverter,
   GoogleDriveToolConverter,
   GoogleDocsToolConverter,
   GoogleSheetsToolConverter,
-  
+
   // Extended Google Suite Tool Converters
   GoogleWorkspaceToolConverter,
   GoogleMeetToolConverter,
   GoogleFormsToolConverter,
-  
+
   // Search Tool Converters
   DuckDuckGoSearchConverter,
-  
+
   // Advanced Search API Converters
   TavilySearchConverter,
   BraveSearchConverter,
@@ -693,7 +685,7 @@ export function initializeRegistry(): void {
   registry.registerAlias('azure', 'azureOpenAI');
   registry.registerAlias('gemini', 'googleGenerativeAI');
   registry.registerAlias('google', 'googleGenerativeAI');
-  
+
   // Bedrock aliases
   registry.registerAlias('bedrock', 'bedrockChat');
   registry.registerAlias('aws', 'bedrockChat');
@@ -729,13 +721,13 @@ export function initializeRegistry(): void {
   registry.registerAlias('shell', 'shellTool');
   registry.registerAlias('request', 'requestTool');
   registry.registerAlias('fs', 'fileSystem');
-  
+
   // Search Tool aliases
   registry.registerAlias('duckduckgo', 'duckDuckGoSearch');
   registry.registerAlias('ddg', 'duckDuckGoSearch');
   registry.registerAlias('duckDuckGo', 'duckDuckGoSearch');
   registry.registerAlias('duck', 'duckDuckGoSearch');
-  
+
   // Google Suite Tool aliases
   registry.registerAlias('gmail', 'gmailTool');
   registry.registerAlias('googleGmail', 'gmailTool');
@@ -761,7 +753,7 @@ export function initializeRegistry(): void {
   registry.registerAlias('forms', 'googleFormsTool');
   registry.registerAlias('googleForms', 'googleFormsTool');
   registry.registerAlias('gforms', 'googleFormsTool');
-  
+
   // Advanced Search API aliases
   registry.registerAlias('tavily', 'tavilySearch');
   registry.registerAlias('brave', 'braveSearch');

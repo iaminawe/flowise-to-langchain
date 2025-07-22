@@ -1,6 +1,6 @@
 /**
  * Utility Types and Constants
- * 
+ *
  * This file contains utility types, constants, and helper functions
  * used throughout the Flowise-to-LangChain converter system.
  */
@@ -24,7 +24,8 @@ export type DeepMutable<T> = {
 
 export type RequiredKeys<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
-export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type OptionalKeys<T, K extends keyof T> = Omit<T, K> &
+  Partial<Pick<T, K>>;
 
 export type PickByType<T, U> = {
   [K in keyof T as T[K] extends U ? K : never]: T[K];
@@ -78,9 +79,18 @@ export type KeysOfType<T, U> = {
 
 export type ValuesOfType<T, U> = T[KeysOfType<T, U>];
 
-export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
+export type UnionToIntersection<U> = (
+  U extends any ? (k: U) => void : never
+) extends (k: infer I) => void
+  ? I
+  : never;
 
-export type UnionToTuple<T> = UnionToIntersection<T extends any ? (t: T) => T : never> extends (_: any) => infer W ? [...UnionToTuple<Exclude<T, W>>, W] : [];
+export type UnionToTuple<T> =
+  UnionToIntersection<T extends any ? (t: T) => T : never> extends (
+    _: any
+  ) => infer W
+    ? [...UnionToTuple<Exclude<T, W>>, W]
+    : [];
 
 export type Prettify<T> = {
   [K in keyof T]: T[K];
@@ -88,15 +98,40 @@ export type Prettify<T> = {
 
 export type Flatten<T> = T extends (infer U)[] ? U : T;
 
-export type Head<T extends readonly any[]> = T extends readonly [infer H, ...any[]] ? H : never;
+export type Head<T extends readonly any[]> = T extends readonly [
+  infer H,
+  ...any[],
+]
+  ? H
+  : never;
 
-export type Tail<T extends readonly any[]> = T extends readonly [any, ...infer U] ? U : never;
+export type Tail<T extends readonly any[]> = T extends readonly [
+  any,
+  ...infer U,
+]
+  ? U
+  : never;
 
-export type Last<T extends readonly any[]> = T extends readonly [...any[], infer L] ? L : never;
+export type Last<T extends readonly any[]> = T extends readonly [
+  ...any[],
+  infer L,
+]
+  ? L
+  : never;
 
-export type Init<T extends readonly any[]> = T extends readonly [...infer U, any] ? U : never;
+export type Init<T extends readonly any[]> = T extends readonly [
+  ...infer U,
+  any,
+]
+  ? U
+  : never;
 
-export type Reverse<T extends readonly any[]> = T extends readonly [...infer U, infer L] ? [L, ...Reverse<U>] : [];
+export type Reverse<T extends readonly any[]> = T extends readonly [
+  ...infer U,
+  infer L,
+]
+  ? [L, ...Reverse<U>]
+  : [];
 
 export type Length<T extends readonly any[]> = T['length'];
 
@@ -104,74 +139,170 @@ export type Push<T extends readonly any[], U> = [...T, U];
 
 export type Unshift<T extends readonly any[], U> = [U, ...T];
 
-export type Concat<T extends readonly any[], U extends readonly any[]> = [...T, ...U];
+export type Concat<T extends readonly any[], U extends readonly any[]> = [
+  ...T,
+  ...U,
+];
 
-export type Includes<T extends readonly any[], U> = U extends T[number] ? true : false;
+export type Includes<T extends readonly any[], U> = U extends T[number]
+  ? true
+  : false;
 
-export type IndexOf<T extends readonly any[], U> = T extends readonly [infer H, ...infer R] 
-  ? H extends U 
-    ? 0 
-    : IndexOf<R, U> extends -1 
-      ? -1 
-      : IndexOf<R, U> extends number 
-        ? IndexOf<R, U> extends infer N 
-          ? N extends number 
-            ? N extends -1 
-              ? -1 
-              : Increment<N> 
-            : never 
-          : never 
-        : never 
+export type IndexOf<T extends readonly any[], U> = T extends readonly [
+  infer H,
+  ...infer R,
+]
+  ? H extends U
+    ? 0
+    : IndexOf<R, U> extends -1
+      ? -1
+      : IndexOf<R, U> extends number
+        ? IndexOf<R, U> extends infer N
+          ? N extends number
+            ? N extends -1
+              ? -1
+              : Increment<N>
+            : never
+          : never
+        : never
   : -1;
 
-type Increment<N extends number> = N extends 0 ? 1 : N extends 1 ? 2 : N extends 2 ? 3 : N extends 3 ? 4 : N extends 4 ? 5 : N extends 5 ? 6 : N extends 6 ? 7 : N extends 7 ? 8 : N extends 8 ? 9 : N extends 9 ? 10 : number;
+type Increment<N extends number> = N extends 0
+  ? 1
+  : N extends 1
+    ? 2
+    : N extends 2
+      ? 3
+      : N extends 3
+        ? 4
+        : N extends 4
+          ? 5
+          : N extends 5
+            ? 6
+            : N extends 6
+              ? 7
+              : N extends 7
+                ? 8
+                : N extends 8
+                  ? 9
+                  : N extends 9
+                    ? 10
+                    : number;
 
-export type Join<T extends readonly string[], D extends string = ','>= T extends readonly [infer H, ...infer R] ? H extends string ? R extends readonly string[] ? R['length'] extends 0 ? H : `${H}${D}${Join<R, D>}` : never : never : '';
+export type Join<
+  T extends readonly string[],
+  D extends string = ',',
+> = T extends readonly [infer H, ...infer R]
+  ? H extends string
+    ? R extends readonly string[]
+      ? R['length'] extends 0
+        ? H
+        : `${H}${D}${Join<R, D>}`
+      : never
+    : never
+  : '';
 
-export type Split<T extends string, D extends string = ''>= T extends `${infer H}${D}${infer R}` ? [H, ...Split<R, D>] : T extends '' ? [] : [T];
+export type Split<
+  T extends string,
+  D extends string = '',
+> = T extends `${infer H}${D}${infer R}`
+  ? [H, ...Split<R, D>]
+  : T extends ''
+    ? []
+    : [T];
 
-export type Trim<T extends string> = T extends ` ${infer R}` ? Trim<R> : T extends `${infer R} ` ? Trim<R> : T;
+export type Trim<T extends string> = T extends ` ${infer R}`
+  ? Trim<R>
+  : T extends `${infer R} `
+    ? Trim<R>
+    : T;
 
-export type TrimStart<T extends string> = T extends ` ${infer R}` ? TrimStart<R> : T;
+export type TrimStart<T extends string> = T extends ` ${infer R}`
+  ? TrimStart<R>
+  : T;
 
-export type TrimEnd<T extends string> = T extends `${infer R} ` ? TrimEnd<R> : T;
+export type TrimEnd<T extends string> = T extends `${infer R} `
+  ? TrimEnd<R>
+  : T;
 
 // Using TypeScript's built-in string manipulation types
-export type Uppercase<T extends string> = T extends string ? `${T}` extends `${infer U}` ? U extends Uppercase<U> ? U : never : never : never;
+export type Uppercase<T extends string> = T extends string
+  ? `${T}` extends `${infer U}`
+    ? U extends Uppercase<U>
+      ? U
+      : never
+    : never
+  : never;
 
-export type Lowercase<T extends string> = T extends string ? `${T}` extends `${infer L}` ? L extends Lowercase<L> ? L : never : never : never;
+export type Lowercase<T extends string> = T extends string
+  ? `${T}` extends `${infer L}`
+    ? L extends Lowercase<L>
+      ? L
+      : never
+    : never
+  : never;
 
-export type Capitalize<T extends string> = T extends `${infer First}${infer Rest}` ? `${First extends string ? First : ''}${Rest}` : T;
+export type Capitalize<T extends string> =
+  T extends `${infer First}${infer Rest}`
+    ? `${First extends string ? First : ''}${Rest}`
+    : T;
 
-export type Uncapitalize<T extends string> = T extends `${infer First}${infer Rest}` ? `${First extends string ? First : ''}${Rest}` : T;
+export type Uncapitalize<T extends string> =
+  T extends `${infer First}${infer Rest}`
+    ? `${First extends string ? First : ''}${Rest}`
+    : T;
 
-export type Replace<T extends string, S extends string, R extends string> = T extends `${infer H}${S}${infer Tail}` ? `${H}${R}${Replace<Tail, S, R>}` : T;
+export type Replace<
+  T extends string,
+  S extends string,
+  R extends string,
+> = T extends `${infer H}${S}${infer Tail}`
+  ? `${H}${R}${Replace<Tail, S, R>}`
+  : T;
 
-export type StartsWith<T extends string, S extends string> = T extends `${S}${any}` ? true : false;
+export type StartsWith<
+  T extends string,
+  S extends string,
+> = T extends `${S}${any}` ? true : false;
 
-export type EndsWith<T extends string, S extends string> = T extends `${any}${S}` ? true : false;
+export type EndsWith<
+  T extends string,
+  S extends string,
+> = T extends `${any}${S}` ? true : false;
 
-export type Contains<T extends string, S extends string> = T extends `${any}${S}${any}` ? true : false;
+export type Contains<
+  T extends string,
+  S extends string,
+> = T extends `${any}${S}${any}` ? true : false;
 
-export type IsEqual<T, U> = T extends U ? U extends T ? true : false : false;
+export type IsEqual<T, U> = T extends U ? (U extends T ? true : false) : false;
 
-export type IsAny<T> = 0 extends (1 & T) ? true : false;
+export type IsAny<T> = 0 extends 1 & T ? true : false;
 
 export type IsNever<T> = [T] extends [never] ? true : false;
 
-export type IsUnknown<T> = IsAny<T> extends true ? false : unknown extends T ? true : false;
+export type IsUnknown<T> =
+  IsAny<T> extends true ? false : unknown extends T ? true : false;
 
 export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
 
 export type IsArray<T> = T extends readonly any[] ? true : false;
 
-export type IsObject<T> = T extends object ? IsArray<T> extends true ? false : true : false;
+export type IsObject<T> = T extends object
+  ? IsArray<T> extends true
+    ? false
+    : true
+  : false;
 
 export type IsFunction<T> = T extends (...args: any[]) => any ? true : false;
 
 export type IsPromise<T> = T extends Promise<any> ? true : false;
 
-export type IsTuple<T> = T extends readonly any[] ? number extends T['length'] ? false : true : false;
+export type IsTuple<T> = T extends readonly any[]
+  ? number extends T['length']
+    ? false
+    : true
+  : false;
 
 export type IsEmptyObject<T> = T extends Record<string, never> ? true : false;
 
@@ -179,19 +310,29 @@ export type IsEmptyArray<T> = T extends readonly [] ? true : false;
 
 export type IsEmptyString<T> = T extends '' ? true : false;
 
-export type IsOptional<T, K extends keyof T> = {} extends Pick<T, K> ? true : false;
+export type IsOptional<T, K extends keyof T> =
+  {} extends Pick<T, K> ? true : false;
 
-export type IsReadonly<T, K extends keyof T> = IsEqual<Pick<T, K>, Readonly<Pick<T, K>>>;
+export type IsReadonly<T, K extends keyof T> = IsEqual<
+  Pick<T, K>,
+  Readonly<Pick<T, K>>
+>;
 
 export type If<C extends boolean, T, F> = C extends true ? T : F;
 
 export type Not<C extends boolean> = C extends true ? false : true;
 
-export type And<A extends boolean, B extends boolean> = A extends true ? B : false;
+export type And<A extends boolean, B extends boolean> = A extends true
+  ? B
+  : false;
 
-export type Or<A extends boolean, B extends boolean> = A extends true ? true : B;
+export type Or<A extends boolean, B extends boolean> = A extends true
+  ? true
+  : B;
 
-export type Xor<A extends boolean, B extends boolean> = A extends true ? Not<B> : B;
+export type Xor<A extends boolean, B extends boolean> = A extends true
+  ? Not<B>
+  : B;
 
 // Branded Types
 export type Brand<T, B> = T & { __brand: B };
@@ -273,7 +414,13 @@ export type CSSProperty = Brand<string, 'css-property'>;
 export type CSSValue = Brand<string, 'css-value'>;
 
 // JSON Types
-export type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
+export type JSONValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JSONObject
+  | JSONArray;
 export type JSONObject = { [key: string]: JSONValue };
 export type JSONArray = JSONValue[];
 export type JSONString = Brand<string, 'json-string'>;
@@ -351,7 +498,11 @@ export type StateAction<T> = {
 
 export type StateReducer<T> = (state: T, action: StateAction<T>) => T;
 
-export type StateMiddleware<T> = (state: T, action: StateAction<T>, next: (action: StateAction<T>) => T) => T;
+export type StateMiddleware<T> = (
+  state: T,
+  action: StateAction<T>,
+  next: (action: StateAction<T>) => T
+) => T;
 
 export type StateSelector<T, R> = (state: T) => R;
 
@@ -360,7 +511,10 @@ export type StateSubscriber<T> = (state: T, prevState: T) => void;
 // Promise Types
 export type PromiseResolve<T> = (value: T | PromiseLike<T>) => void;
 export type PromiseReject = (reason?: any) => void;
-export type PromiseExecutor<T> = (resolve: PromiseResolve<T>, reject: PromiseReject) => void;
+export type PromiseExecutor<T> = (
+  resolve: PromiseResolve<T>,
+  reject: PromiseReject
+) => void;
 export type Deferred<T> = {
   promise: Promise<T>;
   resolve: PromiseResolve<T>;
@@ -441,7 +595,12 @@ export type LogTransport = (entry: LogEntry) => void;
 export type LogFilter = (entry: LogEntry) => boolean;
 
 // Configuration Types
-export type ConfigSource = 'default' | 'file' | 'environment' | 'argument' | 'override';
+export type ConfigSource =
+  | 'default'
+  | 'file'
+  | 'environment'
+  | 'argument'
+  | 'override';
 export type ConfigValue = string | number | boolean | object | null | undefined;
 export type ConfigSchema = Record<string, ConfigSchemaProperty>;
 export type ConfigSchemaProperty = {
@@ -498,29 +657,13 @@ export const SUPPORTED_LANGUAGES = [
   'python',
 ] as const;
 
-export const SUPPORTED_TARGETS = [
-  'node',
-  'browser',
-  'edge',
-] as const;
+export const SUPPORTED_TARGETS = ['node', 'browser', 'edge'] as const;
 
-export const SUPPORTED_FORMATS = [
-  'esm',
-  'cjs',
-  'umd',
-] as const;
+export const SUPPORTED_FORMATS = ['esm', 'cjs', 'umd'] as const;
 
-export const SUPPORTED_PACKAGE_MANAGERS = [
-  'npm',
-  'yarn',
-  'pnpm',
-] as const;
+export const SUPPORTED_PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const;
 
-export const VALIDATION_LEVELS = [
-  'strict',
-  'normal',
-  'loose',
-] as const;
+export const VALIDATION_LEVELS = ['strict', 'normal', 'loose'] as const;
 
 export const TEST_TYPES = [
   'unit',
@@ -539,12 +682,7 @@ export const TEST_STATUSES = [
   'todo',
 ] as const;
 
-export const LOG_LEVELS = [
-  'debug',
-  'info',
-  'warn',
-  'error',
-] as const;
+export const LOG_LEVELS = ['debug', 'info', 'warn', 'error'] as const;
 
 export const HTTP_METHODS = [
   'GET',
@@ -672,7 +810,8 @@ export const REGEX_PATTERNS = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   URL: /^https?:\/\/[^\s$.?#].[^\s]*$/,
   UUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-  SEMVER: /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/,
+  SEMVER:
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/,
   IPV4: /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
   IPV6: /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/,
   MAC: /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/,
@@ -681,7 +820,8 @@ export const REGEX_PATTERNS = {
   HEX_COLOR: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
   SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
   USERNAME: /^[a-zA-Z0-9_]{3,16}$/,
-  PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+  PASSWORD:
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
   CAMEL_CASE: /^[a-z][a-zA-Z0-9]*$/,
   PASCAL_CASE: /^[A-Z][a-zA-Z0-9]*$/,
   SNAKE_CASE: /^[a-z][a-z0-9_]*$/,

@@ -123,7 +123,11 @@ async function runWorkflow(
     );
 
     // Create a runner script
-    const runnerScript = await createRunnerScript(mainFile || '', input, options);
+    const runnerScript = await createRunnerScript(
+      mainFile || '',
+      input,
+      options
+    );
     const runnerPath = join(tempDir, 'runner.ts');
     await fs.writeFile(runnerPath, runnerScript, 'utf-8');
 

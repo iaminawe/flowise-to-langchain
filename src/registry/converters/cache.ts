@@ -1,6 +1,6 @@
 /**
  * Cache System Converters
- * 
+ *
  * Converts Flowise cache nodes into LangChain cache implementations
  * Supports Redis, Momento, Upstash, and InMemory cache systems
  */
@@ -38,7 +38,10 @@ abstract class BaseCacheConverter extends BaseConverter {
   protected abstract getCacheType(): string;
 
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
-    const variableName = this.generateVariableName(node, `${this.getCacheType()}_cache`);
+    const variableName = this.generateVariableName(
+      node,
+      `${this.getCacheType()}_cache`
+    );
     const config = this.generateCacheConfiguration(node, context);
     const fragments: CodeFragment[] = [];
 
@@ -113,9 +116,13 @@ export class RedisCacheConverter extends BaseCacheConverter {
 
   protected extractCacheConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     // Redis connection configuration - use proper getParameterValue method
-    const redisUrl = this.getParameterValue(node, 'redisUrl', 'redis://localhost:6379');
+    const redisUrl = this.getParameterValue(
+      node,
+      'redisUrl',
+      'redis://localhost:6379'
+    );
     const database = this.getParameterValue(node, 'database', 0);
     const keyPrefix = this.getParameterValue(node, 'keyPrefix', 'langchain:');
     const ttl = this.getParameterValue(node, 'ttl', 3600); // 1 hour default
@@ -123,15 +130,15 @@ export class RedisCacheConverter extends BaseCacheConverter {
     if (redisUrl !== 'redis://localhost:6379') {
       config.redisUrl = redisUrl;
     }
-    
+
     if (database !== 0) {
       config.database = database;
     }
-    
+
     if (keyPrefix !== 'langchain:') {
       config.keyPrefix = keyPrefix;
     }
-    
+
     if (ttl !== 3600) {
       config.ttl = ttl;
     }
@@ -169,15 +176,15 @@ export class InMemoryCacheConverter extends BaseCacheConverter {
 
   protected extractCacheConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     // InMemory cache configuration - use proper getParameterValue method
     const maxSize = this.getParameterValue(node, 'maxSize', 1000);
     const ttl = this.getParameterValue(node, 'ttl', 3600);
-    
+
     if (maxSize !== 1000) {
       config.maxSize = maxSize;
     }
-    
+
     if (ttl !== 3600) {
       config.ttl = ttl;
     }
@@ -215,15 +222,26 @@ export class MomentoCacheConverter extends BaseCacheConverter {
 
   protected extractCacheConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     // Momento cache configuration - use proper getParameterValue method
-    const apiKey = this.getParameterValue(node, 'apiKey', 'process.env.MOMENTO_API_KEY');
-    const cacheName = this.getParameterValue(node, 'cacheName', 'langchain-cache');
+    const apiKey = this.getParameterValue(
+      node,
+      'apiKey',
+      'process.env.MOMENTO_API_KEY'
+    );
+    const cacheName = this.getParameterValue(
+      node,
+      'cacheName',
+      'langchain-cache'
+    );
     const ttl = this.getParameterValue(node, 'ttl', 3600);
-    
-    config.apiKey = apiKey === 'process.env.MOMENTO_API_KEY' ? 'process.env.MOMENTO_API_KEY' : apiKey;
+
+    config.apiKey =
+      apiKey === 'process.env.MOMENTO_API_KEY'
+        ? 'process.env.MOMENTO_API_KEY'
+        : apiKey;
     config.cacheName = cacheName;
-    
+
     if (ttl !== 3600) {
       config.ttl = ttl;
     }
@@ -261,20 +279,34 @@ export class UpstashRedisCacheConverter extends BaseCacheConverter {
 
   protected extractCacheConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     // Upstash Redis cache configuration - use proper getParameterValue method
-    const url = this.getParameterValue(node, 'url', 'process.env.UPSTASH_REDIS_REST_URL');
-    const token = this.getParameterValue(node, 'token', 'process.env.UPSTASH_REDIS_REST_TOKEN');
+    const url = this.getParameterValue(
+      node,
+      'url',
+      'process.env.UPSTASH_REDIS_REST_URL'
+    );
+    const token = this.getParameterValue(
+      node,
+      'token',
+      'process.env.UPSTASH_REDIS_REST_TOKEN'
+    );
     const keyPrefix = this.getParameterValue(node, 'keyPrefix', 'langchain:');
     const ttl = this.getParameterValue(node, 'ttl', 3600);
-    
-    config.url = url === 'process.env.UPSTASH_REDIS_REST_URL' ? 'process.env.UPSTASH_REDIS_REST_URL' : url;
-    config.token = token === 'process.env.UPSTASH_REDIS_REST_TOKEN' ? 'process.env.UPSTASH_REDIS_REST_TOKEN' : token;
-    
+
+    config.url =
+      url === 'process.env.UPSTASH_REDIS_REST_URL'
+        ? 'process.env.UPSTASH_REDIS_REST_URL'
+        : url;
+    config.token =
+      token === 'process.env.UPSTASH_REDIS_REST_TOKEN'
+        ? 'process.env.UPSTASH_REDIS_REST_TOKEN'
+        : token;
+
     if (keyPrefix !== 'langchain:') {
       config.keyPrefix = keyPrefix;
     }
-    
+
     if (ttl !== 3600) {
       config.ttl = ttl;
     }

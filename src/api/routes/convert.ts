@@ -1,6 +1,6 @@
 /**
  * Convert Routes
- * 
+ *
  * API routes for converting Flowise flows to LangChain code.
  */
 
@@ -25,15 +25,15 @@ convertRouter.post(
       type: 'object',
       properties: {
         input: {
-          oneOf: [
-            { type: 'string' },
-            { type: 'object' },
-          ],
+          oneOf: [{ type: 'string' }, { type: 'object' }],
         },
         options: {
           type: 'object',
           properties: {
-            format: { type: 'string', enum: ['typescript', 'javascript', 'python'] },
+            format: {
+              type: 'string',
+              enum: ['typescript', 'javascript', 'python'],
+            },
             target: { type: 'string', enum: ['node', 'browser', 'edge'] },
             withLangfuse: { type: 'boolean' },
             includeTests: { type: 'boolean' },
@@ -51,8 +51,10 @@ convertRouter.post(
   }),
   asyncHandler(async (req, res) => {
     const request: ConvertRequest = req.body;
-    const conversionService: ConversionService = req.app.locals.services.conversion;
-    const websocketService: WebSocketService = req.app.locals.services.websocket;
+    const conversionService: ConversionService =
+      req.app.locals.services.conversion;
+    const websocketService: WebSocketService =
+      req.app.locals.services.websocket;
 
     logger.info('Convert request received:', {
       hasInput: !!request.input,
@@ -73,7 +75,11 @@ convertRouter.post(
 
         // Subscribe to conversion completion
         const completeHandler = (event: any) => {
-          websocketService.broadcastResult(event.jobId, event.result, 'convert');
+          websocketService.broadcastResult(
+            event.jobId,
+            event.result,
+            'convert'
+          );
         };
         conversionService.on('conversion:completed', completeHandler);
 
@@ -84,11 +90,14 @@ convertRouter.post(
         conversionService.on('conversion:failed', failedHandler);
 
         // Clean up listeners after some time
-        setTimeout(() => {
-          conversionService.off('job:progress', progressHandler);
-          conversionService.off('conversion:completed', completeHandler);
-          conversionService.off('conversion:failed', failedHandler);
-        }, 5 * 60 * 1000); // 5 minutes
+        setTimeout(
+          () => {
+            conversionService.off('job:progress', progressHandler);
+            conversionService.off('conversion:completed', completeHandler);
+            conversionService.off('conversion:failed', failedHandler);
+          },
+          5 * 60 * 1000
+        ); // 5 minutes
       }
 
       // Start conversion
@@ -113,11 +122,11 @@ convertRouter.post(
       });
     } catch (error) {
       logger.error('Convert request failed:', { error });
-      
+
       // Send error via WebSocket if streaming
       if (request.stream && request.connectionId) {
         websocketService.broadcastError(
-          'unknown', 
+          'unknown',
           {
             code: 'CONVERSION_ERROR',
             message: error instanceof Error ? error.message : 'Unknown error',
@@ -140,7 +149,8 @@ convertRouter.get(
   '/:jobId',
   asyncHandler(async (req, res) => {
     const { jobId } = req.params;
-    const conversionService: ConversionService = req.app.locals.services.conversion;
+    const conversionService: ConversionService =
+      req.app.locals.services.conversion;
 
     logger.info('Convert status request:', { jobId });
 
@@ -175,7 +185,8 @@ convertRouter.delete(
   '/:jobId',
   asyncHandler(async (req, res) => {
     const { jobId } = req.params;
-    const conversionService: ConversionService = req.app.locals.services.conversion;
+    const conversionService: ConversionService =
+      req.app.locals.services.conversion;
 
     logger.info('Convert cancel request:', { jobId });
 
@@ -208,7 +219,8 @@ convertRouter.delete(
 convertRouter.get(
   '/',
   asyncHandler(async (req, res) => {
-    const conversionService: ConversionService = req.app.locals.services.conversion;
+    const conversionService: ConversionService =
+      req.app.locals.services.conversion;
 
     logger.info('Convert jobs list request');
 
@@ -244,8 +256,10 @@ convertRouter.post(
   asyncHandler(async (req, res) => {
     const { jobId } = req.params;
     const { connectionId } = req.body;
-    const conversionService: ConversionService = req.app.locals.services.conversion;
-    const websocketService: WebSocketService = req.app.locals.services.websocket;
+    const conversionService: ConversionService =
+      req.app.locals.services.conversion;
+    const websocketService: WebSocketService =
+      req.app.locals.services.websocket;
 
     logger.info('Convert subscribe request:', { jobId, connectionId });
 
@@ -277,9 +291,12 @@ convertRouter.post(
     });
 
     // Clean up subscription after job completion or timeout
-    setTimeout(() => {
-      unsubscribe();
-    }, 10 * 60 * 1000); // 10 minutes
+    setTimeout(
+      () => {
+        unsubscribe();
+      },
+      10 * 60 * 1000
+    ); // 10 minutes
 
     const response: ApiResponse = {
       success: true,

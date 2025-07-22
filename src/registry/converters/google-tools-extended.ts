@@ -1,6 +1,6 @@
 /**
  * Google Suite Tools Extended Converters - PHASE 3B: Additional Tools for 100% Coverage
- * 
+ *
  * Additional Google Suite integrations for comprehensive business workflow automation
  * Supports Workspace Admin, Meet, Forms, and advanced automation features
  */
@@ -46,70 +46,128 @@ abstract class BaseGoogleToolExtendedConverter extends BaseConverter {
 
   protected extractAuthConfig(node: IRNode): Record<string, unknown> {
     const auth: Record<string, unknown> = {};
-    
+
     // Enhanced OAuth2 configuration with multiple auth methods
-    const clientId = this.getParameterValue(node, 'clientId', 'process.env.GOOGLE_CLIENT_ID');
-    const clientSecret = this.getParameterValue(node, 'clientSecret', 'process.env.GOOGLE_CLIENT_SECRET');
-    const refreshToken = this.getParameterValue(node, 'refreshToken', 'process.env.GOOGLE_REFRESH_TOKEN');
+    const clientId = this.getParameterValue(
+      node,
+      'clientId',
+      'process.env.GOOGLE_CLIENT_ID'
+    );
+    const clientSecret = this.getParameterValue(
+      node,
+      'clientSecret',
+      'process.env.GOOGLE_CLIENT_SECRET'
+    );
+    const refreshToken = this.getParameterValue(
+      node,
+      'refreshToken',
+      'process.env.GOOGLE_REFRESH_TOKEN'
+    );
     const accessToken = this.getParameterValue(node, 'accessToken', '');
-    const serviceAccountKey = this.getParameterValue(node, 'serviceAccountKey', 'process.env.GOOGLE_SERVICE_ACCOUNT_KEY');
-    const scopes = this.getParameterValue(node, 'scopes', this.getDefaultScopes());
-    const redirectUri = this.getParameterValue(node, 'redirectUri', 'process.env.GOOGLE_REDIRECT_URI');
-    
-    auth.clientId = clientId === 'process.env.GOOGLE_CLIENT_ID' ? clientId : this.formatParameterValue(clientId);
-    auth.clientSecret = clientSecret === 'process.env.GOOGLE_CLIENT_SECRET' ? clientSecret : this.formatParameterValue(clientSecret);
-    auth.refreshToken = refreshToken === 'process.env.GOOGLE_REFRESH_TOKEN' ? refreshToken : this.formatParameterValue(refreshToken);
-    auth.redirectUri = redirectUri === 'process.env.GOOGLE_REDIRECT_URI' ? redirectUri : this.formatParameterValue(redirectUri);
-    
+    const serviceAccountKey = this.getParameterValue(
+      node,
+      'serviceAccountKey',
+      'process.env.GOOGLE_SERVICE_ACCOUNT_KEY'
+    );
+    const scopes = this.getParameterValue(
+      node,
+      'scopes',
+      this.getDefaultScopes()
+    );
+    const redirectUri = this.getParameterValue(
+      node,
+      'redirectUri',
+      'process.env.GOOGLE_REDIRECT_URI'
+    );
+
+    auth.clientId =
+      clientId === 'process.env.GOOGLE_CLIENT_ID'
+        ? clientId
+        : this.formatParameterValue(clientId);
+    auth.clientSecret =
+      clientSecret === 'process.env.GOOGLE_CLIENT_SECRET'
+        ? clientSecret
+        : this.formatParameterValue(clientSecret);
+    auth.refreshToken =
+      refreshToken === 'process.env.GOOGLE_REFRESH_TOKEN'
+        ? refreshToken
+        : this.formatParameterValue(refreshToken);
+    auth.redirectUri =
+      redirectUri === 'process.env.GOOGLE_REDIRECT_URI'
+        ? redirectUri
+        : this.formatParameterValue(redirectUri);
+
     if (accessToken) {
       auth.accessToken = this.formatParameterValue(accessToken);
     }
-    
+
     if (serviceAccountKey !== 'process.env.GOOGLE_SERVICE_ACCOUNT_KEY') {
       auth.serviceAccountKey = this.formatParameterValue(serviceAccountKey);
     }
-    
+
     auth.scopes = Array.isArray(scopes) ? scopes : [scopes];
 
     return auth;
   }
-  
+
   protected extractWebhookConfig(node: IRNode): Record<string, unknown> {
     const webhooks: Record<string, unknown> = {};
-    
+
     const webhookUrl = this.getParameterValue(node, 'webhookUrl', '');
-    const enableWebhooks = this.getParameterValue(node, 'enableWebhooks', false);
-    const webhookSecret = this.getParameterValue(node, 'webhookSecret', 'process.env.GOOGLE_WEBHOOK_SECRET');
-    
+    const enableWebhooks = this.getParameterValue(
+      node,
+      'enableWebhooks',
+      false
+    );
+    const webhookSecret = this.getParameterValue(
+      node,
+      'webhookSecret',
+      'process.env.GOOGLE_WEBHOOK_SECRET'
+    );
+
     if (enableWebhooks && webhookUrl) {
       webhooks.enabled = true;
       webhooks.url = this.formatParameterValue(webhookUrl);
-      webhooks.secret = webhookSecret === 'process.env.GOOGLE_WEBHOOK_SECRET' ? webhookSecret : this.formatParameterValue(webhookSecret);
+      webhooks.secret =
+        webhookSecret === 'process.env.GOOGLE_WEBHOOK_SECRET'
+          ? webhookSecret
+          : this.formatParameterValue(webhookSecret);
     }
-    
+
     return webhooks;
   }
-  
+
   protected extractRateLimitingConfig(node: IRNode): Record<string, unknown> {
     const rateLimiting: Record<string, unknown> = {};
-    
-    const enableRateLimit = this.getParameterValue(node, 'enableRateLimit', true);
-    const requestsPerSecond = this.getParameterValue(node, 'requestsPerSecond', 10);
+
+    const enableRateLimit = this.getParameterValue(
+      node,
+      'enableRateLimit',
+      true
+    );
+    const requestsPerSecond = this.getParameterValue(
+      node,
+      'requestsPerSecond',
+      10
+    );
     const burstLimit = this.getParameterValue(node, 'burstLimit', 50);
     const retryOnQuota = this.getParameterValue(node, 'retryOnQuota', true);
-    
+
     if (enableRateLimit) {
       rateLimiting.enabled = true;
       rateLimiting.requestsPerSecond = requestsPerSecond;
       rateLimiting.burstLimit = burstLimit;
       rateLimiting.retryOnQuota = retryOnQuota;
     }
-    
+
     return rateLimiting;
   }
 
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
-    const variableName = this.generateVariableName(node, `google_${this.getGoogleService()}`);
+    const variableName = this.generateVariableName(
+      node,
+      `google_${this.getGoogleService()}`
+    );
     const config = this.generateGoogleToolConfiguration(node, context);
     const fragments: CodeFragment[] = [];
 
@@ -143,7 +201,10 @@ abstract class BaseGoogleToolExtendedConverter extends BaseConverter {
 
     // Rate limiting configuration
     if (config.rateLimiting && Object.keys(config.rateLimiting).length > 0) {
-      const rateLimitCode = this.generateRateLimitingCode(config.rateLimiting, variableName);
+      const rateLimitCode = this.generateRateLimitingCode(
+        config.rateLimiting,
+        variableName
+      );
       fragments.push(
         this.createCodeFragment(
           `${node.id}_rate_limit`,
@@ -158,7 +219,10 @@ abstract class BaseGoogleToolExtendedConverter extends BaseConverter {
 
     // Webhook configuration
     if (config.webhooks && Object.keys(config.webhooks).length > 0) {
-      const webhookCode = this.generateWebhookCode(config.webhooks, variableName);
+      const webhookCode = this.generateWebhookCode(
+        config.webhooks,
+        variableName
+      );
       fragments.push(
         this.createCodeFragment(
           `${node.id}_webhooks`,
@@ -172,8 +236,15 @@ abstract class BaseGoogleToolExtendedConverter extends BaseConverter {
     }
 
     // Enhanced tool initialization with error handling and validation
-    const configStr = this.generateEnhancedConfigurationString(config.config, variableName);
-    const initCode = this.generateEnhancedInitializationCode(config.className, configStr, variableName);
+    const configStr = this.generateEnhancedConfigurationString(
+      config.config,
+      variableName
+    );
+    const initCode = this.generateEnhancedInitializationCode(
+      config.className,
+      configStr,
+      variableName
+    );
 
     fragments.push(
       this.createCodeFragment(
@@ -196,9 +267,11 @@ abstract class BaseGoogleToolExtendedConverter extends BaseConverter {
     const authEntries = Object.entries(auth);
     if (authEntries.length === 0) return '';
 
-    const authConfig = authEntries.map(([key, value]) => {
-      return `  ${key}: ${value}`;
-    }).join(',\n');
+    const authConfig = authEntries
+      .map(([key, value]) => {
+        return `  ${key}: ${value}`;
+      })
+      .join(',\n');
 
     return `// Enhanced Google OAuth2 Authentication with error handling
 const ${variableName}_auth = {
@@ -221,13 +294,13 @@ ${variableName}_authClient.on('tokens', (tokens) => {
   console.log('Google Auth tokens refreshed:', tokens.access_token ? 'Success' : 'Failed');
 });`;
   }
-  
+
   protected generateRateLimitingCode(
     rateLimiting: Record<string, unknown>,
     variableName: string
   ): string {
     if (!rateLimiting.enabled) return '';
-    
+
     return `// Rate limiting configuration for Google API calls
 const ${variableName}_rateLimiter = new RateLimiter({
   tokensPerInterval: ${rateLimiting.requestsPerSecond},
@@ -241,13 +314,13 @@ const ${variableName}_burstLimiter = new RateLimiter({
   interval: 60000 // 1 minute
 });`;
   }
-  
+
   protected generateWebhookCode(
     webhooks: Record<string, unknown>,
     variableName: string
   ): string {
     if (!webhooks.enabled) return '';
-    
+
     return `// Webhook configuration for real-time Google API updates
 const ${variableName}_webhooks = {
   url: ${webhooks.url},
@@ -310,7 +383,7 @@ const ${variableName}_webhooks = {
   }
 }`;
   }
-  
+
   protected generateEnhancedInitializationCode(
     className: string,
     configStr: string,
@@ -334,15 +407,18 @@ try {
   throw new Error(\`Google ${className} initialization failed: \${error.message}\`);
 }`;
   }
-  
-  protected generateEnhancedImports(packageName: string, imports: string[]): string {
+
+  protected generateEnhancedImports(
+    packageName: string,
+    imports: string[]
+  ): string {
     const importStatements = [
-      `import { ${imports.filter(imp => !['GoogleAuth', 'jwt', 'RateLimiter'].includes(imp)).join(', ')} } from '${packageName}';`,
+      `import { ${imports.filter((imp) => !['GoogleAuth', 'jwt', 'RateLimiter'].includes(imp)).join(', ')} } from '${packageName}';`,
       "import { GoogleAuth } from 'google-auth-library';",
       "import { RateLimiter } from 'limiter';",
-      "import * as jwt from 'jsonwebtoken';"
+      "import * as jwt from 'jsonwebtoken';",
     ];
-    
+
     return importStatements.join('\n');
   }
 }
@@ -372,29 +448,57 @@ export class GoogleWorkspaceToolConverter extends BaseGoogleToolExtendedConverte
 
   protected extractToolConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     // Enhanced Google Workspace configuration for admin operations
     const domain = this.getParameterValue(node, 'domain', '');
     const customerID = this.getParameterValue(node, 'customerID', '');
     const maxResults = this.getParameterValue(node, 'maxResults', 100);
-    const includeDeletedUsers = this.getParameterValue(node, 'includeDeletedUsers', false);
+    const includeDeletedUsers = this.getParameterValue(
+      node,
+      'includeDeletedUsers',
+      false
+    );
     const includeGroups = this.getParameterValue(node, 'includeGroups', true);
-    const includeOrgUnits = this.getParameterValue(node, 'includeOrgUnits', true);
-    const enableUserManagement = this.getParameterValue(node, 'enableUserManagement', false);
-    const enableGroupManagement = this.getParameterValue(node, 'enableGroupManagement', false);
-    const enableDeviceManagement = this.getParameterValue(node, 'enableDeviceManagement', false);
-    const enableReporting = this.getParameterValue(node, 'enableReporting', true);
-    const enableAuditLogs = this.getParameterValue(node, 'enableAuditLogs', true);
+    const includeOrgUnits = this.getParameterValue(
+      node,
+      'includeOrgUnits',
+      true
+    );
+    const enableUserManagement = this.getParameterValue(
+      node,
+      'enableUserManagement',
+      false
+    );
+    const enableGroupManagement = this.getParameterValue(
+      node,
+      'enableGroupManagement',
+      false
+    );
+    const enableDeviceManagement = this.getParameterValue(
+      node,
+      'enableDeviceManagement',
+      false
+    );
+    const enableReporting = this.getParameterValue(
+      node,
+      'enableReporting',
+      true
+    );
+    const enableAuditLogs = this.getParameterValue(
+      node,
+      'enableAuditLogs',
+      true
+    );
     const adminRoles = this.getParameterValue(node, 'adminRoles', []);
-    
+
     if (domain) {
       config.domain = domain;
     }
-    
+
     if (customerID) {
       config.customerID = customerID;
     }
-    
+
     config.maxResults = maxResults;
     config.includeDeletedUsers = includeDeletedUsers;
     config.includeGroups = includeGroups;
@@ -404,14 +508,14 @@ export class GoogleWorkspaceToolConverter extends BaseGoogleToolExtendedConverte
     config.enableDeviceManagement = enableDeviceManagement;
     config.enableReporting = enableReporting;
     config.enableAuditLogs = enableAuditLogs;
-    
+
     if (Array.isArray(adminRoles) && adminRoles.length > 0) {
       config.adminRoles = adminRoles;
     }
 
     return config;
   }
-  
+
   protected getDefaultScopes(): string[] {
     return [
       'https://www.googleapis.com/auth/admin.directory.user.readonly',
@@ -419,18 +523,18 @@ export class GoogleWorkspaceToolConverter extends BaseGoogleToolExtendedConverte
       'https://www.googleapis.com/auth/admin.directory.orgunit.readonly',
       'https://www.googleapis.com/auth/admin.reports.audit.readonly',
       'https://www.googleapis.com/auth/admin.directory.user',
-      'https://www.googleapis.com/auth/admin.directory.group'
+      'https://www.googleapis.com/auth/admin.directory.group',
     ];
   }
 
   override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
-      'googleapis', 
-      '@langchain/community', 
-      'google-auth-library', 
-      'limiter', 
+      'googleapis',
+      '@langchain/community',
+      'google-auth-library',
+      'limiter',
       'jsonwebtoken',
-      'crypto'
+      'crypto',
     ];
   }
 }
@@ -460,22 +564,62 @@ export class GoogleMeetToolConverter extends BaseGoogleToolExtendedConverter {
 
   protected extractToolConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     // Enhanced Google Meet configuration for video conferencing
     const spaceType = this.getParameterValue(node, 'spaceType', 'MEETING_ROOM');
-    const maxParticipants = this.getParameterValue(node, 'maxParticipants', 100);
-    const enableRecording = this.getParameterValue(node, 'enableRecording', false);
-    const enableTranscription = this.getParameterValue(node, 'enableTranscription', false);
-    const enableBreakoutRooms = this.getParameterValue(node, 'enableBreakoutRooms', false);
+    const maxParticipants = this.getParameterValue(
+      node,
+      'maxParticipants',
+      100
+    );
+    const enableRecording = this.getParameterValue(
+      node,
+      'enableRecording',
+      false
+    );
+    const enableTranscription = this.getParameterValue(
+      node,
+      'enableTranscription',
+      false
+    );
+    const enableBreakoutRooms = this.getParameterValue(
+      node,
+      'enableBreakoutRooms',
+      false
+    );
     const enableChat = this.getParameterValue(node, 'enableChat', true);
-    const enableScreenShare = this.getParameterValue(node, 'enableScreenShare', true);
-    const enableWaitingRoom = this.getParameterValue(node, 'enableWaitingRoom', false);
-    const requireModerator = this.getParameterValue(node, 'requireModerator', false);
-    const allowExternalParticipants = this.getParameterValue(node, 'allowExternalParticipants', true);
-    const recordingFormat = this.getParameterValue(node, 'recordingFormat', 'mp4');
-    const transcriptionLanguage = this.getParameterValue(node, 'transcriptionLanguage', 'en-US');
+    const enableScreenShare = this.getParameterValue(
+      node,
+      'enableScreenShare',
+      true
+    );
+    const enableWaitingRoom = this.getParameterValue(
+      node,
+      'enableWaitingRoom',
+      false
+    );
+    const requireModerator = this.getParameterValue(
+      node,
+      'requireModerator',
+      false
+    );
+    const allowExternalParticipants = this.getParameterValue(
+      node,
+      'allowExternalParticipants',
+      true
+    );
+    const recordingFormat = this.getParameterValue(
+      node,
+      'recordingFormat',
+      'mp4'
+    );
+    const transcriptionLanguage = this.getParameterValue(
+      node,
+      'transcriptionLanguage',
+      'en-US'
+    );
     const timezone = this.getParameterValue(node, 'timezone', 'UTC');
-    
+
     config.spaceType = spaceType;
     config.maxParticipants = maxParticipants;
     config.enableRecording = enableRecording;
@@ -492,23 +636,23 @@ export class GoogleMeetToolConverter extends BaseGoogleToolExtendedConverter {
 
     return config;
   }
-  
+
   protected getDefaultScopes(): string[] {
     return [
       'https://www.googleapis.com/auth/meetings.space.created',
       'https://www.googleapis.com/auth/meetings.space.readonly',
-      'https://www.googleapis.com/auth/calendar.events'
+      'https://www.googleapis.com/auth/calendar.events',
     ];
   }
 
   override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
-      'googleapis', 
-      '@langchain/community', 
-      'google-auth-library', 
-      'limiter', 
+      'googleapis',
+      '@langchain/community',
+      'google-auth-library',
+      'limiter',
       'jsonwebtoken',
-      'crypto'
+      'crypto',
     ];
   }
 }
@@ -538,28 +682,76 @@ export class GoogleFormsToolConverter extends BaseGoogleToolExtendedConverter {
 
   protected extractToolConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     // Enhanced Google Forms configuration for form automation
     const formId = this.getParameterValue(node, 'formId', '');
-    const includeGridInfo = this.getParameterValue(node, 'includeGridInfo', false);
-    const includeFormResponses = this.getParameterValue(node, 'includeFormResponses', true);
+    const includeGridInfo = this.getParameterValue(
+      node,
+      'includeGridInfo',
+      false
+    );
+    const includeFormResponses = this.getParameterValue(
+      node,
+      'includeFormResponses',
+      true
+    );
     const maxResponses = this.getParameterValue(node, 'maxResponses', 1000);
-    const enableCollectEmail = this.getParameterValue(node, 'enableCollectEmail', false);
-    const enableLimitOneResponse = this.getParameterValue(node, 'enableLimitOneResponse', false);
-    const enableProgressBar = this.getParameterValue(node, 'enableProgressBar', true);
-    const enableShuffleQuestions = this.getParameterValue(node, 'enableShuffleQuestions', false);
-    const enableQuizMode = this.getParameterValue(node, 'enableQuizMode', false);
-    const publishingSummary = this.getParameterValue(node, 'publishingSummary', false);
-    const confirmationMessage = this.getParameterValue(node, 'confirmationMessage', '');
-    const customClosedFormMessage = this.getParameterValue(node, 'customClosedFormMessage', '');
-    const responseValidation = this.getParameterValue(node, 'responseValidation', true);
+    const enableCollectEmail = this.getParameterValue(
+      node,
+      'enableCollectEmail',
+      false
+    );
+    const enableLimitOneResponse = this.getParameterValue(
+      node,
+      'enableLimitOneResponse',
+      false
+    );
+    const enableProgressBar = this.getParameterValue(
+      node,
+      'enableProgressBar',
+      true
+    );
+    const enableShuffleQuestions = this.getParameterValue(
+      node,
+      'enableShuffleQuestions',
+      false
+    );
+    const enableQuizMode = this.getParameterValue(
+      node,
+      'enableQuizMode',
+      false
+    );
+    const publishingSummary = this.getParameterValue(
+      node,
+      'publishingSummary',
+      false
+    );
+    const confirmationMessage = this.getParameterValue(
+      node,
+      'confirmationMessage',
+      ''
+    );
+    const customClosedFormMessage = this.getParameterValue(
+      node,
+      'customClosedFormMessage',
+      ''
+    );
+    const responseValidation = this.getParameterValue(
+      node,
+      'responseValidation',
+      true
+    );
     const autoSave = this.getParameterValue(node, 'autoSave', true);
-    const allowResponseEditing = this.getParameterValue(node, 'allowResponseEditing', false);
-    
+    const allowResponseEditing = this.getParameterValue(
+      node,
+      'allowResponseEditing',
+      false
+    );
+
     if (formId) {
       config.formId = formId;
     }
-    
+
     config.includeGridInfo = includeGridInfo;
     config.includeFormResponses = includeFormResponses;
     config.maxResponses = maxResponses;
@@ -572,35 +764,35 @@ export class GoogleFormsToolConverter extends BaseGoogleToolExtendedConverter {
     config.responseValidation = responseValidation;
     config.autoSave = autoSave;
     config.allowResponseEditing = allowResponseEditing;
-    
+
     if (confirmationMessage) {
       config.confirmationMessage = confirmationMessage;
     }
-    
+
     if (customClosedFormMessage) {
       config.customClosedFormMessage = customClosedFormMessage;
     }
 
     return config;
   }
-  
+
   protected getDefaultScopes(): string[] {
     return [
       'https://www.googleapis.com/auth/forms.body.readonly',
       'https://www.googleapis.com/auth/forms.responses.readonly',
       'https://www.googleapis.com/auth/forms.body',
-      'https://www.googleapis.com/auth/forms.responses'
+      'https://www.googleapis.com/auth/forms.responses',
     ];
   }
 
   override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
-      'googleapis', 
-      '@langchain/community', 
-      'google-auth-library', 
-      'limiter', 
+      'googleapis',
+      '@langchain/community',
+      'google-auth-library',
+      'limiter',
       'jsonwebtoken',
-      'crypto'
+      'crypto',
     ];
   }
 }

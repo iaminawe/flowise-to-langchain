@@ -28,12 +28,12 @@ abstract class BaseDocumentLoaderConverter extends BaseConverter {
         return (param.value as T) ?? defaultValue;
       }
     }
-    
+
     // Then try data.inputs structure (common in Flowise)
     if (node.data?.inputs && paramName in node.data.inputs) {
       return (node.data.inputs[paramName] as T) ?? defaultValue;
     }
-    
+
     return defaultValue;
   }
 
@@ -79,7 +79,11 @@ abstract class BaseDocumentLoaderConverter extends BaseConverter {
     );
 
     // Generate initialization code based on loader type
-    const initCode = this.generateInitializationCode(node, variableName, config);
+    const initCode = this.generateInitializationCode(
+      node,
+      variableName,
+      config
+    );
 
     fragments.push(
       this.createCodeFragment(
@@ -102,10 +106,21 @@ abstract class BaseDocumentLoaderConverter extends BaseConverter {
   ): string {
     // For file-based loaders, the file path is typically the first parameter
     const filePath = this.getParameterValue(node, 'filePath');
-    const url = this.getParameterValue(node, 'url') || this.getParameterValue(node, 'webPath');
-    
+    const url =
+      this.getParameterValue(node, 'url') ||
+      this.getParameterValue(node, 'webPath');
+
     // Handle file-based loaders (PDF, CSV, Text, Docx, Excel)
-    if (filePath && ['PDFLoader', 'CSVLoader', 'TextLoader', 'DocxLoader', 'ExcelLoader'].includes(config.className)) {
+    if (
+      filePath &&
+      [
+        'PDFLoader',
+        'CSVLoader',
+        'TextLoader',
+        'DocxLoader',
+        'ExcelLoader',
+      ].includes(config.className)
+    ) {
       const otherConfig = { ...config.config };
       delete otherConfig.filePath;
       const configStr = this.generateConfigurationString(otherConfig);
@@ -113,9 +128,12 @@ abstract class BaseDocumentLoaderConverter extends BaseConverter {
         ? `const ${variableName} = new ${config.className}(${this.formatParameterValue(filePath)}, ${configStr});`
         : `const ${variableName} = new ${config.className}(${this.formatParameterValue(filePath)});`;
     }
-    
+
     // Handle web-based loaders
-    if (url && ['WebBaseLoader', 'CheerioWebBaseLoader'].includes(config.className)) {
+    if (
+      url &&
+      ['WebBaseLoader', 'CheerioWebBaseLoader'].includes(config.className)
+    ) {
       const otherConfig = { ...config.config };
       delete otherConfig.url;
       delete otherConfig.webPath;
@@ -124,7 +142,7 @@ abstract class BaseDocumentLoaderConverter extends BaseConverter {
         ? `const ${variableName} = new ${config.className}(${this.formatParameterValue(url)}, ${configStr});`
         : `const ${variableName} = new ${config.className}(${this.formatParameterValue(url)});`;
     }
-    
+
     // Handle directory loader
     if (config.className === 'DirectoryLoader') {
       const directoryPath = this.getParameterValue(node, 'directoryPath');
@@ -137,7 +155,7 @@ abstract class BaseDocumentLoaderConverter extends BaseConverter {
           : `const ${variableName} = new ${config.className}(${this.formatParameterValue(directoryPath)});`;
       }
     }
-    
+
     // Default: use config object
     const configStr = this.generateConfigurationString(config.config);
     return configStr
@@ -492,7 +510,9 @@ export class WebBaseLoaderConverter extends BaseDocumentLoaderConverter {
   protected extractDocumentLoaderConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
-    const url = this.getParameterValue(node, 'url') || this.getParameterValue(node, 'webPath');
+    const url =
+      this.getParameterValue(node, 'url') ||
+      this.getParameterValue(node, 'webPath');
     if (url) {
       config.url = url;
     }
@@ -545,7 +565,9 @@ export class WebLoaderConverter extends BaseDocumentLoaderConverter {
   protected extractDocumentLoaderConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
-    const webPath = this.getParameterValue(node, 'webPath') || this.getParameterValue(node, 'url');
+    const webPath =
+      this.getParameterValue(node, 'webPath') ||
+      this.getParameterValue(node, 'url');
     if (webPath) {
       config.webPath = webPath;
     }

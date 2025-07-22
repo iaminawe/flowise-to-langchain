@@ -33,16 +33,8 @@ export class ZepMemoryConverter extends BaseConverter {
 
   protected extractMemoryConfig(node: IRNode): Record<string, unknown> {
     // Extract Zep-specific configuration
-    const baseURL = this.getParameterValue<string>(
-      node,
-      'baseURL',
-      undefined
-    );
-    const apiKey = this.getParameterValue<string>(
-      node,
-      'apiKey',
-      undefined
-    );
+    const baseURL = this.getParameterValue<string>(node, 'baseURL', undefined);
+    const apiKey = this.getParameterValue<string>(node, 'apiKey', undefined);
     const sessionId = this.getParameterValue<string>(
       node,
       'sessionId',
@@ -58,11 +50,7 @@ export class ZepMemoryConverter extends BaseConverter {
       'inputKey',
       'question'
     );
-    const outputKey = this.getParameterValue<string>(
-      node,
-      'outputKey',
-      'text'
-    );
+    const outputKey = this.getParameterValue<string>(node, 'outputKey', 'text');
     const returnMessages = this.getParameterValue<boolean>(
       node,
       'returnMessages',
@@ -98,38 +86,58 @@ export class ZepMemoryConverter extends BaseConverter {
   ): string {
     // Check for required parameters
     const hasRequiredParams = config['baseURL'] && config['sessionId'];
-    
+
     if (!hasRequiredParams) {
       // Generate with placeholders and comments for missing required params
       const configEntries: string[] = [];
-      
+
       if (!config['baseURL']) {
-        configEntries.push('  // baseURL: "YOUR_ZEP_API_URL", // Required: Zep server URL');
+        configEntries.push(
+          '  // baseURL: "YOUR_ZEP_API_URL", // Required: Zep server URL'
+        );
       } else {
-        configEntries.push(`  baseURL: ${this.formatParameterValue(config['baseURL'])}`);
+        configEntries.push(
+          `  baseURL: ${this.formatParameterValue(config['baseURL'])}`
+        );
       }
-      
+
       if (!config['apiKey']) {
-        configEntries.push('  // apiKey: "YOUR_ZEP_API_KEY", // Optional: Zep API key if authentication is enabled');
+        configEntries.push(
+          '  // apiKey: "YOUR_ZEP_API_KEY", // Optional: Zep API key if authentication is enabled'
+        );
       } else {
-        configEntries.push(`  apiKey: ${this.formatParameterValue(config['apiKey'])}`);
+        configEntries.push(
+          `  apiKey: ${this.formatParameterValue(config['apiKey'])}`
+        );
       }
-      
+
       if (!config['sessionId']) {
-        configEntries.push('  // sessionId: "SESSION_ID", // Required: Unique session identifier');
+        configEntries.push(
+          '  // sessionId: "SESSION_ID", // Required: Unique session identifier'
+        );
       } else {
-        configEntries.push(`  sessionId: ${this.formatParameterValue(config['sessionId'])}`);
+        configEntries.push(
+          `  sessionId: ${this.formatParameterValue(config['sessionId'])}`
+        );
       }
-      
+
       // Add other configuration options
-      configEntries.push(`  memoryKey: ${this.formatParameterValue(config['memoryKey'])}`);
-      configEntries.push(`  inputKey: ${this.formatParameterValue(config['inputKey'])}`);
-      configEntries.push(`  outputKey: ${this.formatParameterValue(config['outputKey'])}`);
-      configEntries.push(`  returnMessages: ${this.formatParameterValue(config['returnMessages'])}`);
-      
+      configEntries.push(
+        `  memoryKey: ${this.formatParameterValue(config['memoryKey'])}`
+      );
+      configEntries.push(
+        `  inputKey: ${this.formatParameterValue(config['inputKey'])}`
+      );
+      configEntries.push(
+        `  outputKey: ${this.formatParameterValue(config['outputKey'])}`
+      );
+      configEntries.push(
+        `  returnMessages: ${this.formatParameterValue(config['returnMessages'])}`
+      );
+
       return `const ${variableName} = new ${className}({\n${configEntries.join(',\n')}\n});`;
     }
-    
+
     // Generate normal instantiation with all parameters
     const configEntries = Object.entries(config)
       .filter(([_, value]) => value !== undefined)
@@ -181,7 +189,7 @@ export class ZepMemoryConverter extends BaseConverter {
     // Add a comment about Zep server requirements if baseURL is missing
     if (!config['baseURL']) {
       const setupComment = `// Note: ZepMemory requires a running Zep server instance.\n// See https://github.com/getzep/zep for setup instructions.\n// You can install Zep using Docker: docker run -p 8000:8000 ghcr.io/getzep/zep:latest\n`;
-      
+
       fragments.push(
         this.createCodeFragment(
           `${node.id}_setup_comment`,

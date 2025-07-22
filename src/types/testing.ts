@@ -1,14 +1,12 @@
 /**
  * Testing Interface Definitions
- * 
+ *
  * This file contains comprehensive TypeScript interfaces for all testing-related
  * functionality, including test configurations, results, runners, and utilities.
  */
 
 // Import ValidationResult from API to avoid circular dependencies
-import type {
-  ValidationResult
-} from './api.js';
+import type { ValidationResult } from './api.js';
 
 // Import remaining types from index
 import {
@@ -24,7 +22,13 @@ export interface TestSuite {
   id: string;
   name: string;
   description: string;
-  type: 'unit' | 'integration' | 'e2e' | 'performance' | 'security' | 'accessibility';
+  type:
+    | 'unit'
+    | 'integration'
+    | 'e2e'
+    | 'performance'
+    | 'security'
+    | 'accessibility';
   tests: Test[];
   setup?: TestSetup;
   teardown?: TestTeardown;
@@ -38,7 +42,13 @@ export interface Test {
   id: string;
   name: string;
   description: string;
-  type: 'unit' | 'integration' | 'e2e' | 'performance' | 'security' | 'accessibility';
+  type:
+    | 'unit'
+    | 'integration'
+    | 'e2e'
+    | 'performance'
+    | 'security'
+    | 'accessibility';
   suite: string;
   function: TestFunction;
   setup?: TestSetup;
@@ -323,13 +333,20 @@ export interface TestConfig {
   description: string;
   version: string;
   author: string;
-  
+
   // Test selection
-  testType: 'unit' | 'integration' | 'e2e' | 'performance' | 'security' | 'accessibility' | 'all';
+  testType:
+    | 'unit'
+    | 'integration'
+    | 'e2e'
+    | 'performance'
+    | 'security'
+    | 'accessibility'
+    | 'all';
   includePatterns: string[];
   excludePatterns: string[];
   tags: string[];
-  
+
   // Execution settings
   timeout: number;
   retries: number;
@@ -339,22 +356,31 @@ export interface TestConfig {
   failFast: boolean;
   randomize: boolean;
   seed?: number;
-  
+
   // Environment
   environment: string;
   variables: Record<string, string>;
   setupFiles: string[];
   teardownFiles: string[];
-  
+
   // Mocking
   mockExternal: boolean;
   mockNetwork: boolean;
   mockFileSystem: boolean;
   mockDatabase: boolean;
   mockApis: ApiMockConfig[];
-  
+
   // Reporting
-  reporter: 'default' | 'json' | 'junit' | 'html' | 'tap' | 'spec' | 'dot' | 'nyan' | 'lcov';
+  reporter:
+    | 'default'
+    | 'json'
+    | 'junit'
+    | 'html'
+    | 'tap'
+    | 'spec'
+    | 'dot'
+    | 'nyan'
+    | 'lcov';
   outputDir: string;
   verbose: boolean;
   silent: boolean;
@@ -364,7 +390,7 @@ export interface TestConfig {
   showPassed: boolean;
   showFailed: boolean;
   showTodo: boolean;
-  
+
   // Coverage
   coverage: boolean;
   coverageDir: string;
@@ -372,57 +398,57 @@ export interface TestConfig {
   coverageThreshold: CoverageThreshold;
   collectCoverageFrom: string[];
   coveragePathIgnorePatterns: string[];
-  
+
   // Snapshots
   updateSnapshots: boolean;
   snapshotDir: string;
   snapshotSerializers: string[];
-  
+
   // Performance
   performanceThreshold: PerformanceThreshold;
   memoryThreshold: number;
   cpuThreshold: number;
-  
+
   // Security
   securityChecks: SecurityCheck[];
   vulnerabilityThreshold: 'low' | 'medium' | 'high' | 'critical';
-  
+
   // Accessibility
   accessibilityStandards: string[];
   accessibilityLevel: 'A' | 'AA' | 'AAA';
-  
+
   // Browser testing
   browsers: BrowserConfig[];
   headless: boolean;
   slowMo: number;
   devtools: boolean;
-  
+
   // Device testing
   devices: DeviceConfig[];
-  
+
   // Screenshots
   screenshots: boolean;
   screenshotDir: string;
   screenshotOnFailure: boolean;
-  
+
   // Videos
   videos: boolean;
   videoDir: string;
   videoOnFailure: boolean;
-  
+
   // Artifacts
   artifacts: boolean;
   artifactDir: string;
-  
+
   // Notifications
   notifications: NotificationConfig[];
-  
+
   // Hooks
   hooks: TestHooks;
-  
+
   // Plugins
   plugins: TestPlugin[];
-  
+
   // Custom
   custom: Record<string, unknown>;
 }
@@ -471,7 +497,13 @@ export interface PerformanceThreshold {
 }
 
 export interface SecurityCheck {
-  type: 'xss' | 'sql_injection' | 'csrf' | 'clickjacking' | 'insecure_dependencies' | 'custom';
+  type:
+    | 'xss'
+    | 'sql_injection'
+    | 'csrf'
+    | 'clickjacking'
+    | 'insecure_dependencies'
+    | 'custom';
   enabled: boolean;
   config?: Record<string, unknown>;
 }
@@ -563,7 +595,13 @@ export interface TestResult {
   id: string;
   name: string;
   description: string;
-  type: 'unit' | 'integration' | 'e2e' | 'performance' | 'security' | 'accessibility';
+  type:
+    | 'unit'
+    | 'integration'
+    | 'e2e'
+    | 'performance'
+    | 'security'
+    | 'accessibility';
   suite: string;
   status: 'passed' | 'failed' | 'skipped' | 'pending' | 'todo';
   duration: number;
@@ -655,7 +693,14 @@ export interface TestVideo {
 export interface TestArtifact {
   id: string;
   name: string;
-  type: 'log' | 'screenshot' | 'video' | 'report' | 'trace' | 'profile' | 'custom';
+  type:
+    | 'log'
+    | 'screenshot'
+    | 'video'
+    | 'report'
+    | 'trace'
+    | 'profile'
+    | 'custom';
   path: string;
   url?: string;
   timestamp: number;
@@ -867,7 +912,7 @@ export interface TestRunner {
   currentSuite?: string;
   startTime?: number;
   endTime?: number;
-  
+
   // Methods
   run(config?: Partial<TestConfig>): Promise<TestSummary>;
   stop(): Promise<void>;
@@ -877,7 +922,7 @@ export interface TestRunner {
   getResults(): TestResult[];
   getSummary(): TestSummary | null;
   getStatus(): TestRunnerStatus;
-  
+
   // Events
   on(event: string, listener: (...args: unknown[]) => void): void;
   off(event: string, listener?: (...args: unknown[]) => void): void;
@@ -903,7 +948,10 @@ export interface TestRunnerStatus {
 
 // Test Discovery
 export interface TestDiscovery {
-  discover(patterns: string[], options?: DiscoveryOptions): Promise<TestSuite[]>;
+  discover(
+    patterns: string[],
+    options?: DiscoveryOptions
+  ): Promise<TestSuite[]>;
   getTestCount(patterns: string[]): Promise<number>;
   validateTests(tests: TestSuite[]): Promise<ValidationResult>;
   getDependencies(tests: TestSuite[]): Promise<TestDependency[]>;
@@ -964,11 +1012,23 @@ export interface TestExecution {
 // Test Utilities
 export interface TestGenerator {
   generateUnitTests(flow: FlowiseJSON, config: ConversionConfig): TestSuite[];
-  generateIntegrationTests(flow: FlowiseJSON, config: ConversionConfig): TestSuite[];
+  generateIntegrationTests(
+    flow: FlowiseJSON,
+    config: ConversionConfig
+  ): TestSuite[];
   generateE2ETests(flow: FlowiseJSON, config: ConversionConfig): TestSuite[];
-  generatePerformanceTests(flow: FlowiseJSON, config: ConversionConfig): TestSuite[];
-  generateSecurityTests(flow: FlowiseJSON, config: ConversionConfig): TestSuite[];
-  generateAccessibilityTests(flow: FlowiseJSON, config: ConversionConfig): TestSuite[];
+  generatePerformanceTests(
+    flow: FlowiseJSON,
+    config: ConversionConfig
+  ): TestSuite[];
+  generateSecurityTests(
+    flow: FlowiseJSON,
+    config: ConversionConfig
+  ): TestSuite[];
+  generateAccessibilityTests(
+    flow: FlowiseJSON,
+    config: ConversionConfig
+  ): TestSuite[];
 }
 
 export interface TestDataGenerator {
@@ -1032,8 +1092,16 @@ export interface ValidationRule {
 // Test Reporting
 export interface TestReporter {
   name: string;
-  generate(results: TestResult[], summary: TestSummary, config: TestConfig): Promise<TestReport>;
-  stream(results: TestResult[], summary: TestSummary, config: TestConfig): AsyncIterable<string>;
+  generate(
+    results: TestResult[],
+    summary: TestSummary,
+    config: TestConfig
+  ): Promise<TestReport>;
+  stream(
+    results: TestResult[],
+    summary: TestSummary,
+    config: TestConfig
+  ): AsyncIterable<string>;
   supports(format: string): boolean;
 }
 

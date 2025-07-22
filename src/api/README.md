@@ -74,10 +74,12 @@ Connect to `/ws` for real-time updates:
 const ws = new WebSocket('ws://localhost:3001/ws');
 
 // Subscribe to job progress
-ws.send(JSON.stringify({
-  type: 'subscribe',
-  payload: { jobId: 'job-123' }
-}));
+ws.send(
+  JSON.stringify({
+    type: 'subscribe',
+    payload: { jobId: 'job-123' },
+  })
+);
 
 // Listen for progress updates
 ws.onmessage = (event) => {
@@ -186,8 +188,8 @@ const response = await fetch('/api/convert', {
   body: JSON.stringify({
     input: flowData,
     stream: true,
-    connectionId: 'client-123'
-  })
+    connectionId: 'client-123',
+  }),
 });
 ```
 

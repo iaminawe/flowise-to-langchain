@@ -5,7 +5,12 @@
  */
 
 import { BaseConverter } from '../registry.js';
-import { IRNode, CodeFragment, GenerationContext, CodeReference } from '../../ir/types.js';
+import {
+  IRNode,
+  CodeFragment,
+  GenerationContext,
+  CodeReference,
+} from '../../ir/types.js';
 
 /**
  * Streaming LLM Converter
@@ -85,19 +90,25 @@ export class StreamingChainConverter extends BaseConverter {
     const verbose = this.getParameterValue(node, 'verbose', false);
 
     // Get references to connected nodes
-    const llmInput = node.inputs?.find(input => input.id === 'llm');
-    const promptInput = node.inputs?.find(input => input.id === 'prompt');
-    
+    const llmInput = node.inputs?.find((input) => input.id === 'llm');
+    const promptInput = node.inputs?.find((input) => input.id === 'prompt');
+
     const llmRefResult = llmInput ? _context.getReference?.(llmInput) : null;
-    const promptRefResult = promptInput ? _context.getReference?.(promptInput) : null;
+    const promptRefResult = promptInput
+      ? _context.getReference?.(promptInput)
+      : null;
 
     if (!llmRefResult) {
-      throw new Error(`StreamingChain node ${node.id} is missing required llm input`);
+      throw new Error(
+        `StreamingChain node ${node.id} is missing required llm input`
+      );
     }
     if (!promptRefResult) {
-      throw new Error(`StreamingChain node ${node.id} is missing required prompt input`);
+      throw new Error(
+        `StreamingChain node ${node.id} is missing required prompt input`
+      );
     }
-    
+
     const llmRef = llmRefResult as CodeReference;
     const promptRef = promptRefResult as CodeReference;
 
@@ -141,7 +152,7 @@ export class StreamingChainConverter extends BaseConverter {
         {
           exports: [variableName],
           llm: llmRef.exportedAs,
-          prompt: promptRef.exportedAs
+          prompt: promptRef.exportedAs,
         }
       ),
     ];
@@ -166,19 +177,27 @@ export class StreamingAgentConverter extends BaseConverter {
     const verbose = this.getParameterValue(node, 'verbose', true);
 
     // Get references to connected nodes
-    const agentInput = node.inputs?.find(input => input.id === 'agent');
-    const toolsInput = node.inputs?.find(input => input.id === 'tools');
-    
-    const agentRefResult = agentInput ? _context.getReference?.(agentInput) : null;
-    const toolsRefResult = toolsInput ? _context.getReference?.(toolsInput) : null;
+    const agentInput = node.inputs?.find((input) => input.id === 'agent');
+    const toolsInput = node.inputs?.find((input) => input.id === 'tools');
+
+    const agentRefResult = agentInput
+      ? _context.getReference?.(agentInput)
+      : null;
+    const toolsRefResult = toolsInput
+      ? _context.getReference?.(toolsInput)
+      : null;
 
     if (!agentRefResult) {
-      throw new Error(`StreamingAgent node ${node.id} is missing required agent input`);
+      throw new Error(
+        `StreamingAgent node ${node.id} is missing required agent input`
+      );
     }
     if (!toolsRefResult) {
-      throw new Error(`StreamingAgent node ${node.id} is missing required tools input`);
+      throw new Error(
+        `StreamingAgent node ${node.id} is missing required tools input`
+      );
     }
-    
+
     const agentRef = agentRefResult as CodeReference;
     const toolsRef = toolsRefResult as CodeReference;
 
@@ -223,7 +242,7 @@ export class StreamingAgentConverter extends BaseConverter {
         {
           exports: [variableName],
           agent: agentRef.exportedAs,
-          tools: toolsRef.exportedAs
+          tools: toolsRef.exportedAs,
         }
       ),
     ];

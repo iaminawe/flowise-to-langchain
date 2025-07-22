@@ -1,6 +1,6 @@
 /**
  * Rate Limit Middleware
- * 
+ *
  * Simple in-memory rate limiting middleware.
  */
 
@@ -26,7 +26,7 @@ interface RateLimitStore {
  */
 export const rateLimit = (config: RateLimitConfig) => {
   const store: RateLimitStore = {};
-  
+
   const {
     windowMs,
     max,

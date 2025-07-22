@@ -42,14 +42,14 @@ const detailedResult = await parser.parseString(jsonString);
 
 ```typescript
 class FlowiseParser {
-  constructor(options?: ParserOptions)
-  
-  async parseString(content: string): Promise<ParseResult>
-  async parseFile(filePath: string): Promise<ParseResult>
-  async parseUrl(url: string): Promise<ParseResult>
-  async parseBuffer(buffer: Buffer): Promise<ParseResult>
-  async validate(content: string): Promise<ValidationResult>
-  async quickValidate(content: string): Promise<QuickValidationResult>
+  constructor(options?: ParserOptions);
+
+  async parseString(content: string): Promise<ParseResult>;
+  async parseFile(filePath: string): Promise<ParseResult>;
+  async parseUrl(url: string): Promise<ParseResult>;
+  async parseBuffer(buffer: Buffer): Promise<ParseResult>;
+  async validate(content: string): Promise<ValidationResult>;
+  async quickValidate(content: string): Promise<QuickValidationResult>;
 }
 ```
 
@@ -57,14 +57,14 @@ class FlowiseParser {
 
 ```typescript
 interface ParserOptions {
-  strict?: boolean;              // Strict validation (default: true)
+  strict?: boolean; // Strict validation (default: true)
   version?: '1.x' | '2.x' | 'auto'; // Flowise version (default: 'auto')
-  minimal?: boolean;             // Minimal validation only (default: false)
-  includeMetadata?: boolean;     // Include performance metadata (default: true)
-  maxFileSize?: number;          // Max file size in bytes (default: 10MB)
-  autoDetectVersion?: boolean;   // Auto-detect Flowise version (default: true)
-  includeWarnings?: boolean;     // Include warnings (default: true)
-  fetchTimeout?: number;         // URL fetch timeout (default: 30s)
+  minimal?: boolean; // Minimal validation only (default: false)
+  includeMetadata?: boolean; // Include performance metadata (default: true)
+  maxFileSize?: number; // Max file size in bytes (default: 10MB)
+  autoDetectVersion?: boolean; // Auto-detect Flowise version (default: true)
+  includeWarnings?: boolean; // Include warnings (default: true)
+  fetchTimeout?: number; // URL fetch timeout (default: 30s)
   errorFormatter?: (issues: ZodIssue[]) => string; // Custom error formatter
 }
 ```
@@ -140,11 +140,13 @@ The parser automatically detects Flowise versions based on:
 ### Version-Specific Features
 
 **Flowise v1.x:**
+
 - Basic node structure
 - Simple input/output anchors
 - Limited metadata
 
 **Flowise v2.x:**
+
 - Enhanced node data structure
 - Extended base classes
 - Rich metadata support
@@ -158,11 +160,11 @@ The parser provides detailed error information:
 interface ParseError {
   type: 'validation' | 'syntax' | 'structure' | 'version' | 'network';
   message: string;
-  path?: string;        // JSON path to error location
-  line?: number;        // Line number (for syntax errors)
-  column?: number;      // Column number (for syntax errors)
-  code?: string;        // Error code
-  suggestion?: string;  // Suggested fix
+  path?: string; // JSON path to error location
+  line?: number; // Line number (for syntax errors)
+  column?: number; // Column number (for syntax errors)
+  code?: string; // Error code
+  suggestion?: string; // Suggested fix
 }
 ```
 
@@ -205,11 +207,11 @@ const analysis = analyzeFlow(flowData);
 
 ```typescript
 const transformed = transformFlow(flow, {
-  stripMetadata: true,     // Remove UI metadata
-  normalizeIds: true,      // Use sequential IDs
-  removeOrphans: true,     // Remove disconnected nodes
-  addDefaults: true,       // Add missing default values
-  simplify: true,          // Simplify structure
+  stripMetadata: true, // Remove UI metadata
+  normalizeIds: true, // Use sequential IDs
+  removeOrphans: true, // Remove disconnected nodes
+  addDefaults: true, // Add missing default values
+  simplify: true, // Simplify structure
 });
 ```
 
@@ -218,8 +220,8 @@ const transformed = transformFlow(flow, {
 ```typescript
 const merged = mergeFlows([flow1, flow2], {
   idConflictStrategy: 'rename', // 'rename' | 'merge' | 'error'
-  validateResult: true,         // Validate merged result
-  renamePrefix: 'merged_',      // Prefix for renamed nodes
+  validateResult: true, // Validate merged result
+  renamePrefix: 'merged_', // Prefix for renamed nodes
 });
 ```
 
@@ -244,12 +246,12 @@ The parser is optimized for performance:
 
 ```typescript
 interface ParseMetadata {
-  parseTime: number;           // Parse duration in ms
-  sourceSize: number;          // Input size in bytes
-  nodeCount: number;           // Number of nodes
-  edgeCount: number;           // Number of edges
+  parseTime: number; // Parse duration in ms
+  sourceSize: number; // Input size in bytes
+  nodeCount: number; // Number of nodes
+  edgeCount: number; // Number of edges
   complexity: 'simple' | 'medium' | 'complex';
-  memoryUsage?: number;        // Peak memory usage
+  memoryUsage?: number; // Peak memory usage
 }
 ```
 
@@ -282,16 +284,16 @@ const parser = new FlowiseParser({
 const result = await parser.parseFile('./complex-flow.json');
 if (result.success) {
   const analysis = analyzeFlow(result.data);
-  
+
   console.log(`🔍 Flow Analysis:`);
   console.log(`  Valid: ${analysis.isValid}`);
   console.log(`  Entry points: ${analysis.entryPoints.length}`);
   console.log(`  Cycles: ${analysis.cycles.length}`);
   console.log(`  Recommendations: ${analysis.recommendations.length}`);
-  
+
   if (analysis.recommendations.length > 0) {
     console.log('\n💡 Recommendations:');
-    analysis.recommendations.forEach(rec => console.log(`  - ${rec}`));
+    analysis.recommendations.forEach((rec) => console.log(`  - ${rec}`));
   }
 }
 ```
@@ -333,6 +335,7 @@ npm test src/parser/parser.test.ts
 ```
 
 Test coverage includes:
+
 - Schema validation edge cases
 - Version detection accuracy
 - Error handling scenarios

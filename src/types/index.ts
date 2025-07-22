@@ -1,26 +1,23 @@
 /**
  * Comprehensive TypeScript Interfaces for Flowise-to-LangChain Converter
- * 
+ *
  * This file contains all the core TypeScript interfaces and types needed
  * for the converter system, including testing, configuration, and component interfaces.
  */
 
 // Import types for internal use
-import type {
-  FlowiseNode,
-  FlowiseEdge
-} from '../parser/schema.js';
+import type { FlowiseNode, FlowiseEdge } from '../parser/schema.js';
 
 import type {
   FlowMetadata,
-  ConversionResult as APIConversionResult
+  ConversionResult as APIConversionResult,
 } from './api.js';
 
 import type {
   ValidationWarning as IRValidationWarning,
   ValidationSuggestion as IRValidationSuggestion,
   GenerationContext as IRGenerationContext,
-  ValidationResult as IRValidationResult
+  ValidationResult as IRValidationResult,
 } from '../ir/types.js';
 
 // Re-export core types from existing modules (explicit to avoid ambiguity)
@@ -29,7 +26,7 @@ export type {
   FlowiseEdge as FlowiseEdgeSchema,
   FlowiseInputParam,
   FlowiseChatFlow,
-  FlowiseAnchor
+  FlowiseAnchor,
 } from '../parser/schema.js';
 
 export type {
@@ -41,13 +38,16 @@ export type {
   ValidationResult as IRValidationResult,
   ValidationWarning as IRValidationWarning,
   ValidationSuggestion as IRValidationSuggestion,
-  NodeId
+  NodeId,
 } from '../ir/types.js';
 
 // Re-export specific types to avoid conflicts
 export type { ConversionOptions } from '../cli/types.js';
 export type { ChatflowMetadata, ConversionResult } from './api.js';
-export type { TestMetrics as APITestMetrics, TestReport as APITestReport } from './api.js';
+export type {
+  TestMetrics as APITestMetrics,
+  TestReport as APITestReport,
+} from './api.js';
 export type { UserPreferences as APIUserPreferences } from './api.js';
 export type { LogFilter as ComponentLogFilter } from './components.js';
 
@@ -57,18 +57,15 @@ export * from './utils.js';
 export * from './hooks.js';
 
 // Re-export API types for compatibility
-export type { 
+export type {
   ValidationResult,
   ApiResponse,
   WebSocketMessage,
-  UserInfo
+  UserInfo,
 } from './api.js';
 
 // Re-export specific validation types
-export type { 
-  ValidationWarning,
-  ValidationSuggestion
-} from './api.js';
+export type { ValidationWarning, ValidationSuggestion } from './api.js';
 
 // Core Data Interfaces
 export interface FlowiseJSON {
@@ -630,7 +627,21 @@ export interface SettingsState {
 }
 
 // Utility Type Definitions
-export type NodeCategory = 'llm' | 'chain' | 'agent' | 'tool' | 'memory' | 'vectorstore' | 'embedding' | 'prompt' | 'retriever' | 'output_parser' | 'text_splitter' | 'loader' | 'utility' | 'control_flow';
+export type NodeCategory =
+  | 'llm'
+  | 'chain'
+  | 'agent'
+  | 'tool'
+  | 'memory'
+  | 'vectorstore'
+  | 'embedding'
+  | 'prompt'
+  | 'retriever'
+  | 'output_parser'
+  | 'text_splitter'
+  | 'loader'
+  | 'utility'
+  | 'control_flow';
 
 export type FileType = 'main' | 'test' | 'config' | 'types' | 'utils' | 'docs';
 
@@ -638,17 +649,51 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 export type ValidationSeverity = 'error' | 'warning' | 'info';
 
-export type TestStatus = 'pending' | 'running' | 'passed' | 'failed' | 'skipped';
+export type TestStatus =
+  | 'pending'
+  | 'running'
+  | 'passed'
+  | 'failed'
+  | 'skipped';
 
-export type GenerationPhase = 'parsing' | 'validation' | 'transformation' | 'generation' | 'writing';
+export type GenerationPhase =
+  | 'parsing'
+  | 'validation'
+  | 'transformation'
+  | 'generation'
+  | 'writing';
 
 export type ConnectionType = 'data' | 'control' | 'trigger';
 
-export type ParameterType = 'string' | 'number' | 'boolean' | 'object' | 'array' | 'json' | 'code' | 'file' | 'credential' | 'password' | 'multiline' | 'select' | 'multiselect';
+export type ParameterType =
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'object'
+  | 'array'
+  | 'json'
+  | 'code'
+  | 'file'
+  | 'credential'
+  | 'password'
+  | 'multiline'
+  | 'select'
+  | 'multiselect';
 
-export type NodeStatus = 'idle' | 'processing' | 'completed' | 'error' | 'disabled';
+export type NodeStatus =
+  | 'idle'
+  | 'processing'
+  | 'completed'
+  | 'error'
+  | 'disabled';
 
-export type FlowStatus = 'draft' | 'valid' | 'invalid' | 'converting' | 'testing' | 'ready';
+export type FlowStatus =
+  | 'draft'
+  | 'valid'
+  | 'invalid'
+  | 'converting'
+  | 'testing'
+  | 'ready';
 
 export type ProjectStatus = 'new' | 'active' | 'archived' | 'deleted';
 
@@ -1175,15 +1220,29 @@ export interface ConfigPreset {
 
 // Type Guards
 export function isFlowiseJSON(obj: unknown): obj is FlowiseJSON {
-  return typeof obj === 'object' && obj !== null && 'nodes' in obj && 'edges' in obj;
+  return (
+    typeof obj === 'object' && obj !== null && 'nodes' in obj && 'edges' in obj
+  );
 }
 
 export function isNode(obj: unknown): obj is Node {
-  return typeof obj === 'object' && obj !== null && 'id' in obj && 'type' in obj && 'data' in obj;
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'type' in obj &&
+    'data' in obj
+  );
 }
 
 export function isEdge(obj: unknown): obj is Edge {
-  return typeof obj === 'object' && obj !== null && 'id' in obj && 'source' in obj && 'target' in obj;
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'source' in obj &&
+    'target' in obj
+  );
 }
 
 export function isValidationError(obj: unknown): obj is ValidationError {
@@ -1191,11 +1250,15 @@ export function isValidationError(obj: unknown): obj is ValidationError {
 }
 
 export function isTestResult(obj: unknown): obj is TestResult {
-  return typeof obj === 'object' && obj !== null && 'id' in obj && 'status' in obj;
+  return (
+    typeof obj === 'object' && obj !== null && 'id' in obj && 'status' in obj
+  );
 }
 
 export function isGeneratedFile(obj: unknown): obj is GeneratedFile {
-  return typeof obj === 'object' && obj !== null && 'path' in obj && 'content' in obj;
+  return (
+    typeof obj === 'object' && obj !== null && 'path' in obj && 'content' in obj
+  );
 }
 
 // Default Values
@@ -1283,7 +1346,8 @@ export type DeepPartial<T> = {
 
 export type RequiredKeys<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
-export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type OptionalKeys<T, K extends keyof T> = Omit<T, K> &
+  Partial<Pick<T, K>>;
 
 export type Mutable<T> = {
   -readonly [P in keyof T]: T[P];
@@ -1335,7 +1399,9 @@ export type AsyncFilter<T> = (item: T, index: number) => Promise<boolean>;
 
 export type Validator<T> = (value: T) => boolean | string | ValidationError[];
 
-export type AsyncValidator<T> = (value: T) => Promise<boolean | string | ValidationError[]>;
+export type AsyncValidator<T> = (
+  value: T
+) => Promise<boolean | string | ValidationError[]>;
 
 export type Serializer<T> = (value: T) => string;
 
@@ -1354,7 +1420,8 @@ export type AsyncDisposable = {
 };
 
 // Component Types (Framework-agnostic)
-export type ComponentProps<T extends (...args: unknown[]) => unknown> = T extends (props: infer P) => unknown ? P : never;
+export type ComponentProps<T extends (...args: unknown[]) => unknown> =
+  T extends (props: infer P) => unknown ? P : never;
 
 export type StyleProps = {
   className?: string;
@@ -1375,8 +1442,12 @@ export type WithRequiredChildren<T = {}> = T & {
 
 // Generic component types for various frameworks
 export type ComponentWithChildren<T = {}> = (props: WithChildren<T>) => unknown;
-export type ComponentWithOptionalChildren<T = {}> = (props: WithOptionalChildren<T>) => unknown;
-export type ComponentWithRequiredChildren<T = {}> = (props: WithRequiredChildren<T>) => unknown;
+export type ComponentWithOptionalChildren<T = {}> = (
+  props: WithOptionalChildren<T>
+) => unknown;
+export type ComponentWithRequiredChildren<T = {}> = (
+  props: WithRequiredChildren<T>
+) => unknown;
 
 // Generic ref types
 export type RefObject<T> = { current: T | null };
@@ -1511,7 +1582,7 @@ export default {
   DEFAULT_TEST_CONFIG,
   DEFAULT_VALIDATION_OPTIONS,
   DEFAULT_GENERATION_CONTEXT,
-  
+
   // Utilities (actual functions)
   isFlowiseJSON,
   isNode,
@@ -1519,7 +1590,7 @@ export default {
   isValidationError,
   isTestResult,
   isGeneratedFile,
-  
+
   // Error classes (actual constructors)
   FlowiseConversionError,
   ValidationError,

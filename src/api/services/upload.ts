@@ -1,6 +1,6 @@
 /**
  * Upload Service
- * 
+ *
  * This service handles file uploads for the API, providing secure file handling
  * with validation and optional auto-conversion capabilities.
  */
@@ -64,7 +64,7 @@ export class UploadService extends EventEmitter {
 
   constructor(config: Partial<UploadConfig> = {}) {
     super();
-    
+
     this.config = {
       maxFileSize: 10 * 1024 * 1024, // 10MB
       allowedMimeTypes: ['application/json', 'text/plain'],
@@ -77,7 +77,7 @@ export class UploadService extends EventEmitter {
 
     this.validationService = new ValidationService();
     this.conversionService = new ConversionService();
-    
+
     this.ensureDirectories();
   }
 
@@ -86,7 +86,7 @@ export class UploadService extends EventEmitter {
    */
   private async ensureDirectories(): Promise<void> {
     const dirs = [this.config.tempDir, this.config.quarantineDir];
-    
+
     for (const dir of dirs) {
       if (!existsSync(dir)) {
         await mkdir(dir, { recursive: true });
@@ -116,7 +116,7 @@ export class UploadService extends EventEmitter {
 
       // Validate upload
       await this.validateUpload(request.file);
-      
+
       this.emitProgress(job, 30, 'Processing file...');
 
       // Process the uploaded file
@@ -139,7 +139,7 @@ export class UploadService extends EventEmitter {
       // Run validation if requested
       if (request.options?.validate) {
         this.emitProgress(job, 80, 'Validating JSON content...');
-        
+
         try {
           const validateResponse = await this.validationService.validate({
             input: uploadedFile.path,
@@ -159,7 +159,7 @@ export class UploadService extends EventEmitter {
       // Run auto-conversion if requested
       if (request.options?.autoConvert) {
         this.emitProgress(job, 90, 'Auto-converting file...');
-        
+
         try {
           const convertResponse = await this.conversionService.convert({
             input: uploadedFile.path,
@@ -191,7 +191,8 @@ export class UploadService extends EventEmitter {
       // Handle upload error
       const apiError: ApiError = {
         code: 'UPLOAD_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown upload error',
+        message:
+          error instanceof Error ? error.message : 'Unknown upload error',
         details: error,
       };
 
@@ -246,7 +247,7 @@ export class UploadService extends EventEmitter {
     try {
       await rm(job.uploadedFile.path, { force: true });
       this.jobs.delete(jobId);
-      
+
       this.emit('upload:deleted', { jobId });
       return true;
     } catch (error) {
@@ -298,7 +299,7 @@ export class UploadService extends EventEmitter {
    * Get all jobs
    */
   public getAllJobs(): JobInfo[] {
-    return Array.from(this.jobs.values()).map(job => ({
+    return Array.from(this.jobs.values()).map((job) => ({
       id: job.id,
       type: 'upload',
       status: job.status,
@@ -314,7 +315,10 @@ export class UploadService extends EventEmitter {
   /**
    * Subscribe to job progress updates
    */
-  public subscribeToJob(jobId: string, callback: (progress: any) => void): () => void {
+  public subscribeToJob(
+    jobId: string,
+    callback: (progress: any) => void
+  ): () => void {
     const job = this.jobs.get(jobId);
     if (!job) return () => {};
 
@@ -330,15 +334,17 @@ export class UploadService extends EventEmitter {
    * Clean up old files and jobs
    */
   public async cleanup(): Promise<void> {
-    const cutoffDate = new Date(Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000);
-    
+    const cutoffDate = new Date(
+      Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000
+    );
+
     for (const [jobId, job] of this.jobs.entries()) {
       if (job.completedAt && job.completedAt < cutoffDate) {
         // Delete file if it exists
         if (job.uploadedFile) {
           await rm(job.uploadedFile.path, { force: true }).catch(console.error);
         }
-        
+
         // Remove job from memory
         this.jobs.delete(jobId);
       }
@@ -365,7 +371,7 @@ export class UploadService extends EventEmitter {
     for (const job of jobs) {
       if (job.uploadedFile) {
         totalSize += job.uploadedFile.size;
-        
+
         const time = job.startedAt?.getTime() || 0;
         if (time < oldestTime) {
           oldestTime = time;
@@ -393,7 +399,9 @@ export class UploadService extends EventEmitter {
   private async validateUpload(file: Express.Multer.File): Promise<void> {
     // Check file size
     if (file.size > this.config.maxFileSize) {
-      throw new Error(`File size ${file.size} exceeds maximum allowed size ${this.config.maxFileSize}`);
+      throw new Error(
+        `File size ${file.size} exceeds maximum allowed size ${this.config.maxFileSize}`
+      );
     }
 
     // Check MIME type
@@ -403,7 +411,10 @@ export class UploadService extends EventEmitter {
 
     // Check file extension
     const extension = file.originalname.toLowerCase().split('.').pop();
-    if (!extension || !this.config.allowedExtensions.includes(`.${extension}`)) {
+    if (
+      !extension ||
+      !this.config.allowedExtensions.includes(`.${extension}`)
+    ) {
       throw new Error(`File extension .${extension} is not allowed`);
     }
 
@@ -416,16 +427,22 @@ export class UploadService extends EventEmitter {
   /**
    * Process uploaded file
    */
-  private async processUploadedFile(file: Express.Multer.File, jobId: string): Promise<UploadedFile> {
+  private async processUploadedFile(
+    file: Express.Multer.File,
+    jobId: string
+  ): Promise<UploadedFile> {
     const fileStats = await stat(file.path);
     const fileHash = await this.calculateFileHash(file.path);
-    
+
     // Create permanent file path
-    const permanentPath = join(this.config.tempDir, `${jobId}-${fileHash}.json`);
-    
+    const permanentPath = join(
+      this.config.tempDir,
+      `${jobId}-${fileHash}.json`
+    );
+
     // Move file to permanent location
     await writeFile(permanentPath, await readFile(file.path));
-    
+
     // Remove original temp file
     await rm(file.path, { force: true });
 
@@ -454,7 +471,7 @@ export class UploadService extends EventEmitter {
     try {
       // Read file content
       const content = await readFile(file.path, 'utf-8');
-      
+
       // Check for suspicious patterns
       const suspiciousPatterns = [
         /eval\s*\(/,
@@ -477,7 +494,7 @@ export class UploadService extends EventEmitter {
       // Validate JSON structure
       try {
         const parsed = JSON.parse(content);
-        
+
         // Check for nested depth (potential DoS)
         if (this.getObjectDepth(parsed) > 50) {
           throw new Error('JSON structure too deeply nested');
@@ -505,14 +522,17 @@ export class UploadService extends EventEmitter {
    */
   private async quarantineFile(file: UploadedFile): Promise<void> {
     try {
-      const quarantinePath = join(this.config.quarantineDir, `quarantine-${Date.now()}-${file.filename}`);
+      const quarantinePath = join(
+        this.config.quarantineDir,
+        `quarantine-${Date.now()}-${file.filename}`
+      );
       await writeFile(quarantinePath, await readFile(file.path));
       await rm(file.path, { force: true });
-      
-      logger.warn('File quarantined:', { 
-        originalPath: file.path, 
+
+      logger.warn('File quarantined:', {
+        originalPath: file.path,
         quarantinePath,
-        reason: 'Security scan failed'
+        reason: 'Security scan failed',
       });
     } catch (error) {
       logger.error('Failed to quarantine file:', { error, file });
@@ -524,7 +544,7 @@ export class UploadService extends EventEmitter {
    */
   private getObjectDepth(obj: any): number {
     if (typeof obj !== 'object' || obj === null) return 0;
-    
+
     let maxDepth = 0;
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
@@ -532,7 +552,7 @@ export class UploadService extends EventEmitter {
         maxDepth = Math.max(maxDepth, depth);
       }
     }
-    
+
     return maxDepth + 1;
   }
 
@@ -547,7 +567,7 @@ export class UploadService extends EventEmitter {
       }
       return maxLength;
     }
-    
+
     if (typeof obj === 'object' && obj !== null) {
       let maxLength = 0;
       for (const key in obj) {
@@ -557,16 +577,21 @@ export class UploadService extends EventEmitter {
       }
       return maxLength;
     }
-    
+
     return 0;
   }
 
   /**
    * Emit progress update
    */
-  private emitProgress(job: UploadJob, progress: number, step: string, details?: string): void {
+  private emitProgress(
+    job: UploadJob,
+    progress: number,
+    step: string,
+    details?: string
+  ): void {
     job.progress = progress;
-    
+
     const progressMessage = {
       jobId: job.id,
       progress,

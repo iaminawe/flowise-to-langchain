@@ -12,7 +12,7 @@ import {
   GitBranch,
   Star,
   Download,
-  Refresh,
+  RefreshCw,
   TrendingUp,
   Activity,
   Database,
@@ -251,7 +251,7 @@ export function FloWiseIntegration({
                 </div>
                 {flowiseState.lastRefresh && (
                   <div className="flex items-center gap-2 ml-auto">
-                    <Refresh className="h-4 w-4 text-muted-foreground" />
+                    <RefreshCw className="h-4 w-4 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground">
                       Last sync: {flowiseState.lastRefresh.toLocaleTimeString()}
                     </span>
@@ -374,7 +374,7 @@ export function FloWiseIntegration({
                       {flowiseState.loading ? (
                         <Loader2 className="h-6 w-6 animate-spin" />
                       ) : (
-                        <Refresh className="h-6 w-6" />
+                        <RefreshCw className="h-6 w-6" />
                       )}
                       <span>Refresh Flows</span>
                     </Button>

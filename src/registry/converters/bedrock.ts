@@ -45,7 +45,9 @@ abstract class BaseBedrockConverter extends BaseConverter {
     const sessionToken = this.getParameterValue<string>(node, 'sessionToken');
 
     const config: Record<string, unknown> = {
-      ...(typeof modelName === 'string' && modelName ? { model: modelName } : {}),
+      ...(typeof modelName === 'string' && modelName
+        ? { model: modelName }
+        : {}),
       ...(typeof region === 'string' && region ? { region } : {}),
       ...(temperature !== undefined && { temperature }),
       ...(maxTokens !== undefined && { maxTokens }),
@@ -58,7 +60,7 @@ abstract class BaseBedrockConverter extends BaseConverter {
       if (accessKeyId) credentials.accessKeyId = accessKeyId;
       if (secretAccessKey) credentials.secretAccessKey = secretAccessKey;
       if (sessionToken) credentials.sessionToken = sessionToken;
-      
+
       if (Object.keys(credentials).length > 0) {
         config['credentials'] = credentials;
       }
@@ -147,14 +149,21 @@ export class BedrockChatConverter extends BaseBedrockConverter {
     // BedrockChat specific parameters
     const topP = this.getParameterValue<number>(node, 'topP');
     const topK = this.getParameterValue<number>(node, 'topK');
-    const stopSequences = this.getParameterValue<string[]>(node, 'stopSequences');
+    const stopSequences = this.getParameterValue<string[]>(
+      node,
+      'stopSequences'
+    );
     const maxRetries = this.getParameterValue<number>(node, 'maxRetries', 2);
 
     // Add BedrockChat specific configuration
     const configObj = config.config as any;
     if (topP !== undefined) configObj.topP = topP;
     if (topK !== undefined) configObj.topK = topK;
-    if (stopSequences && Array.isArray(stopSequences) && stopSequences.length > 0) {
+    if (
+      stopSequences &&
+      Array.isArray(stopSequences) &&
+      stopSequences.length > 0
+    ) {
       configObj.stopSequences = stopSequences;
     }
     if (maxRetries !== undefined) configObj.maxRetries = maxRetries;
@@ -194,14 +203,21 @@ export class BedrockLLMConverter extends BaseBedrockConverter {
     // BedrockLLM specific parameters
     const topP = this.getParameterValue<number>(node, 'topP');
     const topK = this.getParameterValue<number>(node, 'topK');
-    const stopSequences = this.getParameterValue<string[]>(node, 'stopSequences');
+    const stopSequences = this.getParameterValue<string[]>(
+      node,
+      'stopSequences'
+    );
     const maxRetries = this.getParameterValue<number>(node, 'maxRetries', 2);
 
     // Add BedrockLLM specific configuration
     const configObj = config.config as any;
     if (topP !== undefined) configObj.topP = topP;
     if (topK !== undefined) configObj.topK = topK;
-    if (stopSequences && Array.isArray(stopSequences) && stopSequences.length > 0) {
+    if (
+      stopSequences &&
+      Array.isArray(stopSequences) &&
+      stopSequences.length > 0
+    ) {
       configObj.stopSequences = stopSequences;
     }
     if (maxRetries !== undefined) configObj.maxRetries = maxRetries;
@@ -264,7 +280,9 @@ export class BedrockEmbeddingConverter extends BaseConverter {
     const sessionToken = this.getParameterValue<string>(node, 'sessionToken');
 
     const config: Record<string, unknown> = {
-      ...(typeof modelName === 'string' && modelName ? { model: modelName } : {}),
+      ...(typeof modelName === 'string' && modelName
+        ? { model: modelName }
+        : {}),
       ...(typeof region === 'string' && region ? { region } : {}),
     };
 
@@ -274,7 +292,7 @@ export class BedrockEmbeddingConverter extends BaseConverter {
       if (accessKeyId) credentials.accessKeyId = accessKeyId;
       if (secretAccessKey) credentials.secretAccessKey = secretAccessKey;
       if (sessionToken) credentials.sessionToken = sessionToken;
-      
+
       if (Object.keys(credentials).length > 0) {
         config['credentials'] = credentials;
       }

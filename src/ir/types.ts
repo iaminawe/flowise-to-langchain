@@ -105,7 +105,7 @@ export interface IRNode {
 
   // Node configuration
   parameters: IRParameter[];
-  
+
   // Raw Flowise node data (important for converters)
   data?: {
     id?: string;
@@ -440,7 +440,7 @@ export interface GenerationContext {
 
   // Reference resolution for connected nodes
   getReference?: (input: any) => CodeReference | string | null;
-  
+
   // Additional context methods for enhanced functionality
   resolveNodeReference?: (nodeId: NodeId) => string;
   addDependency?: (dependency: string) => void;

@@ -116,7 +116,9 @@ export class BufferMemoryConverter extends BaseMemoryConverter {
     return ['@langchain/core'];
   }
 
-  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const memoryKey = this.getParameterValue<string>(
       node,
       'memoryKey',
@@ -173,7 +175,9 @@ export class BufferWindowMemoryConverter extends BaseMemoryConverter {
     return ['@langchain/core'];
   }
 
-  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const k = this.getParameterValue<number>(node, 'k', 5);
     const memoryKey = this.getParameterValue<string>(
       node,
@@ -232,7 +236,9 @@ export class SummaryBufferMemoryConverter extends BaseMemoryConverter {
     return ['@langchain/core'];
   }
 
-  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const maxTokenLimit = this.getParameterValue<number>(
       node,
       'maxTokenLimit',
@@ -311,7 +317,9 @@ export class VectorStoreRetrieverMemoryConverter extends BaseMemoryConverter {
     return ['@langchain/core'];
   }
 
-  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const memoryKey = this.getParameterValue<string>(
       node,
       'memoryKey',
@@ -377,7 +385,9 @@ export class ConversationSummaryMemoryConverter extends BaseMemoryConverter {
     return ['@langchain/core'];
   }
 
-  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const memoryKey = this.getParameterValue<string>(
       node,
       'memoryKey',
@@ -450,7 +460,9 @@ export class EntityMemoryConverter extends BaseMemoryConverter {
     return ['@langchain/core'];
   }
 
-  protected override extractMemoryConfig(node: IRNode): Record<string, unknown> {
+  protected override extractMemoryConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const memoryKey = this.getParameterValue<string>(
       node,
       'memoryKey',

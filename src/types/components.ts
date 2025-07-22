@@ -1,15 +1,13 @@
 /**
  * Component Interface Definitions
- * 
+ *
  * This file contains TypeScript interfaces for all component types
  * used in the Flowise-to-LangChain converter application.
  */
 // React types are optional for this converter
 // import * as React from 'react';
 // Import ValidationResult from API to avoid circular dependencies
-import type {
-  ValidationResult
-} from './api.js';
+import type { ValidationResult } from './api.js';
 
 // Import remaining types from index
 import {
@@ -112,7 +110,12 @@ export interface FlowCanvasProps extends BaseComponentProps {
   selectedEdges: string[];
   onSelectionChange: (nodes: string[], edges: string[]) => void;
   onNodeDrag?: (nodeId: string, position: Position) => void;
-  onEdgeCreate?: (connection: { source: string; target: string; sourceHandle: string; targetHandle: string }) => void;
+  onEdgeCreate?: (connection: {
+    source: string;
+    target: string;
+    sourceHandle: string;
+    targetHandle: string;
+  }) => void;
   showGrid?: boolean;
   snapToGrid?: boolean;
   gridSize?: number;
@@ -126,7 +129,11 @@ export interface FlowNodeProps extends BaseComponentProps {
   onUpdate?: (nodeId: string, data: Partial<NodeData>) => void;
   onDelete?: (nodeId: string) => void;
   onDrag?: (nodeId: string, position: Position) => void;
-  onConnect?: (nodeId: string, handleId: string, handleType: 'source' | 'target') => void;
+  onConnect?: (
+    nodeId: string,
+    handleId: string,
+    handleType: 'source' | 'target'
+  ) => void;
   readOnly?: boolean;
   showHandles?: boolean;
   showLabels?: boolean;
@@ -381,7 +388,16 @@ export interface ConfigSectionProps extends BaseComponentProps {
 export interface ConfigFieldProps extends BaseComponentProps {
   label: string;
   description?: string;
-  type: 'text' | 'number' | 'boolean' | 'select' | 'multiselect' | 'file' | 'directory' | 'json' | 'code';
+  type:
+    | 'text'
+    | 'number'
+    | 'boolean'
+    | 'select'
+    | 'multiselect'
+    | 'file'
+    | 'directory'
+    | 'json'
+    | 'code';
   value: unknown;
   onChange: (value: unknown) => void;
   options?: { label: string; value: unknown }[];
@@ -524,7 +540,16 @@ export interface FileViewerProps extends BaseComponentProps {
 
 export interface CodeViewerProps extends BaseComponentProps {
   code: string;
-  language: 'typescript' | 'javascript' | 'python' | 'json' | 'yaml' | 'markdown' | 'html' | 'css' | 'xml';
+  language:
+    | 'typescript'
+    | 'javascript'
+    | 'python'
+    | 'json'
+    | 'yaml'
+    | 'markdown'
+    | 'html'
+    | 'css'
+    | 'xml';
   filename?: string;
   onEdit?: (code: string) => void;
   onDownload?: () => void;
@@ -721,13 +746,31 @@ export interface NotificationProps extends BaseComponentProps {
   actionLabel?: string;
   showIcon?: boolean;
   showClose?: boolean;
-  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center';
+  position?:
+    | 'top-left'
+    | 'top-right'
+    | 'bottom-left'
+    | 'bottom-right'
+    | 'top-center'
+    | 'bottom-center';
 }
 
 export interface TooltipProps extends BaseComponentProps {
   content: unknown;
   title?: string;
-  placement?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end';
+  placement?:
+    | 'top'
+    | 'bottom'
+    | 'left'
+    | 'right'
+    | 'top-start'
+    | 'top-end'
+    | 'bottom-start'
+    | 'bottom-end'
+    | 'left-start'
+    | 'left-end'
+    | 'right-start'
+    | 'right-end';
   trigger?: 'hover' | 'click' | 'focus' | 'manual';
   delay?: number;
   hideDelay?: number;
@@ -742,7 +785,19 @@ export interface TooltipProps extends BaseComponentProps {
 export interface PopoverProps extends BaseComponentProps {
   content: unknown;
   title?: string;
-  placement?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end';
+  placement?:
+    | 'top'
+    | 'bottom'
+    | 'left'
+    | 'right'
+    | 'top-start'
+    | 'top-end'
+    | 'bottom-start'
+    | 'bottom-end'
+    | 'left-start'
+    | 'left-end'
+    | 'right-start'
+    | 'right-end';
   trigger?: 'hover' | 'click' | 'focus' | 'manual';
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -800,7 +855,15 @@ export interface ContextMenuProps extends BaseComponentProps {
 export interface DropdownProps extends BaseComponentProps {
   items: DropdownItem[];
   onItemClick: (itemId: string) => void;
-  placement?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end';
+  placement?:
+    | 'bottom-start'
+    | 'bottom-end'
+    | 'top-start'
+    | 'top-end'
+    | 'left-start'
+    | 'left-end'
+    | 'right-start'
+    | 'right-end';
   trigger?: 'hover' | 'click' | 'focus';
   disabled?: boolean;
   children: unknown;
@@ -1074,7 +1137,15 @@ export interface SliderProps extends BaseComponentProps {
 }
 
 export interface ButtonProps extends BaseComponentProps {
-  type?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'link' | 'text';
+  type?:
+    | 'default'
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'warning'
+    | 'error'
+    | 'link'
+    | 'text';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
@@ -1108,9 +1179,15 @@ export interface TableProps extends BaseComponentProps {
   bordered?: boolean;
   showHeader?: boolean;
   scroll?: { x?: number; y?: number };
-  onRow?: (record: Record<string, unknown>, index: number) => Record<string, unknown>;
+  onRow?: (
+    record: Record<string, unknown>,
+    index: number
+  ) => Record<string, unknown>;
   onHeaderRow?: (column: TableColumn, index: number) => Record<string, unknown>;
-  onSelectionChange?: (selectedRowKeys: string[], selectedRows: Record<string, unknown>[]) => void;
+  onSelectionChange?: (
+    selectedRowKeys: string[],
+    selectedRows: Record<string, unknown>[]
+  ) => void;
   onSortChange?: (sorter: TableSorter) => void;
   onFilterChange?: (filters: Record<string, unknown>) => void;
   onExpandChange?: (expanded: boolean, record: Record<string, unknown>) => void;
@@ -1129,7 +1206,11 @@ export interface TableColumn {
   sortable?: boolean;
   filterable?: boolean;
   filters?: TableFilter[];
-  render?: (value: unknown, record: Record<string, unknown>, index: number) => any;
+  render?: (
+    value: unknown,
+    record: Record<string, unknown>,
+    index: number
+  ) => any;
   sorter?: (a: Record<string, unknown>, b: Record<string, unknown>) => number;
   filterMultiple?: boolean;
   filterSearch?: boolean;
