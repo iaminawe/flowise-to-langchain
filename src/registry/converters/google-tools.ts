@@ -1,6 +1,6 @@
 /**
  * Google Suite Tools Converters
- * 
+ *
  * Converts Flowise Google Suite tool nodes into LangChain implementations
  * Supports Gmail, Calendar, Drive, Docs, and Sheets integration
  */
@@ -41,16 +41,37 @@ abstract class BaseGoogleToolConverter extends BaseConverter {
 
   protected extractAuthConfig(node: IRNode): Record<string, unknown> {
     const auth: Record<string, unknown> = {};
-    
-    const clientId = this.getParameterValue(node, 'clientId', 'process.env.GOOGLE_CLIENT_ID');
-    const clientSecret = this.getParameterValue(node, 'clientSecret', 'process.env.GOOGLE_CLIENT_SECRET');
-    const refreshToken = this.getParameterValue(node, 'refreshToken', 'process.env.GOOGLE_REFRESH_TOKEN');
+
+    const clientId = this.getParameterValue(
+      node,
+      'clientId',
+      'process.env.GOOGLE_CLIENT_ID'
+    );
+    const clientSecret = this.getParameterValue(
+      node,
+      'clientSecret',
+      'process.env.GOOGLE_CLIENT_SECRET'
+    );
+    const refreshToken = this.getParameterValue(
+      node,
+      'refreshToken',
+      'process.env.GOOGLE_REFRESH_TOKEN'
+    );
     const accessToken = this.getParameterValue(node, 'accessToken', '');
-    
-    auth.clientId = clientId === 'process.env.GOOGLE_CLIENT_ID' ? clientId : this.formatParameterValue(clientId);
-    auth.clientSecret = clientSecret === 'process.env.GOOGLE_CLIENT_SECRET' ? clientSecret : this.formatParameterValue(clientSecret);
-    auth.refreshToken = refreshToken === 'process.env.GOOGLE_REFRESH_TOKEN' ? refreshToken : this.formatParameterValue(refreshToken);
-    
+
+    auth.clientId =
+      clientId === 'process.env.GOOGLE_CLIENT_ID'
+        ? clientId
+        : this.formatParameterValue(clientId);
+    auth.clientSecret =
+      clientSecret === 'process.env.GOOGLE_CLIENT_SECRET'
+        ? clientSecret
+        : this.formatParameterValue(clientSecret);
+    auth.refreshToken =
+      refreshToken === 'process.env.GOOGLE_REFRESH_TOKEN'
+        ? refreshToken
+        : this.formatParameterValue(refreshToken);
+
     if (accessToken) {
       auth.accessToken = this.formatParameterValue(accessToken);
     }
@@ -59,7 +80,10 @@ abstract class BaseGoogleToolConverter extends BaseConverter {
   }
 
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
-    const variableName = this.generateVariableName(node, `google_${this.getGoogleService()}`);
+    const variableName = this.generateVariableName(
+      node,
+      `google_${this.getGoogleService()}`
+    );
     const config = this.generateGoogleToolConfiguration(node, context);
     const fragments: CodeFragment[] = [];
 
@@ -68,8 +92,9 @@ abstract class BaseGoogleToolConverter extends BaseConverter {
       this.createCodeFragment(
         `${node.id}_import`,
         'import',
-        this.generateImport(config.packageName, config.imports) + '\n' +
-        "import { OAuth2Client } from 'google-auth-library';",
+        this.generateImport(config.packageName, config.imports) +
+          '\n' +
+          "import { OAuth2Client } from 'google-auth-library';",
         [config.packageName, 'google-auth-library'],
         node.id,
         1
@@ -118,9 +143,11 @@ abstract class BaseGoogleToolConverter extends BaseConverter {
     const authEntries = Object.entries(auth);
     if (authEntries.length === 0) return '';
 
-    const authConfig = authEntries.map(([key, value]) => {
-      return `  ${key}: ${value}`;
-    }).join(',\n');
+    const authConfig = authEntries
+      .map(([key, value]) => {
+        return `  ${key}: ${value}`;
+      })
+      .join(',\n');
 
     return `const ${variableName}_auth = {\n${authConfig}\n};`;
   }
@@ -164,19 +191,23 @@ export class GmailToolConverter extends BaseGoogleToolConverter {
 
   protected extractToolConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     const maxResults = this.getParameterValue(node, 'maxResults', 10);
-    const includeSpamTrash = this.getParameterValue(node, 'includeSpamTrash', false);
+    const includeSpamTrash = this.getParameterValue(
+      node,
+      'includeSpamTrash',
+      false
+    );
     const labelIds = this.getParameterValue(node, 'labelIds', []);
     const query = this.getParameterValue(node, 'query', '');
-    
+
     config.maxResults = maxResults;
     config.includeSpamTrash = includeSpamTrash;
-    
+
     if (Array.isArray(labelIds) && labelIds.length > 0) {
       config.labelIds = labelIds;
     }
-    
+
     if (query) {
       config.query = query;
     }
@@ -186,12 +217,12 @@ export class GmailToolConverter extends BaseGoogleToolConverter {
 
   override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
-      'googleapis', 
-      '@langchain/community', 
-      'google-auth-library', 
-      'limiter', 
+      'googleapis',
+      '@langchain/community',
+      'google-auth-library',
+      'limiter',
       'jsonwebtoken',
-      'crypto'
+      'crypto',
     ];
   }
 }
@@ -221,19 +252,19 @@ export class GoogleCalendarToolConverter extends BaseGoogleToolConverter {
 
   protected extractToolConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     const calendarId = this.getParameterValue(node, 'calendarId', 'primary');
     const maxResults = this.getParameterValue(node, 'maxResults', 10);
     const timeMin = this.getParameterValue(node, 'timeMin', '');
     const timeMax = this.getParameterValue(node, 'timeMax', '');
-    
+
     config.calendarId = calendarId;
     config.maxResults = maxResults;
-    
+
     if (timeMin) {
       config.timeMin = timeMin;
     }
-    
+
     if (timeMax) {
       config.timeMax = timeMax;
     }
@@ -243,12 +274,12 @@ export class GoogleCalendarToolConverter extends BaseGoogleToolConverter {
 
   override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
-      'googleapis', 
-      '@langchain/community', 
-      'google-auth-library', 
-      'limiter', 
+      'googleapis',
+      '@langchain/community',
+      'google-auth-library',
+      'limiter',
       'jsonwebtoken',
-      'crypto'
+      'crypto',
     ];
   }
 }
@@ -278,19 +309,23 @@ export class GoogleDriveToolConverter extends BaseGoogleToolConverter {
 
   protected extractToolConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     const folderId = this.getParameterValue(node, 'folderId', '');
     const maxResults = this.getParameterValue(node, 'maxResults', 100);
-    const includeItemsFromAllDrives = this.getParameterValue(node, 'includeItemsFromAllDrives', false);
+    const includeItemsFromAllDrives = this.getParameterValue(
+      node,
+      'includeItemsFromAllDrives',
+      false
+    );
     const mimeType = this.getParameterValue(node, 'mimeType', '');
-    
+
     if (folderId) {
       config.folderId = folderId;
     }
-    
+
     config.maxResults = maxResults;
     config.includeItemsFromAllDrives = includeItemsFromAllDrives;
-    
+
     if (mimeType) {
       config.mimeType = mimeType;
     }
@@ -300,12 +335,12 @@ export class GoogleDriveToolConverter extends BaseGoogleToolConverter {
 
   override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
-      'googleapis', 
-      '@langchain/community', 
-      'google-auth-library', 
-      'limiter', 
+      'googleapis',
+      '@langchain/community',
+      'google-auth-library',
+      'limiter',
       'jsonwebtoken',
-      'crypto'
+      'crypto',
     ];
   }
 }
@@ -335,15 +370,19 @@ export class GoogleDocsToolConverter extends BaseGoogleToolConverter {
 
   protected extractToolConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     const documentId = this.getParameterValue(node, 'documentId', '');
     const readOnly = this.getParameterValue(node, 'readOnly', false);
-    const includeComments = this.getParameterValue(node, 'includeComments', false);
-    
+    const includeComments = this.getParameterValue(
+      node,
+      'includeComments',
+      false
+    );
+
     if (documentId) {
       config.documentId = documentId;
     }
-    
+
     config.readOnly = readOnly;
     config.includeComments = includeComments;
 
@@ -352,12 +391,12 @@ export class GoogleDocsToolConverter extends BaseGoogleToolConverter {
 
   override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
-      'googleapis', 
-      '@langchain/community', 
-      'google-auth-library', 
-      'limiter', 
+      'googleapis',
+      '@langchain/community',
+      'google-auth-library',
+      'limiter',
       'jsonwebtoken',
-      'crypto'
+      'crypto',
     ];
   }
 }
@@ -387,16 +426,24 @@ export class GoogleSheetsToolConverter extends BaseGoogleToolConverter {
 
   protected extractToolConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     const spreadsheetId = this.getParameterValue(node, 'spreadsheetId', '');
     const range = this.getParameterValue(node, 'range', 'A1:Z1000');
-    const valueInputOption = this.getParameterValue(node, 'valueInputOption', 'RAW');
-    const includeGridData = this.getParameterValue(node, 'includeGridData', false);
-    
+    const valueInputOption = this.getParameterValue(
+      node,
+      'valueInputOption',
+      'RAW'
+    );
+    const includeGridData = this.getParameterValue(
+      node,
+      'includeGridData',
+      false
+    );
+
     if (spreadsheetId) {
       config.spreadsheetId = spreadsheetId;
     }
-    
+
     config.range = range;
     config.valueInputOption = valueInputOption;
     config.includeGridData = includeGridData;
@@ -406,12 +453,12 @@ export class GoogleSheetsToolConverter extends BaseGoogleToolConverter {
 
   override getDependencies(node: IRNode, context: GenerationContext): string[] {
     return [
-      'googleapis', 
-      '@langchain/community', 
-      'google-auth-library', 
-      'limiter', 
+      'googleapis',
+      '@langchain/community',
+      'google-auth-library',
+      'limiter',
       'jsonwebtoken',
-      'crypto'
+      'crypto',
     ];
   }
 }

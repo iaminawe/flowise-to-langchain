@@ -1,6 +1,6 @@
 /**
  * Test Service
- * 
+ *
  * This service provides API integration with the existing CLI testing,
  * handling test execution requests and providing detailed results.
  */
@@ -93,18 +93,21 @@ export class TestService extends EventEmitter {
       this.emitProgress(job, 30, 'Setting up test configuration...');
 
       // Create test configuration
-      const testConfig = this.createTestConfiguration(workspaceDir, request.options || {});
-      
+      const testConfig = this.createTestConfiguration(
+        workspaceDir,
+        request.options || {}
+      );
+
       // Initialize test runner
       const testRunner = new TestRunner(testConfig);
       await testRunner.setupEnvironment();
-      
+
       this.emitProgress(job, 50, 'Running tests...');
 
       // Run tests based on type
       let testResult: TestResult;
       const testType = request.options?.testType || 'all';
-      
+
       switch (testType) {
         case 'unit':
           testResult = await testRunner.runUnitTests();
@@ -121,15 +124,34 @@ export class TestService extends EventEmitter {
           const unitResult = await testRunner.runUnitTests();
           const integrationResult = await testRunner.runIntegrationTests();
           const e2eResult = await testRunner.runE2ETests();
-          
+
           // Combine results
           testResult = {
-            success: unitResult.success && integrationResult.success && e2eResult.success,
-            totalTests: unitResult.totalTests + integrationResult.totalTests + e2eResult.totalTests,
-            passedTests: unitResult.passedTests + integrationResult.passedTests + e2eResult.passedTests,
-            failedTests: [...unitResult.failedTests, ...integrationResult.failedTests, ...e2eResult.failedTests],
-            duration: unitResult.duration + integrationResult.duration + e2eResult.duration,
-            coverage: unitResult.coverage || integrationResult.coverage || e2eResult.coverage,
+            success:
+              unitResult.success &&
+              integrationResult.success &&
+              e2eResult.success,
+            totalTests:
+              unitResult.totalTests +
+              integrationResult.totalTests +
+              e2eResult.totalTests,
+            passedTests:
+              unitResult.passedTests +
+              integrationResult.passedTests +
+              e2eResult.passedTests,
+            failedTests: [
+              ...unitResult.failedTests,
+              ...integrationResult.failedTests,
+              ...e2eResult.failedTests,
+            ],
+            duration:
+              unitResult.duration +
+              integrationResult.duration +
+              e2eResult.duration,
+            coverage:
+              unitResult.coverage ||
+              integrationResult.coverage ||
+              e2eResult.coverage,
           };
           break;
       }
@@ -191,7 +213,9 @@ export class TestService extends EventEmitter {
       // Clean up temporary files after a delay
       setTimeout(() => {
         if (job.tempDir) {
-          rm(job.tempDir, { recursive: true, force: true }).catch(console.error);
+          rm(job.tempDir, { recursive: true, force: true }).catch(
+            console.error
+          );
         }
       }, 60000); // Clean up after 1 minute
     }
@@ -229,7 +253,9 @@ export class TestService extends EventEmitter {
 
     // Clean up temporary files
     if (job.tempDir) {
-      await rm(job.tempDir, { recursive: true, force: true }).catch(console.error);
+      await rm(job.tempDir, { recursive: true, force: true }).catch(
+        console.error
+      );
     }
 
     this.emit('test:cancelled', { jobId });
@@ -240,7 +266,7 @@ export class TestService extends EventEmitter {
    * Get all jobs
    */
   public getAllJobs(): JobInfo[] {
-    return Array.from(this.jobs.values()).map(job => ({
+    return Array.from(this.jobs.values()).map((job) => ({
       id: job.id,
       type: 'test',
       status: job.status,
@@ -256,7 +282,10 @@ export class TestService extends EventEmitter {
   /**
    * Subscribe to job progress updates
    */
-  public subscribeToJob(jobId: string, callback: (progress: any) => void): () => void {
+  public subscribeToJob(
+    jobId: string,
+    callback: (progress: any) => void
+  ): () => void {
     const job = this.jobs.get(jobId);
     if (!job) return () => {};
 
@@ -271,7 +300,9 @@ export class TestService extends EventEmitter {
   /**
    * Clean up completed jobs
    */
-  public cleanupJobs(olderThan: Date = new Date(Date.now() - 24 * 60 * 60 * 1000)): void {
+  public cleanupJobs(
+    olderThan: Date = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  ): void {
     for (const [jobId, job] of this.jobs.entries()) {
       if (job.completedAt && job.completedAt < olderThan) {
         this.jobs.delete(jobId);
@@ -282,7 +313,10 @@ export class TestService extends EventEmitter {
   /**
    * Setup test project structure
    */
-  private async setupTestProject(workspaceDir: string, files: GeneratedFile[]): Promise<void> {
+  private async setupTestProject(
+    workspaceDir: string,
+    files: GeneratedFile[]
+  ): Promise<void> {
     // Create directories
     await mkdir(join(workspaceDir, 'src'), { recursive: true });
     await mkdir(join(workspaceDir, 'tests'), { recursive: true });
@@ -308,14 +342,14 @@ export class TestService extends EventEmitter {
         '@jest/globals': '^29.7.0',
         '@types/jest': '^29.5.12',
         '@types/node': '^20.14.15',
-        'jest': '^29.7.0',
+        jest: '^29.7.0',
         'ts-jest': '^29.2.4',
-        'typescript': '^5.5.4',
+        typescript: '^5.5.4',
       },
       dependencies: {
         '@langchain/core': '^0.2.30',
         '@langchain/openai': '^0.2.7',
-        'langchain': '^0.2.17',
+        langchain: '^0.2.17',
       },
     };
 
@@ -375,7 +409,10 @@ export class TestService extends EventEmitter {
   /**
    * Create test configuration
    */
-  private createTestConfiguration(workspaceDir: string, options: TestOptions): TestConfiguration {
+  private createTestConfiguration(
+    workspaceDir: string,
+    options: TestOptions
+  ): TestConfiguration {
     return {
       inputPath: join(workspaceDir, 'input.json'), // Placeholder
       outputPath: workspaceDir,
@@ -392,10 +429,13 @@ export class TestService extends EventEmitter {
   /**
    * Generate test report
    */
-  private async generateTestReport(testResult: TestResult, workspaceDir: string): Promise<TestReport> {
+  private async generateTestReport(
+    testResult: TestResult,
+    workspaceDir: string
+  ): Promise<TestReport> {
     // Generate HTML report
     const htmlReport = this.generateHTMLReport(testResult);
-    
+
     // Generate JSON report
     const jsonReport = {
       testResults: testResult,
@@ -434,7 +474,7 @@ export class TestService extends EventEmitter {
   private generateHTMLReport(testResult: TestResult): string {
     const status = testResult.success ? 'SUCCESS' : 'FAILURE';
     const statusColor = testResult.success ? '#4CAF50' : '#F44336';
-    
+
     return `
     <!DOCTYPE html>
     <html>
@@ -466,13 +506,17 @@ export class TestService extends EventEmitter {
       
       <div class="failures">
         <h2>Failed Tests</h2>
-        ${testResult.failedTests.map(test => `
+        ${testResult.failedTests
+          .map(
+            (test) => `
           <div class="test-case failed">
             <h3>${test.name}</h3>
             <div class="error">${test.error}</div>
             ${test.suggestion ? `<p><strong>Suggestion:</strong> ${test.suggestion}</p>` : ''}
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
       </div>
     </body>
     </html>
@@ -485,7 +529,7 @@ export class TestService extends EventEmitter {
   private processCoverageData(coverageData: any): CoverageReport {
     // Extract coverage metrics from Jest coverage format
     const totals = coverageData.total || {};
-    
+
     return {
       total: totals.lines?.pct || 0,
       lines: totals.lines?.pct || 0,
@@ -498,18 +542,20 @@ export class TestService extends EventEmitter {
   /**
    * Collect generated test files
    */
-  private async collectTestFiles(workspaceDir: string): Promise<GeneratedFile[]> {
+  private async collectTestFiles(
+    workspaceDir: string
+  ): Promise<GeneratedFile[]> {
     const testFiles: GeneratedFile[] = [];
     const testDir = join(workspaceDir, 'tests');
-    
+
     if (existsSync(testDir)) {
       const { readdir, stat } = await import('fs/promises');
       const files = await readdir(testDir);
-      
+
       for (const file of files) {
         const filePath = join(testDir, file);
         const stats = await stat(filePath);
-        
+
         if (stats.isFile() && file.endsWith('.ts')) {
           const content = await readFile(filePath, 'utf-8');
           testFiles.push({
@@ -522,16 +568,21 @@ export class TestService extends EventEmitter {
         }
       }
     }
-    
+
     return testFiles;
   }
 
   /**
    * Emit progress update
    */
-  private emitProgress(job: TestJob, progress: number, step: string, details?: string): void {
+  private emitProgress(
+    job: TestJob,
+    progress: number,
+    step: string,
+    details?: string
+  ): void {
     job.progress = progress;
-    
+
     const progressMessage = {
       jobId: job.id,
       progress,

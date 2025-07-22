@@ -1,6 +1,6 @@
 /**
  * Validation Middleware
- * 
+ *
  * Request validation middleware using JSON Schema.
  */
 
@@ -15,11 +15,14 @@ interface ValidationSchema {
 /**
  * Simple JSON schema validation
  */
-const validateSchema = (data: any, schema: any): { valid: boolean; errors: string[] } => {
+const validateSchema = (
+  data: any,
+  schema: any
+): { valid: boolean; errors: string[] } => {
   const errors: string[] = [];
-  
+
   if (!schema) return { valid: true, errors };
-  
+
   // Type validation
   if (schema.type) {
     const actualType = Array.isArray(data) ? 'array' : typeof data;
@@ -44,7 +47,7 @@ const validateSchema = (data: any, schema: any): { valid: boolean; errors: strin
       if (key in data) {
         const propValidation = validateSchema(data[key], propSchema);
         if (!propValidation.valid) {
-          errors.push(...propValidation.errors.map(err => `${key}: ${err}`));
+          errors.push(...propValidation.errors.map((err) => `${key}: ${err}`));
         }
       }
     }
@@ -55,7 +58,7 @@ const validateSchema = (data: any, schema: any): { valid: boolean; errors: strin
     for (let i = 0; i < data.length; i++) {
       const itemValidation = validateSchema(data[i], schema.items);
       if (!itemValidation.valid) {
-        errors.push(...itemValidation.errors.map(err => `[${i}]: ${err}`));
+        errors.push(...itemValidation.errors.map((err) => `[${i}]: ${err}`));
       }
     }
   }
@@ -67,8 +70,8 @@ const validateSchema = (data: any, schema: any): { valid: boolean; errors: strin
 
   // OneOf validation
   if (schema.oneOf) {
-    const validOptions = schema.oneOf.filter((option: any) => 
-      validateSchema(data, option).valid
+    const validOptions = schema.oneOf.filter(
+      (option: any) => validateSchema(data, option).valid
     );
     if (validOptions.length === 0) {
       errors.push('Value does not match any of the allowed schemas');
@@ -91,7 +94,7 @@ export const validateRequest = (schema: ValidationSchema) => {
     if (schema.body) {
       const bodyValidation = validateSchema(req.body, schema.body);
       if (!bodyValidation.valid) {
-        errors.push(...bodyValidation.errors.map(err => `body: ${err}`));
+        errors.push(...bodyValidation.errors.map((err) => `body: ${err}`));
       }
     }
 
@@ -99,7 +102,7 @@ export const validateRequest = (schema: ValidationSchema) => {
     if (schema.query) {
       const queryValidation = validateSchema(req.query, schema.query);
       if (!queryValidation.valid) {
-        errors.push(...queryValidation.errors.map(err => `query: ${err}`));
+        errors.push(...queryValidation.errors.map((err) => `query: ${err}`));
       }
     }
 
@@ -107,7 +110,7 @@ export const validateRequest = (schema: ValidationSchema) => {
     if (schema.params) {
       const paramsValidation = validateSchema(req.params, schema.params);
       if (!paramsValidation.valid) {
-        errors.push(...paramsValidation.errors.map(err => `params: ${err}`));
+        errors.push(...paramsValidation.errors.map((err) => `params: ${err}`));
       }
     }
 

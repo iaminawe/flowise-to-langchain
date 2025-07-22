@@ -1,6 +1,6 @@
 /**
  * API Server for Flowise-to-LangChain Converter
- * 
+ *
  * This module provides a REST API and WebSocket interface for the CLI converter,
  * enabling web applications to interact with the conversion pipeline.
  */
@@ -75,7 +75,10 @@ export class ApiServer {
     this.validationService = new ValidationService();
     this.testService = new TestService();
     this.uploadService = new UploadService(this.config.upload);
-    this.websocketService = new WebSocketService(this.wss, this.config.websocket);
+    this.websocketService = new WebSocketService(
+      this.wss,
+      this.config.websocket
+    );
 
     // Setup multer for file uploads
     this.upload = multer({
@@ -112,7 +115,7 @@ export class ApiServer {
     this.app.use(cors(this.config.cors));
     this.app.use(express.json({ limit: '50mb' }));
     this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-    
+
     // Custom middleware
     this.app.use(logger);
     this.app.use(rateLimit(this.config.rateLimit));
@@ -156,7 +159,7 @@ export class ApiServer {
    */
   private setupWebSocket(): void {
     this.websocketService.initialize();
-    
+
     // WebSocket endpoint for real-time updates
     this.wss.on('connection', (ws, req) => {
       this.websocketService.handleConnection(ws, req);
@@ -186,10 +189,14 @@ export class ApiServer {
   public async start(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.server.listen(this.config.port, this.config.host, () => {
-        console.log(`🚀 API Server running on http://${this.config.host}:${this.config.port}`);
+        console.log(
+          `🚀 API Server running on http://${this.config.host}:${this.config.port}`
+        );
         console.log(`📡 WebSocket server ready for connections`);
         console.log(`📁 Upload directory: ${this.config.upload.tempDir}`);
-        console.log(`🔗 API Documentation: http://${this.config.host}:${this.config.port}/docs`);
+        console.log(
+          `🔗 API Documentation: http://${this.config.host}:${this.config.port}/docs`
+        );
         resolve();
       });
 
@@ -232,7 +239,9 @@ export class ApiServer {
 /**
  * Create and start API server
  */
-export async function createApiServer(config?: Partial<ApiConfig>): Promise<ApiServer> {
+export async function createApiServer(
+  config?: Partial<ApiConfig>
+): Promise<ApiServer> {
   const server = new ApiServer(config);
   await server.start();
   return server;

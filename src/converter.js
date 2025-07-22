@@ -23,23 +23,25 @@ class FlowiseConverter {
     try {
       // Convert using the main converter
       const result = await this.converter.convert(flow);
-      
+
       if (!result.success) {
         throw new Error(result.errors.join('; '));
       }
 
       // Flatten the result to match expected test structure
       const codeGenerationResult = result.result;
-      
+
       // Combine all code fragments into a single code string
       const code = codeGenerationResult.files
-        .map(file => file.content)
+        .map((file) => file.content)
         .join('\n\n');
 
       // Extract dependencies from package.json if present
-      const packageFile = codeGenerationResult.files.find(f => f.path === 'package.json');
+      const packageFile = codeGenerationResult.files.find(
+        (f) => f.path === 'package.json'
+      );
       let dependencies = [];
-      
+
       if (packageFile) {
         try {
           const packageData = JSON.parse(packageFile.content);
@@ -57,15 +59,17 @@ class FlowiseConverter {
         metadata: {
           nodeCount: flow.nodes?.length || 0,
           connectionCount: flow.edges?.length || 0,
-          hasVectorStore: flow.nodes?.some(n => 
-            n.data?.category === 'vectorstore' || 
-            n.data?.type?.includes('vector') ||
-            n.data?.name?.toLowerCase().includes('vector')
+          hasVectorStore: flow.nodes?.some(
+            (n) =>
+              n.data?.category === 'vectorstore' ||
+              n.data?.type?.includes('vector') ||
+              n.data?.name?.toLowerCase().includes('vector')
           ),
-          hasEmbeddings: flow.nodes?.some(n => 
-            n.data?.category === 'embeddings' || 
-            n.data?.type?.includes('embedding') ||
-            n.data?.name?.toLowerCase().includes('embedding')
+          hasEmbeddings: flow.nodes?.some(
+            (n) =>
+              n.data?.category === 'embeddings' ||
+              n.data?.type?.includes('embedding') ||
+              n.data?.name?.toLowerCase().includes('embedding')
           ),
         },
         errors: result.errors || [],

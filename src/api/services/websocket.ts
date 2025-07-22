@@ -1,6 +1,6 @@
 /**
  * WebSocket Service
- * 
+ *
  * This service handles real-time WebSocket connections for streaming
  * conversion results, progress updates, and notifications.
  */
@@ -54,7 +54,7 @@ export class WebSocketService extends EventEmitter {
 
   constructor(wss: WebSocketServer, config: Partial<WebSocketConfig> = {}) {
     super();
-    
+
     this.wss = wss;
     this.config = {
       heartbeatInterval: 30000,
@@ -71,7 +71,7 @@ export class WebSocketService extends EventEmitter {
   public initialize(): void {
     this.setupHeartbeat();
     this.setupCleanup();
-    
+
     logger.info('WebSocket service initialized', {
       config: this.config,
     });
@@ -192,7 +192,10 @@ export class WebSocketService extends EventEmitter {
         break;
 
       default:
-        logger.warn('Unknown message type:', { type: message.type, connectionId });
+        logger.warn('Unknown message type:', {
+          type: message.type,
+          connectionId,
+        });
         this.sendError(connectionId, {
           code: 'UNKNOWN_MESSAGE_TYPE',
           message: `Unknown message type: ${message.type}`,
@@ -208,7 +211,7 @@ export class WebSocketService extends EventEmitter {
     if (!connection) return;
 
     const { jobId, userId } = payload;
-    
+
     if (!jobId) {
       this.sendError(connectionId, {
         code: 'MISSING_JOB_ID',
@@ -250,7 +253,7 @@ export class WebSocketService extends EventEmitter {
     if (!connection) return;
 
     const { jobId } = payload;
-    
+
     if (!jobId) {
       this.sendError(connectionId, {
         code: 'MISSING_JOB_ID',
@@ -261,7 +264,7 @@ export class WebSocketService extends EventEmitter {
 
     // Remove subscription
     connection.subscriptions.delete(jobId);
-    
+
     // Remove from subscription tracking
     const jobSubscriptions = this.subscriptions.get(jobId);
     if (jobSubscriptions) {
@@ -289,7 +292,11 @@ export class WebSocketService extends EventEmitter {
   /**
    * Handle connection disconnection
    */
-  private handleDisconnection(connectionId: string, code: number, reason: Buffer): void {
+  private handleDisconnection(
+    connectionId: string,
+    code: number,
+    reason: Buffer
+  ): void {
     const connection = this.connections.get(connectionId);
     if (!connection) return;
 
@@ -335,7 +342,10 @@ export class WebSocketService extends EventEmitter {
       connection.ws.send(JSON.stringify(message));
       return true;
     } catch (error) {
-      logger.error('Failed to send WebSocket message:', { error, connectionId });
+      logger.error('Failed to send WebSocket message:', {
+        error,
+        connectionId,
+      });
       return false;
     }
   }
@@ -421,7 +431,11 @@ export class WebSocketService extends EventEmitter {
   /**
    * Broadcast error to job subscribers
    */
-  public broadcastError(jobId: string, error: ApiError, operation?: string): void {
+  public broadcastError(
+    jobId: string,
+    error: ApiError,
+    operation?: string
+  ): void {
     const subscribers = this.subscriptions.get(jobId);
     if (!subscribers) return;
 
@@ -464,10 +478,13 @@ export class WebSocketService extends EventEmitter {
     averageSubscriptionsPerConnection: number;
   } {
     const totalConnections = this.connections.size;
-    const totalSubscriptions = Array.from(this.connections.values())
-      .reduce((sum, conn) => sum + conn.subscriptions.size, 0);
+    const totalSubscriptions = Array.from(this.connections.values()).reduce(
+      (sum, conn) => sum + conn.subscriptions.size,
+      0
+    );
     const activeJobs = this.subscriptions.size;
-    const averageSubscriptionsPerConnection = totalConnections > 0 ? totalSubscriptions / totalConnections : 0;
+    const averageSubscriptionsPerConnection =
+      totalConnections > 0 ? totalSubscriptions / totalConnections : 0;
 
     return {
       totalConnections,
@@ -487,7 +504,11 @@ export class WebSocketService extends EventEmitter {
   /**
    * Close connection
    */
-  public closeConnection(connectionId: string, code: number = 1000, reason?: string): boolean {
+  public closeConnection(
+    connectionId: string,
+    code: number = 1000,
+    reason?: string
+  ): boolean {
     const connection = this.connections.get(connectionId);
     if (!connection) return false;
 
@@ -504,7 +525,11 @@ export class WebSocketService extends EventEmitter {
         if (connection.isAlive === false) {
           // Connection is dead, terminate it
           connection.ws.terminate();
-          this.handleDisconnection(connectionId, 1006, Buffer.from('Heartbeat failed'));
+          this.handleDisconnection(
+            connectionId,
+            1006,
+            Buffer.from('Heartbeat failed')
+          );
         } else {
           // Send ping
           connection.isAlive = false;
@@ -525,10 +550,10 @@ export class WebSocketService extends EventEmitter {
       // Clean up stale subscriptions
       for (const [jobId, subscribers] of this.subscriptions) {
         const staleConnections = [];
-        
+
         for (const connectionId of subscribers) {
           const connection = this.connections.get(connectionId);
-          if (!connection || (now - connection.lastPing.getTime()) > timeout) {
+          if (!connection || now - connection.lastPing.getTime() > timeout) {
             staleConnections.push(connectionId);
           }
         }
@@ -553,7 +578,7 @@ export class WebSocketService extends EventEmitter {
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
     }
-    
+
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
     }

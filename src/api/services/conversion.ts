@@ -1,6 +1,6 @@
 /**
  * Conversion Service
- * 
+ *
  * This service provides API integration with the existing CLI converter,
  * handling file conversion requests and streaming results.
  */
@@ -119,7 +119,9 @@ export class ConversionService extends EventEmitter {
       this.emitProgress(job, 30, 'Starting conversion...');
 
       // Convert options from API format to CLI format
-      const conversionOptions = this.mapApiOptionsToCliOptions(request.options || {});
+      const conversionOptions = this.mapApiOptionsToCliOptions(
+        request.options || {}
+      );
 
       // Run the conversion using the existing pipeline
       const startTime = Date.now();
@@ -190,7 +192,8 @@ export class ConversionService extends EventEmitter {
       // Handle conversion error
       const apiError: ApiError = {
         code: 'CONVERSION_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown conversion error',
+        message:
+          error instanceof Error ? error.message : 'Unknown conversion error',
         details: error,
       };
 
@@ -208,7 +211,9 @@ export class ConversionService extends EventEmitter {
       // Clean up temporary files after a delay
       setTimeout(() => {
         if (job.tempDir) {
-          rm(job.tempDir, { recursive: true, force: true }).catch(console.error);
+          rm(job.tempDir, { recursive: true, force: true }).catch(
+            console.error
+          );
         }
       }, 60000); // Clean up after 1 minute
     }
@@ -246,7 +251,9 @@ export class ConversionService extends EventEmitter {
 
     // Clean up temporary files
     if (job.tempDir) {
-      await rm(job.tempDir, { recursive: true, force: true }).catch(console.error);
+      await rm(job.tempDir, { recursive: true, force: true }).catch(
+        console.error
+      );
     }
 
     this.emit('conversion:cancelled', { jobId });
@@ -257,7 +264,7 @@ export class ConversionService extends EventEmitter {
    * Get all jobs
    */
   public getAllJobs(): JobInfo[] {
-    return Array.from(this.jobs.values()).map(job => ({
+    return Array.from(this.jobs.values()).map((job) => ({
       id: job.id,
       type: 'convert',
       status: job.status,
@@ -273,7 +280,10 @@ export class ConversionService extends EventEmitter {
   /**
    * Subscribe to job progress updates
    */
-  public subscribeToJob(jobId: string, callback: (progress: ProgressMessage) => void): () => void {
+  public subscribeToJob(
+    jobId: string,
+    callback: (progress: ProgressMessage) => void
+  ): () => void {
     const job = this.jobs.get(jobId);
     if (!job) return () => {};
 
@@ -288,7 +298,9 @@ export class ConversionService extends EventEmitter {
   /**
    * Clean up completed jobs
    */
-  public cleanupJobs(olderThan: Date = new Date(Date.now() - 24 * 60 * 60 * 1000)): void {
+  public cleanupJobs(
+    olderThan: Date = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  ): void {
     for (const [jobId, job] of this.jobs.entries()) {
       if (job.completedAt && job.completedAt < olderThan) {
         this.jobs.delete(jobId);
@@ -315,7 +327,14 @@ export class ConversionService extends EventEmitter {
   /**
    * Read generated files from the output directory
    */
-  private async readGeneratedFiles(filePaths: Array<{ path: string; relativePath: string; size: number; type: string }>): Promise<GeneratedFile[]> {
+  private async readGeneratedFiles(
+    filePaths: Array<{
+      path: string;
+      relativePath: string;
+      size: number;
+      type: string;
+    }>
+  ): Promise<GeneratedFile[]> {
     const files: GeneratedFile[] = [];
 
     for (const file of filePaths) {
@@ -343,7 +362,7 @@ export class ConversionService extends EventEmitter {
    */
   private detectLanguage(filePath: string): string {
     const ext = filePath.split('.').pop()?.toLowerCase();
-    
+
     switch (ext) {
       case 'ts':
         return 'typescript';
@@ -366,9 +385,14 @@ export class ConversionService extends EventEmitter {
   /**
    * Emit progress update
    */
-  private emitProgress(job: ConversionJob, progress: number, step: string, details?: string): void {
+  private emitProgress(
+    job: ConversionJob,
+    progress: number,
+    step: string,
+    details?: string
+  ): void {
     job.progress = progress;
-    
+
     const progressMessage: ProgressMessage = {
       jobId: job.id,
       progress,

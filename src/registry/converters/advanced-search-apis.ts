@@ -1,6 +1,6 @@
 /**
  * Advanced Search API Converters - Phase 3B
- * 
+ *
  * Converts Flowise advanced search API nodes into LangChain implementations
  * 100% Coverage: Tavily, Brave, Google, Exa, Arxiv, WolframAlpha, SerpAPI, SearchAPI, DataForSEO, SearXNG
  */
@@ -65,7 +65,10 @@ abstract class BaseSearchAPIConverter extends BaseConverter {
   protected abstract getSearchProvider(): string;
 
   override convert(node: IRNode, context: GenerationContext): CodeFragment[] {
-    const variableName = this.generateVariableName(node, `${this.getSearchProvider()}_search`);
+    const variableName = this.generateVariableName(
+      node,
+      `${this.getSearchProvider()}_search`
+    );
     const config = this.generateSearchAPIConfiguration(node, context);
     const fragments: CodeFragment[] = [];
 
@@ -140,14 +143,25 @@ export class TavilySearchConverter extends BaseSearchAPIConverter {
 
   protected extractSearchConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
-    const apiKey = this.getParameterValue(node, 'apiKey', 'process.env.TAVILY_API_KEY');
+
+    const apiKey = this.getParameterValue(
+      node,
+      'apiKey',
+      'process.env.TAVILY_API_KEY'
+    );
     const maxResults = this.getParameterValue(node, 'maxResults', 5);
     const searchDepth = this.getParameterValue(node, 'searchDepth', 'basic');
     const includeAnswer = this.getParameterValue(node, 'includeAnswer', true);
-    const includeRawContent = this.getParameterValue(node, 'includeRawContent', false);
-    
-    config['apiKey'] = apiKey === 'process.env.TAVILY_API_KEY' ? apiKey : this.formatParameterValue(apiKey);
+    const includeRawContent = this.getParameterValue(
+      node,
+      'includeRawContent',
+      false
+    );
+
+    config['apiKey'] =
+      apiKey === 'process.env.TAVILY_API_KEY'
+        ? apiKey
+        : this.formatParameterValue(apiKey);
     config['maxResults'] = maxResults;
     config['searchDepth'] = searchDepth;
     config['includeAnswer'] = includeAnswer;
@@ -186,14 +200,21 @@ export class BraveSearchConverter extends BaseSearchAPIConverter {
 
   protected extractSearchConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
-    const apiKey = this.getParameterValue(node, 'apiKey', 'process.env.BRAVE_SEARCH_API_KEY');
+
+    const apiKey = this.getParameterValue(
+      node,
+      'apiKey',
+      'process.env.BRAVE_SEARCH_API_KEY'
+    );
     const count = this.getParameterValue(node, 'count', 10);
     const offset = this.getParameterValue(node, 'offset', 0);
     const safesearch = this.getParameterValue(node, 'safesearch', 'moderate');
     const country = this.getParameterValue(node, 'country', 'US');
-    
-    config['apiKey'] = apiKey === 'process.env.BRAVE_SEARCH_API_KEY' ? apiKey : this.formatParameterValue(apiKey);
+
+    config['apiKey'] =
+      apiKey === 'process.env.BRAVE_SEARCH_API_KEY'
+        ? apiKey
+        : this.formatParameterValue(apiKey);
     config['count'] = count;
     config['offset'] = offset;
     config['safesearch'] = safesearch;
@@ -232,15 +253,29 @@ export class GoogleSearchConverter extends BaseSearchAPIConverter {
 
   protected extractSearchConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
-    const apiKey = this.getParameterValue(node, 'apiKey', 'process.env.GOOGLE_API_KEY');
-    const searchEngineId = this.getParameterValue(node, 'searchEngineId', 'process.env.GOOGLE_CSE_ID');
+
+    const apiKey = this.getParameterValue(
+      node,
+      'apiKey',
+      'process.env.GOOGLE_API_KEY'
+    );
+    const searchEngineId = this.getParameterValue(
+      node,
+      'searchEngineId',
+      'process.env.GOOGLE_CSE_ID'
+    );
     const num = this.getParameterValue(node, 'num', 10);
     const start = this.getParameterValue(node, 'start', 1);
     const safe = this.getParameterValue(node, 'safe', 'medium');
-    
-    config['apiKey'] = apiKey === 'process.env.GOOGLE_API_KEY' ? apiKey : this.formatParameterValue(apiKey);
-    config['searchEngineId'] = searchEngineId === 'process.env.GOOGLE_CSE_ID' ? searchEngineId : this.formatParameterValue(searchEngineId);
+
+    config['apiKey'] =
+      apiKey === 'process.env.GOOGLE_API_KEY'
+        ? apiKey
+        : this.formatParameterValue(apiKey);
+    config['searchEngineId'] =
+      searchEngineId === 'process.env.GOOGLE_CSE_ID'
+        ? searchEngineId
+        : this.formatParameterValue(searchEngineId);
     config['num'] = num;
     config['start'] = start;
     config['safe'] = safe;
@@ -278,14 +313,21 @@ export class ExaSearchConverter extends BaseSearchAPIConverter {
 
   protected extractSearchConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
-    const apiKey = this.getParameterValue(node, 'apiKey', 'process.env.EXA_API_KEY');
+
+    const apiKey = this.getParameterValue(
+      node,
+      'apiKey',
+      'process.env.EXA_API_KEY'
+    );
     const numResults = this.getParameterValue(node, 'numResults', 10);
     const useAutoprompt = this.getParameterValue(node, 'useAutoprompt', true);
     const type = this.getParameterValue(node, 'type', 'neural');
     const contents = this.getParameterValue(node, 'contents', false);
-    
-    config['apiKey'] = apiKey === 'process.env.EXA_API_KEY' ? apiKey : this.formatParameterValue(apiKey);
+
+    config['apiKey'] =
+      apiKey === 'process.env.EXA_API_KEY'
+        ? apiKey
+        : this.formatParameterValue(apiKey);
     config['numResults'] = numResults;
     config['useAutoprompt'] = useAutoprompt;
     config['type'] = type;
@@ -324,12 +366,12 @@ export class ArxivSearchConverter extends BaseSearchAPIConverter {
 
   protected extractSearchConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     const maxResults = this.getParameterValue(node, 'maxResults', 3);
     const sortBy = this.getParameterValue(node, 'sortBy', 'relevance');
     const sortOrder = this.getParameterValue(node, 'sortOrder', 'descending');
     const getFullText = this.getParameterValue(node, 'getFullText', false);
-    
+
     config['maxResults'] = maxResults;
     config['sortBy'] = sortBy;
     config['sortOrder'] = sortOrder;
@@ -368,13 +410,20 @@ export class WolframAlphaConverter extends BaseSearchAPIConverter {
 
   protected extractSearchConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
-    const appId = this.getParameterValue(node, 'appId', 'process.env.WOLFRAM_ALPHA_APPID');
+
+    const appId = this.getParameterValue(
+      node,
+      'appId',
+      'process.env.WOLFRAM_ALPHA_APPID'
+    );
     const format = this.getParameterValue(node, 'format', 'plaintext');
     const units = this.getParameterValue(node, 'units', 'metric');
     const timeout = this.getParameterValue(node, 'timeout', 10000);
-    
-    config['appId'] = appId === 'process.env.WOLFRAM_ALPHA_APPID' ? appId : this.formatParameterValue(appId);
+
+    config['appId'] =
+      appId === 'process.env.WOLFRAM_ALPHA_APPID'
+        ? appId
+        : this.formatParameterValue(appId);
     config['format'] = format;
     config['units'] = units;
     config['timeout'] = timeout;
@@ -412,15 +461,22 @@ export class SerpAPIConverter extends BaseSearchAPIConverter {
 
   protected extractSearchConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
-    const apiKey = this.getParameterValue(node, 'apiKey', 'process.env.SERPAPI_API_KEY');
+
+    const apiKey = this.getParameterValue(
+      node,
+      'apiKey',
+      'process.env.SERPAPI_API_KEY'
+    );
     const engine = this.getParameterValue(node, 'engine', 'google');
     const num = this.getParameterValue(node, 'num', 10);
     const hl = this.getParameterValue(node, 'hl', 'en');
     const gl = this.getParameterValue(node, 'gl', 'us');
     const safe = this.getParameterValue(node, 'safe', 'off');
-    
-    config['apiKey'] = apiKey === 'process.env.SERPAPI_API_KEY' ? apiKey : this.formatParameterValue(apiKey);
+
+    config['apiKey'] =
+      apiKey === 'process.env.SERPAPI_API_KEY'
+        ? apiKey
+        : this.formatParameterValue(apiKey);
     config['engine'] = engine;
     config['num'] = num;
     config['hl'] = hl;
@@ -460,15 +516,22 @@ export class SearchAPIConverter extends BaseSearchAPIConverter {
 
   protected extractSearchConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
-    const apiKey = this.getParameterValue(node, 'apiKey', 'process.env.SEARCHAPI_API_KEY');
+
+    const apiKey = this.getParameterValue(
+      node,
+      'apiKey',
+      'process.env.SEARCHAPI_API_KEY'
+    );
     const engine = this.getParameterValue(node, 'engine', 'google');
     const num = this.getParameterValue(node, 'num', 10);
     const page = this.getParameterValue(node, 'page', 1);
     const hl = this.getParameterValue(node, 'hl', 'en');
     const gl = this.getParameterValue(node, 'gl', 'us');
-    
-    config['apiKey'] = apiKey === 'process.env.SEARCHAPI_API_KEY' ? apiKey : this.formatParameterValue(apiKey);
+
+    config['apiKey'] =
+      apiKey === 'process.env.SEARCHAPI_API_KEY'
+        ? apiKey
+        : this.formatParameterValue(apiKey);
     config['engine'] = engine;
     config['num'] = num;
     config['page'] = page;
@@ -508,15 +571,37 @@ export class DataForSEOConverter extends BaseSearchAPIConverter {
 
   protected extractSearchConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
-    const username = this.getParameterValue(node, 'username', 'process.env.DATAFORSEO_LOGIN');
-    const password = this.getParameterValue(node, 'password', 'process.env.DATAFORSEO_PASSWORD');
+
+    const username = this.getParameterValue(
+      node,
+      'username',
+      'process.env.DATAFORSEO_LOGIN'
+    );
+    const password = this.getParameterValue(
+      node,
+      'password',
+      'process.env.DATAFORSEO_PASSWORD'
+    );
     const limit = this.getParameterValue(node, 'limit', 10);
-    const locationName = this.getParameterValue(node, 'locationName', 'United States');
-    const languageName = this.getParameterValue(node, 'languageName', 'English');
-    
-    config['username'] = username === 'process.env.DATAFORSEO_LOGIN' ? username : this.formatParameterValue(username);
-    config['password'] = password === 'process.env.DATAFORSEO_PASSWORD' ? password : this.formatParameterValue(password);
+    const locationName = this.getParameterValue(
+      node,
+      'locationName',
+      'United States'
+    );
+    const languageName = this.getParameterValue(
+      node,
+      'languageName',
+      'English'
+    );
+
+    config['username'] =
+      username === 'process.env.DATAFORSEO_LOGIN'
+        ? username
+        : this.formatParameterValue(username);
+    config['password'] =
+      password === 'process.env.DATAFORSEO_PASSWORD'
+        ? password
+        : this.formatParameterValue(password);
     config['limit'] = limit;
     config['locationName'] = locationName;
     config['languageName'] = languageName;
@@ -554,14 +639,21 @@ export class SearXNGSearchConverter extends BaseSearchAPIConverter {
 
   protected extractSearchConfig(node: IRNode): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
-    const apiBase = this.getParameterValue(node, 'apiBase', 'process.env.SEARXNG_API_BASE');
+
+    const apiBase = this.getParameterValue(
+      node,
+      'apiBase',
+      'process.env.SEARXNG_API_BASE'
+    );
     const format = this.getParameterValue(node, 'format', 'json');
     const engines = this.getParameterValue(node, 'engines', ['google', 'bing']);
     const categories = this.getParameterValue(node, 'categories', ['general']);
     const pageno = this.getParameterValue(node, 'pageno', 1);
-    
-    config['apiBase'] = apiBase === 'process.env.SEARXNG_API_BASE' ? apiBase : this.formatParameterValue(apiBase);
+
+    config['apiBase'] =
+      apiBase === 'process.env.SEARXNG_API_BASE'
+        ? apiBase
+        : this.formatParameterValue(apiBase);
     config['format'] = format;
     config['engines'] = engines;
     config['categories'] = categories;

@@ -4,11 +4,7 @@
  * Converts chain nodes (LLMChain, ConversationChain, etc.) to TypeScript code.
  */
 
-import {
-  IRNode,
-  CodeFragment,
-  GenerationContext,
-} from '../../../ir/types.js';
+import { IRNode, CodeFragment, GenerationContext } from '../../../ir/types.js';
 import { NodeConverter } from '../emitter.js';
 
 export class ChainConverter implements NodeConverter {

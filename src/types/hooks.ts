@@ -1,6 +1,6 @@
 /**
  * Hook Interface Definitions
- * 
+ *
  * This file contains comprehensive TypeScript interfaces for all hooks
  * used throughout the Flowise-to-LangChain converter application.
  */
@@ -13,7 +13,7 @@ import type {
   ApiError,
   ApiResponse,
   WebSocketMessage,
-  UserInfo
+  UserInfo,
 } from './api.js';
 
 // Import remaining types from index
@@ -112,7 +112,7 @@ export interface UseFlowHook {
   flow: FlowiseJSON;
   setFlow: (flow: FlowiseJSON) => void;
   updateFlow: (updates: Partial<FlowiseJSON>) => void;
-  
+
   // Node operations
   nodes: Node[];
   addNode: (node: Node) => void;
@@ -120,14 +120,14 @@ export interface UseFlowHook {
   updateNode: (nodeId: string, updates: Partial<Node>) => void;
   getNode: (nodeId: string) => Node | null;
   duplicateNode: (nodeId: string) => void;
-  
+
   // Edge operations
   edges: Edge[];
   addEdge: (edge: Edge) => void;
   removeEdge: (edgeId: string) => void;
   updateEdge: (edgeId: string, updates: Partial<Edge>) => void;
   getEdge: (edgeId: string) => Edge | null;
-  
+
   // Selection
   selectedNodes: string[];
   selectedEdges: string[];
@@ -135,33 +135,33 @@ export interface UseFlowHook {
   setSelectedEdges: (edgeIds: string[]) => void;
   clearSelection: () => void;
   selectAll: () => void;
-  
+
   // Clipboard
   copy: () => void;
   paste: () => void;
   cut: () => void;
   canPaste: boolean;
-  
+
   // History
   undo: () => void;
   redo: () => void;
   canUndo: boolean;
   canRedo: boolean;
-  
+
   // Validation
   validate: () => Promise<ValidationResult>;
   validation: ValidationResult | null;
   isValid: boolean;
-  
+
   // Conversion
   convert: (config: ConversionConfig) => Promise<GeneratedFile[]>;
-  
+
   // Utilities
   clear: () => void;
   reset: () => void;
   exportFlow: () => string;
   importFlow: (flowData: string) => void;
-  
+
   // State
   loading: boolean;
   error: Error | null;
@@ -246,24 +246,24 @@ export interface UseConfigHook {
   setConfig: (config: ConversionConfig) => void;
   updateConfig: (updates: Partial<ConversionConfig>) => void;
   resetConfig: () => void;
-  
+
   // Validation
   validateConfig: () => ValidationResult;
   isValidConfig: boolean;
   configErrors: ValidationError[];
-  
+
   // Presets
   presets: ConfigPreset[];
   loadPreset: (presetId: string) => void;
   savePreset: (name: string, description?: string) => void;
   deletePreset: (presetId: string) => void;
-  
+
   // Persistence
   save: () => void;
   load: () => void;
   autoSave: boolean;
   setAutoSave: (enabled: boolean) => void;
-  
+
   // State
   loading: boolean;
   error: Error | null;
@@ -288,7 +288,10 @@ export interface UseConfigPresetsHook {
   error: Error | null;
   fetchPresets: () => Promise<void>;
   createPreset: (preset: Omit<ConfigPreset, 'id'>) => Promise<ConfigPreset>;
-  updatePreset: (id: string, updates: Partial<ConfigPreset>) => Promise<ConfigPreset>;
+  updatePreset: (
+    id: string,
+    updates: Partial<ConfigPreset>
+  ) => Promise<ConfigPreset>;
   deletePreset: (id: string) => Promise<void>;
   getPreset: (id: string) => ConfigPreset | null;
   searchPresets: (query: string) => ConfigPreset[];
@@ -300,38 +303,41 @@ export interface UseTestingHook {
   testConfig: TestConfig;
   setTestConfig: (config: TestConfig) => void;
   updateTestConfig: (updates: Partial<TestConfig>) => void;
-  
+
   // Test execution
   runTests: (config?: TestConfig) => Promise<void>;
   stopTests: () => void;
   pauseTests: () => void;
   resumeTests: () => void;
-  
+
   // Results
   results: TestResult[];
   summary: TestSummary | null;
   coverage: CoverageReport | null;
   logs: LogEntry[];
-  
+
   // State
   isRunning: boolean;
   isPaused: boolean;
   progress: number;
   currentTest: string | null;
-  
+
   // Utilities
   clearResults: () => void;
   exportResults: (format: 'json' | 'junit' | 'html') => void;
   retryFailedTests: () => Promise<void>;
-  
+
   // Configuration
   generateTestConfig: (flow: FlowiseJSON) => TestConfig;
   validateTestConfig: (config: TestConfig) => ValidationResult;
-  
+
   // Reporting
   generateReport: (format: 'json' | 'junit' | 'html') => Promise<string>;
-  saveReport: (format: 'json' | 'junit' | 'html', path: string) => Promise<void>;
-  
+  saveReport: (
+    format: 'json' | 'junit' | 'html',
+    path: string
+  ) => Promise<void>;
+
   // State
   loading: boolean;
   error: Error | null;
@@ -353,23 +359,23 @@ export interface UseTestingOptionsHook {
 export interface UseTestRunnerHook {
   runner: TestRunner | null;
   status: TestRunnerStatus;
-  
+
   // Control
   start: (config: TestConfig) => Promise<void>;
   stop: () => Promise<void>;
   pause: () => Promise<void>;
   resume: () => Promise<void>;
   reset: () => Promise<void>;
-  
+
   // Results
   getResults: () => TestResult[];
   getSummary: () => TestSummary | null;
-  
+
   // Events
   onProgress: (callback: (progress: number) => void) => void;
   onComplete: (callback: (results: TestResult[]) => void) => void;
   onError: (callback: (error: Error) => void) => void;
-  
+
   // State
   isReady: boolean;
   isRunning: boolean;
@@ -385,11 +391,11 @@ export interface UseTestGeneratorHook {
   generateSecurityTests: (flow: FlowiseJSON) => TestSuite[];
   generateAccessibilityTests: (flow: FlowiseJSON) => TestSuite[];
   generateAllTests: (flow: FlowiseJSON) => TestSuite[];
-  
+
   // Options
   options: TestGeneratorOptions;
   setOptions: (options: TestGeneratorOptions) => void;
-  
+
   // State
   loading: boolean;
   error: Error | null;
@@ -417,26 +423,32 @@ export interface UseValidationHook {
   errors: ValidationError[];
   warnings: ValidationWarning[];
   suggestions: ValidationSuggestion[];
-  
+
   // Validation
-  validate: (input: FlowiseJSON | ConversionConfig | TestConfig) => Promise<ValidationResult>;
-  validateAsync: (input: FlowiseJSON | ConversionConfig | TestConfig) => Promise<ValidationResult>;
-  
+  validate: (
+    input: FlowiseJSON | ConversionConfig | TestConfig
+  ) => Promise<ValidationResult>;
+  validateAsync: (
+    input: FlowiseJSON | ConversionConfig | TestConfig
+  ) => Promise<ValidationResult>;
+
   // Auto-validation
   autoValidate: boolean;
   setAutoValidate: (enabled: boolean) => void;
   debounceTime: number;
   setDebounceTime: (time: number) => void;
-  
+
   // Utilities
   clearValidation: () => void;
   revalidate: () => Promise<void>;
-  
+
   // Filtering
   filterErrors: (severity?: 'error' | 'warning') => ValidationError[];
   filterWarnings: (type?: string) => ValidationWarning[];
-  filterSuggestions: (impact?: 'low' | 'medium' | 'high') => ValidationSuggestion[];
-  
+  filterSuggestions: (
+    impact?: 'low' | 'medium' | 'high'
+  ) => ValidationSuggestion[];
+
   // State
   loading: boolean;
   error: Error | null;
@@ -459,33 +471,36 @@ export interface UseGenerationHook {
   files: GeneratedFile[];
   metadata: ConversionMetadata | null;
   analysis: FlowAnalysis | null;
-  
+
   // Generation
   generate: (flow: FlowiseJSON, config: ConversionConfig) => Promise<void>;
-  generateAsync: (flow: FlowiseJSON, config: ConversionConfig) => Promise<GeneratedFile[]>;
-  
+  generateAsync: (
+    flow: FlowiseJSON,
+    config: ConversionConfig
+  ) => Promise<GeneratedFile[]>;
+
   // State
   isGenerating: boolean;
   progress: number;
   currentStep: string;
   estimatedTime: number;
-  
+
   // Results
   getFiles: () => GeneratedFile[];
   getFile: (path: string) => GeneratedFile | null;
   downloadFile: (path: string) => void;
   downloadAll: () => void;
   previewFile: (path: string) => void;
-  
+
   // Utilities
   clearResults: () => void;
   cancel: () => void;
-  
+
   // Errors
   errors: string[];
   warnings: string[];
   clearErrors: () => void;
-  
+
   // State
   loading: boolean;
   error: Error | null;
@@ -551,19 +566,19 @@ export interface UseWebSocketHook {
   isConnected: boolean;
   isConnecting: boolean;
   error: Error | null;
-  
+
   // Messaging
   send: (message: WebSocketMessage) => void;
   sendRequest: (method: string, path: string, data?: any) => Promise<any>;
-  
+
   // Subscriptions
   subscribe: (event: string, callback: (data: any) => void) => () => void;
   unsubscribe: (event: string, callback?: (data: any) => void) => void;
-  
+
   // State
   readyState: number;
   bufferedAmount: number;
-  
+
   // Events
   onOpen: (callback: () => void) => void;
   onClose: (callback: (event: CloseEvent) => void) => void;
@@ -591,56 +606,61 @@ export interface UseUIStateHook {
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
   toggleTheme: () => void;
-  
+
   // Layout
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
-  
+
   // Panels
   panelSizes: number[];
   setPanelSizes: (sizes: number[]) => void;
-  
+
   // Tabs
   activeTab: string;
   setActiveTab: (tab: string) => void;
   openTab: (tab: TabItem) => void;
   closeTab: (tabId: string) => void;
-  
+
   // Modals
   modals: string[];
   openModal: (modalId: string) => void;
   closeModal: (modalId: string) => void;
   isModalOpen: (modalId: string) => boolean;
-  
+
   // Notifications
   notifications: NotificationItem[];
-  showNotification: (notification: Omit<NotificationItem, 'id' | 'timestamp'>) => void;
+  showNotification: (
+    notification: Omit<NotificationItem, 'id' | 'timestamp'>
+  ) => void;
   hideNotification: (id: string) => void;
   clearNotifications: () => void;
-  
+
   // Context menu
   contextMenu: {
     isOpen: boolean;
     position: { x: number; y: number };
     items: ContextMenuItem[];
   } | null;
-  showContextMenu: (position: { x: number; y: number }, items: ContextMenuItem[]) => void;
+  showContextMenu: (
+    position: { x: number; y: number },
+    items: ContextMenuItem[]
+  ) => void;
   hideContextMenu: () => void;
-  
+
   // Loading states
   globalLoading: boolean;
   setGlobalLoading: (loading: boolean) => void;
-  
+
   // Error states
   globalError: Error | null;
   setGlobalError: (error: Error | null) => void;
-  
+
   // Settings
   settings: Record<string, unknown>;
   getSetting: (key: string) => unknown;
   setSetting: (key: string, value: unknown) => void;
-  
+
   // Persistence
   saveState: () => void;
   loadState: () => void;
@@ -664,29 +684,32 @@ export interface UseUIStateOptionsHook {
 export interface UseProjectHook {
   project: ProjectInfo | null;
   setProject: (project: ProjectInfo) => void;
-  
+
   // Project management
   createProject: (name: string, description?: string) => Promise<ProjectInfo>;
-  updateProject: (id: string, updates: Partial<ProjectInfo>) => Promise<ProjectInfo>;
+  updateProject: (
+    id: string,
+    updates: Partial<ProjectInfo>
+  ) => Promise<ProjectInfo>;
   deleteProject: (id: string) => Promise<void>;
   duplicateProject: (id: string, name: string) => Promise<ProjectInfo>;
-  
+
   // Project list
   projects: ProjectInfo[];
   fetchProjects: () => Promise<void>;
   searchProjects: (query: string) => ProjectInfo[];
   filterProjects: (filter: ProjectFilter) => ProjectInfo[];
-  
+
   // Recent projects
   recentProjects: ProjectInfo[];
   addRecentProject: (project: ProjectInfo) => void;
   clearRecentProjects: () => void;
-  
+
   // State
   loading: boolean;
   error: Error | null;
   isDirty: boolean;
-  
+
   // Utilities
   exportProject: (id: string) => Promise<string>;
   importProject: (data: string) => Promise<ProjectInfo>;
@@ -713,25 +736,30 @@ export interface UseProjectOptionsHook {
 export interface UseUserHook {
   user: UserInfo | null;
   setUser: (user: UserInfo) => void;
-  
+
   // Authentication
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
-  
+
   // Profile
   updateProfile: (updates: Partial<UserInfo>) => Promise<UserInfo>;
-  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
-  
+  changePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<void>;
+
   // Preferences
   preferences: UserPreferences;
-  updatePreferences: (updates: Partial<UserPreferences>) => Promise<UserPreferences>;
-  
+  updatePreferences: (
+    updates: Partial<UserPreferences>
+  ) => Promise<UserPreferences>;
+
   // State
   isAuthenticated: boolean;
   loading: boolean;
   error: Error | null;
-  
+
   // Utilities
   refresh: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -900,8 +928,16 @@ export interface UseMutationObserverHook {
 }
 
 export interface UseEventListenerHook {
-  addEventListener: (element: Element | Window | Document, event: string, handler: EventHandler) => void;
-  removeEventListener: (element: Element | Window | Document, event: string, handler: EventHandler) => void;
+  addEventListener: (
+    element: Element | Window | Document,
+    event: string,
+    handler: EventHandler
+  ) => void;
+  removeEventListener: (
+    element: Element | Window | Document,
+    event: string,
+    handler: EventHandler
+  ) => void;
   removeAllEventListeners: () => void;
 }
 

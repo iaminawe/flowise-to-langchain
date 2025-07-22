@@ -1,6 +1,6 @@
 /**
  * Logger Middleware
- * 
+ *
  * HTTP request logging middleware.
  */
 
@@ -34,7 +34,7 @@ export const logger = (req: Request, res: Response, next: NextFunction) => {
   const originalJson = res.json;
   res.json = function (body: any) {
     const duration = Date.now() - startTime;
-    
+
     cliLogger.info('HTTP Response', {
       requestId,
       method: req.method,

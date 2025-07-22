@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const fs = require('fs').promises;
 const WebSocket = require('ws');
 const http = require('http');
@@ -20,6 +20,42 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Input validation middleware
+const validateInput = (req, res, next) => {
+  const { flow, options, settings } = req.body;
+  
+  // Validate flow structure
+  if (flow && typeof flow !== 'object') {
+    return res.status(400).json({
+      success: false,
+      error: 'Flow must be a valid JSON object'
+    });
+  }
+  
+  // Sanitize and validate format/output language
+  if (options?.format) {
+    const allowedFormats = ['typescript', 'python', 'javascript'];
+    if (!allowedFormats.includes(options.format)) {
+      return res.status(400).json({
+        success: false,
+        error: `Format must be one of: ${allowedFormats.join(', ')}`
+      });
+    }
+  }
+  
+  if (settings?.outputLanguage) {
+    const allowedLanguages = ['typescript', 'python', 'javascript'];
+    if (!allowedLanguages.includes(settings.outputLanguage)) {
+      return res.status(400).json({
+        success: false,
+        error: `Output language must be one of: ${allowedLanguages.join(', ')}`
+      });
+    }
+  }
+  
+  next();
+};
 
 // Port configuration
 const PORT = process.env.PORT || 3001;
@@ -191,7 +227,7 @@ app.post('/api/flows/validate', async (req, res) => {
 });
 
 // Flow conversion endpoint (new API style)
-app.post('/api/flows/convert', async (req, res) => {
+app.post('/api/flows/convert', validateInput, async (req, res) => {
   try {
     const { flow, options } = req.body;
     
@@ -212,10 +248,10 @@ app.post('/api/flows/convert', async (req, res) => {
     const cliPath = path.join(__dirname, '../../index.js');
     const outputPath = path.join(__dirname, 'temp', `output-${Date.now()}`);
     
-    const command = `node ${cliPath} --input ${tempFlowPath} --output ${outputPath} --format ${outputLang}`;
+    // Execute conversion with safe parameters
+    const args = ['--input', tempFlowPath, '--output', outputPath, '--format', outputLang];
     
-    // Execute conversion
-    exec(command, async (error, stdout, stderr) => {
+    execFile('node', [cliPath, ...args], async (error, stdout, stderr) => {
       // Clean up temp file
       await fs.unlink(tempFlowPath).catch(() => {});
       
@@ -342,7 +378,7 @@ app.get('/api/flows/conversion/:conversionId/download', (req, res) => {
 });
 
 // Legacy flow conversion endpoint
-app.post('/api/convert', async (req, res) => {
+app.post('/api/convert', validateInput, async (req, res) => {
   try {
     const { flow, settings } = req.body;
     
@@ -356,10 +392,10 @@ app.post('/api/convert', async (req, res) => {
     const cliPath = path.join(__dirname, '../../index.js');
     const outputPath = path.join(__dirname, 'temp', `output-${Date.now()}`);
     
-    const command = `node ${cliPath} --input ${tempFlowPath} --output ${outputPath} --format ${outputLang}`;
+    // Execute conversion with safe parameters
+    const args = ['--input', tempFlowPath, '--output', outputPath, '--format', outputLang];
     
-    // Execute conversion
-    exec(command, async (error, stdout, stderr) => {
+    execFile('node', [cliPath, ...args], async (error, stdout, stderr) => {
       // Clean up temp file
       await fs.unlink(tempFlowPath).catch(() => {});
       

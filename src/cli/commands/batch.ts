@@ -219,11 +219,11 @@ async function convertSingleFile(
       const mainFile =
         result.result.files.find((f) => f.path.endsWith('.ts')) ||
         result.result.files[0];
-      
+
       if (!mainFile) {
         throw new Error('No output file generated');
       }
-      
+
       await fs.writeFile(outputPath, mainFile.content, 'utf-8');
 
       return {

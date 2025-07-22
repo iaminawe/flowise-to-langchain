@@ -1,6 +1,6 @@
 /**
  * Development Tools Converters
- * 
+ *
  * This module provides converters for various development tools including:
  * - Code Interpreter (Python, JavaScript, Bash execution)
  * - OpenAPI Tool (REST API integration)
@@ -17,11 +17,11 @@ export class CodeInterpreterConverter {
   static convert(nodeData: NodeData): ConversionResult {
     const code = nodeData.inputs?.code || '';
     const language = nodeData.inputs?.language || 'python';
-    
+
     if (!code) {
       return {
         success: false,
-        error: 'Code is required for Code Interpreter'
+        error: 'Code is required for Code Interpreter',
       };
     }
 
@@ -52,7 +52,9 @@ const codeInterpreterTool = {
     }
     
     try {
-      ${language === 'python' ? `
+      ${
+        language === 'python'
+          ? `
       const { PythonShell } = require('python-shell');
       return new Promise((resolve, reject) => {
         const pyshell = new PythonShell(null, { mode: 'text' });
@@ -63,40 +65,52 @@ const codeInterpreterTool = {
           if (err) reject(err);
           else resolve(output.trim());
         });
-      });` : language === 'javascript' ? `
+      });`
+          : language === 'javascript'
+            ? `
       const { VM } = require('vm2');
       const vm = new VM({ timeout: 30000 });
-      return vm.run(code);` : `
+      return vm.run(code);`
+            : `
       const { exec } = require('child_process');
       return new Promise((resolve, reject) => {
         exec(code, (error, stdout, stderr) => {
           if (error) reject(error);
           else resolve(stdout || stderr);
         });
-      });`}
+      });`
+      }
     } catch (error) {
       throw new Error(\`Execution failed: \${error.message}\`);
     }
   }
 };`;
 
-    const imports = language === 'python' 
-      ? ['import { DynamicStructuredTool } from "langchain/tools"', 'import { PythonShell } from "python-shell"']
-      : language === 'javascript'
-      ? ['import { DynamicStructuredTool } from "langchain/tools"', 'import { VM } from "vm2"']
-      : ['import { DynamicStructuredTool } from "langchain/tools"'];
+    const imports =
+      language === 'python'
+        ? [
+            'import { DynamicStructuredTool } from "langchain/tools"',
+            'import { PythonShell } from "python-shell"',
+          ]
+        : language === 'javascript'
+          ? [
+              'import { DynamicStructuredTool } from "langchain/tools"',
+              'import { VM } from "vm2"',
+            ]
+          : ['import { DynamicStructuredTool } from "langchain/tools"'];
 
-    const dependencies = language === 'python' 
-      ? ['langchain', 'python-shell']
-      : language === 'javascript'
-      ? ['langchain', 'vm2']
-      : ['langchain'];
+    const dependencies =
+      language === 'python'
+        ? ['langchain', 'python-shell']
+        : language === 'javascript'
+          ? ['langchain', 'vm2']
+          : ['langchain'];
 
     return {
       success: true,
       code: langchainCode,
       imports,
-      dependencies
+      dependencies,
     };
   }
 }
@@ -106,11 +120,11 @@ export class OpenAPIConverter {
   static convert(nodeData: NodeData): ConversionResult {
     const apiSpecUrl = nodeData.inputs?.apiSpecUrl || '';
     const operationId = nodeData.inputs?.operationId || '';
-    
+
     if (!apiSpecUrl || !operationId) {
       return {
         success: false,
-        error: 'API Spec URL and Operation ID are required'
+        error: 'API Spec URL and Operation ID are required',
       };
     }
 
@@ -151,8 +165,11 @@ const openAPITool = {
     return {
       success: true,
       code: langchainCode,
-      imports: ['import { DynamicStructuredTool } from "langchain/tools"', 'import axios from "axios"'],
-      dependencies: ['langchain', 'axios', 'swagger-parser']
+      imports: [
+        'import { DynamicStructuredTool } from "langchain/tools"',
+        'import axios from "axios"',
+      ],
+      dependencies: ['langchain', 'axios', 'swagger-parser'],
     };
   }
 }
@@ -163,11 +180,11 @@ export class GitHubConverter {
     const token = nodeData.inputs?.token || '';
     const owner = nodeData.inputs?.owner || '';
     const repo = nodeData.inputs?.repo || '';
-    
+
     if (!token || !owner || !repo) {
       return {
         success: false,
-        error: 'GitHub token, owner, and repo are required'
+        error: 'GitHub token, owner, and repo are required',
       };
     }
 
@@ -219,8 +236,11 @@ const gitHubTool = {
     return {
       success: true,
       code: langchainCode,
-      imports: ['import { DynamicStructuredTool } from "langchain/tools"', 'import { Octokit } from "@octokit/rest"'],
-      dependencies: ['langchain', '@octokit/rest']
+      imports: [
+        'import { DynamicStructuredTool } from "langchain/tools"',
+        'import { Octokit } from "@octokit/rest"',
+      ],
+      dependencies: ['langchain', '@octokit/rest'],
     };
   }
 }
@@ -229,7 +249,7 @@ const gitHubTool = {
 export class DockerConverter {
   static convert(nodeData: NodeData): ConversionResult {
     const operation = nodeData.inputs?.operation || 'run';
-    
+
     const langchainCode = `
 // Docker Tool
 const dockerTool = {
@@ -287,7 +307,7 @@ const dockerTool = {
       success: true,
       code: langchainCode,
       imports: ['import { DynamicStructuredTool } from "langchain/tools"'],
-      dependencies: ['langchain']
+      dependencies: ['langchain'],
     };
   }
 }
@@ -296,11 +316,11 @@ const dockerTool = {
 export class ShellConverter {
   static convert(nodeData: NodeData): ConversionResult {
     const command = nodeData.inputs?.command || '';
-    
+
     if (!command) {
       return {
         success: false,
-        error: 'Command is required for Shell Tool'
+        error: 'Command is required for Shell Tool',
       };
     }
 
@@ -356,7 +376,7 @@ const shellTool = {
       success: true,
       code: langchainCode,
       imports: ['import { DynamicStructuredTool } from "langchain/tools"'],
-      dependencies: ['langchain']
+      dependencies: ['langchain'],
     };
   }
 }
@@ -367,11 +387,11 @@ export class DatabaseConverter {
     const connectionString = nodeData.inputs?.connectionString || '';
     const query = nodeData.inputs?.query || '';
     const database = nodeData.inputs?.database || 'postgresql';
-    
+
     if (!connectionString || !query) {
       return {
         success: false,
-        error: 'Connection string and query are required'
+        error: 'Connection string and query are required',
       };
     }
 
@@ -389,7 +409,9 @@ const databaseTool = {
     required: ["query"]
   },
   func: async ({ query, parameters = {} }) => {
-    ${database === 'postgresql' ? `
+    ${
+      database === 'postgresql'
+        ? `
     const { Client } = require('pg');
     const client = new Client('${connectionString}');
     await client.connect();
@@ -399,7 +421,9 @@ const databaseTool = {
       return { success: true, result: result.rows, rowCount: result.rowCount };
     } finally {
       await client.end();
-    }` : database === 'mysql' ? `
+    }`
+        : database === 'mysql'
+          ? `
     const mysql = require('mysql2/promise');
     const connection = await mysql.createConnection('${connectionString}');
     
@@ -408,35 +432,48 @@ const databaseTool = {
       return { success: true, result, rowCount: result.affectedRows };
     } finally {
       await connection.end();
-    }` : `
+    }`
+          : `
     // Generic database implementation
-    throw new Error('Database type ${database} not fully implemented');`}
+    throw new Error('Database type ${database} not fully implemented');`
+    }
   }
 };`;
 
-    const imports = database === 'postgresql' 
-      ? ['import { DynamicStructuredTool } from "langchain/tools"', 'import { Client } from "pg"']
-      : database === 'mysql'
-      ? ['import { DynamicStructuredTool } from "langchain/tools"', 'import mysql from "mysql2/promise"']
-      : ['import { DynamicStructuredTool } from "langchain/tools"'];
+    const imports =
+      database === 'postgresql'
+        ? [
+            'import { DynamicStructuredTool } from "langchain/tools"',
+            'import { Client } from "pg"',
+          ]
+        : database === 'mysql'
+          ? [
+              'import { DynamicStructuredTool } from "langchain/tools"',
+              'import mysql from "mysql2/promise"',
+            ]
+          : ['import { DynamicStructuredTool } from "langchain/tools"'];
 
-    const dependencies = database === 'postgresql'
-      ? ['langchain', 'pg']
-      : database === 'mysql'
-      ? ['langchain', 'mysql2']
-      : ['langchain'];
+    const dependencies =
+      database === 'postgresql'
+        ? ['langchain', 'pg']
+        : database === 'mysql'
+          ? ['langchain', 'mysql2']
+          : ['langchain'];
 
     return {
       success: true,
       code: langchainCode,
       imports,
-      dependencies
+      dependencies,
     };
   }
 }
 
 // Main converter function
-export function convertDevelopmentTool(nodeData: NodeData, nodeType: string): ConversionResult {
+export function convertDevelopmentTool(
+  nodeData: NodeData,
+  nodeType: string
+): ConversionResult {
   switch (nodeType) {
     case 'codeInterpreter':
       return CodeInterpreterConverter.convert(nodeData);
@@ -453,7 +490,7 @@ export function convertDevelopmentTool(nodeData: NodeData, nodeType: string): Co
     default:
       return {
         success: false,
-        error: `Unknown development tool type: ${nodeType}`
+        error: `Unknown development tool type: ${nodeType}`,
       };
   }
 }
@@ -465,5 +502,5 @@ export const developmentToolConverters = {
   githubTool: GitHubConverter,
   dockerTool: DockerConverter,
   shellTool: ShellConverter,
-  databaseTool: DatabaseConverter
+  databaseTool: DatabaseConverter,
 };

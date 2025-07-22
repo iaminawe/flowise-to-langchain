@@ -28,15 +28,10 @@ export type {
 } from './ir/types.js';
 
 // Import main components for pipeline
-import {
-  parseFlowiseJson,
-  type FlowiseChatFlow,
-} from './parser/index.js';
+import { parseFlowiseJson, type FlowiseChatFlow } from './parser/index.js';
 import { IRProcessor, type GenerationContext } from './ir/index.js';
 import { initializeRegistry, ConverterFactory } from './registry/index.js';
-import {
-  type CodeGenerationResult,
-} from './emitters/typescript/index.js';
+import { type CodeGenerationResult } from './emitters/typescript/index.js';
 import { Logger } from './cli/utils/logger.js';
 
 // Types are automatically exported via "export * from" statements above

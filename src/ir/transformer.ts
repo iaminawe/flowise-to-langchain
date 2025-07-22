@@ -22,9 +22,7 @@ import {
   CodeGenerationResult,
   GeneratedFile,
 } from './types.js';
-import {
-  StandardNodeFactory,
-} from './nodes.js';
+import { StandardNodeFactory } from './nodes.js';
 import { IRGraphAnalyzer } from './graph.js';
 import { ConverterFactory } from '../registry/registry.js';
 
@@ -354,7 +352,9 @@ export class FlowiseToIRTransformer {
     const warnings: string[] = [];
 
     // Check for unsupported nodes
-    const unsupportedNodes = graph.nodes.filter((n) => n.metadata?.['unsupported']);
+    const unsupportedNodes = graph.nodes.filter(
+      (n) => n.metadata?.['unsupported']
+    );
     if (unsupportedNodes.length > 0) {
       warnings.push(`Found ${unsupportedNodes.length} unsupported node types`);
     }
@@ -918,7 +918,8 @@ export class IRToCodeTransformer {
     graph?: IRGraph
   ): CodeFragment {
     const params = this.getNodeParameters(node);
-    const headless = params['headless'] !== undefined ? params['headless'] : true;
+    const headless =
+      params['headless'] !== undefined ? params['headless'] : true;
     const timeout = params['timeout'] || 30000;
 
     let content = `// ${node.label}\n`;

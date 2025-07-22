@@ -70,15 +70,15 @@ abstract class BaseOutputParserConverter extends BaseConverter {
    */
   protected generateZodSchema(node: IRNode): string {
     const schema = this.getParameterValue<FlowiseSchema>(node, 'schema');
-    
+
     if (!schema || !schema.fields || schema.fields.length === 0) {
       // Default schema if none provided
       return 'z.object({\n  output: z.string().describe("The parsed output")\n})';
     }
 
-    const schemaFields = schema.fields.map(field => 
-      this.generateZodFieldDefinition(field)
-    ).join(',\n');
+    const schemaFields = schema.fields
+      .map((field) => this.generateZodFieldDefinition(field))
+      .join(',\n');
 
     return `z.object({\n${schemaFields}\n})`;
   }
@@ -86,14 +86,17 @@ abstract class BaseOutputParserConverter extends BaseConverter {
   /**
    * Generate individual Zod field definition
    */
-  protected generateZodFieldDefinition(field: SchemaField, indent: string = '  '): string {
+  protected generateZodFieldDefinition(
+    field: SchemaField,
+    indent: string = '  '
+  ): string {
     let zodType = this.getZodTypeForField(field);
-    
+
     // Add description if provided
     if (field.description) {
       zodType += `.describe("${field.description.replace(/"/g, '\\"')}")`;
     }
-    
+
     // Make optional if not required
     if (field.required === false) {
       zodType += '.optional()';
@@ -122,7 +125,7 @@ abstract class BaseOutputParserConverter extends BaseConverter {
       case 'object':
         if (field.properties) {
           const properties = Object.entries(field.properties)
-            .map(([name, propField]) => 
+            .map(([name, propField]) =>
               this.generateZodFieldDefinition({ ...propField, name }, '    ')
             )
             .join(',\n');
@@ -263,9 +266,14 @@ export class StructuredOutputParserConverter extends BaseOutputParserConverter {
     return ['@langchain/core', 'zod'];
   }
 
-  protected override extractParserConfig(node: IRNode): Record<string, unknown> {
+  protected override extractParserConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const outputKey = this.getParameterValue<string>(node, 'outputKey');
-    const formatInstructions = this.getParameterValue<string>(node, 'formatInstructions');
+    const formatInstructions = this.getParameterValue<string>(
+      node,
+      'formatInstructions'
+    );
 
     return {
       ...(outputKey && { outputKey }),
@@ -304,7 +312,9 @@ export class JsonOutputParserConverter extends BaseOutputParserConverter {
     return ['@langchain/core', 'zod'];
   }
 
-  protected override extractParserConfig(node: IRNode): Record<string, unknown> {
+  protected override extractParserConfig(
+    node: IRNode
+  ): Record<string, unknown> {
     const outputKey = this.getParameterValue<string>(node, 'outputKey');
 
     return {

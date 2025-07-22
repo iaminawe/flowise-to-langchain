@@ -335,7 +335,9 @@ export class TypeScriptEmitter {
       content: formattedContent,
       type: 'types',
       dependencies: [],
-      exports: interfaces.map((i) => i.split(' ')[2]).filter((name): name is string => Boolean(name)),
+      exports: interfaces
+        .map((i) => i.split(' ')[2])
+        .filter((name): name is string => Boolean(name)),
       size: Buffer.byteLength(formattedContent, 'utf8'),
     };
   }

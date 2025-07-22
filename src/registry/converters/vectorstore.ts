@@ -106,7 +106,9 @@ export class PineconeConverter extends BaseVectorStoreConverter {
     return 'PineconeStore';
   }
 
-  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(
+    _node: IRNode
+  ): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     const apiKey = this.getParameterValue(_node, 'apiKey');
@@ -161,7 +163,9 @@ export class ChromaConverter extends BaseVectorStoreConverter {
     return 'Chroma';
   }
 
-  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(
+    _node: IRNode
+  ): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     const url = this.getParameterValue(_node, 'url', 'http://localhost:8000');
@@ -210,7 +214,9 @@ export class FAISSConverter extends BaseVectorStoreConverter {
     return 'FaissStore';
   }
 
-  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(
+    _node: IRNode
+  ): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     const directory = this.getParameterValue(_node, 'directory');
@@ -248,7 +254,9 @@ export class MemoryVectorStoreConverter extends BaseVectorStoreConverter {
     return 'MemoryVectorStore';
   }
 
-  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(
+    _node: IRNode
+  ): Record<string, unknown> {
     // MemoryVectorStore doesn't require configuration
     return {};
   }
@@ -280,7 +288,9 @@ export class SupabaseConverter extends BaseVectorStoreConverter {
     return 'SupabaseVectorStore';
   }
 
-  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(
+    _node: IRNode
+  ): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     const supabaseUrl = this.getParameterValue(_node, 'supabaseUrl');
@@ -333,14 +343,17 @@ export class WeaviateConverter extends BaseVectorStoreConverter {
     return 'WeaviateStore';
   }
 
-  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(
+    _node: IRNode
+  ): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     // Client configuration
     const scheme = this.getParameterValue(_node, 'scheme', 'https');
     const host = this.getParameterValue(_node, 'host', 'localhost:8080');
-    
-    config['client'] = `new WeaviateClient({ scheme: '${scheme}', host: '${host}' })`;
+
+    config['client'] =
+      `new WeaviateClient({ scheme: '${scheme}', host: '${host}' })`;
 
     // API Key (optional)
     const apiKey = this.getParameterValue(_node, 'apiKey');
@@ -372,7 +385,9 @@ export class WeaviateConverter extends BaseVectorStoreConverter {
         config['metadataKeys'] = metadataKeys;
       } else if (typeof metadataKeys === 'string') {
         // Parse comma-separated string
-        config['metadataKeys'] = metadataKeys.split(',').map((key) => key.trim());
+        config['metadataKeys'] = metadataKeys
+          .split(',')
+          .map((key) => key.trim());
       }
     }
 
@@ -380,10 +395,7 @@ export class WeaviateConverter extends BaseVectorStoreConverter {
   }
 
   override getDependencies(): string[] {
-    return [
-      '@langchain/community/vectorstores/weaviate',
-      'weaviate-ts-client',
-    ];
+    return ['@langchain/community/vectorstores/weaviate', 'weaviate-ts-client'];
   }
 
   override getSupportedVersions(): string[] {
@@ -477,7 +489,9 @@ export class QdrantConverter extends BaseVectorStoreConverter {
     return 'QdrantVectorStore';
   }
 
-  protected override extractVectorStoreConfig(_node: IRNode): Record<string, unknown> {
+  protected override extractVectorStoreConfig(
+    _node: IRNode
+  ): Record<string, unknown> {
     const config: Record<string, unknown> = {};
 
     // URL configuration with default
@@ -503,23 +517,35 @@ export class QdrantConverter extends BaseVectorStoreConverter {
     }
 
     // Content payload key
-    const contentPayloadKey = this.getParameterValue(_node, 'contentPayloadKey', 'page_content');
+    const contentPayloadKey = this.getParameterValue(
+      _node,
+      'contentPayloadKey',
+      'page_content'
+    );
     config['contentPayloadKey'] = contentPayloadKey;
 
     // Metadata payload key
-    const metadataPayloadKey = this.getParameterValue(_node, 'metadataPayloadKey', 'metadata');
+    const metadataPayloadKey = this.getParameterValue(
+      _node,
+      'metadataPayloadKey',
+      'metadata'
+    );
     config['metadataPayloadKey'] = metadataPayloadKey;
 
     // Collection configuration for distance metric and vector size
-    const distanceMetric = this.getParameterValue(_node, 'distanceMetric', 'Cosine');
+    const distanceMetric = this.getParameterValue(
+      _node,
+      'distanceMetric',
+      'Cosine'
+    );
     const vectorSize = this.getParameterValue(_node, 'vectorSize', 1536);
-    
+
     if (distanceMetric || vectorSize) {
       const collectionConfig: Record<string, unknown> = {
         vectors: {
           size: vectorSize,
-          distance: distanceMetric
-        }
+          distance: distanceMetric,
+        },
       };
       config['collectionConfig'] = collectionConfig;
     }

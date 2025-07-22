@@ -1,6 +1,6 @@
 /**
  * API Routes
- * 
+ *
  * This module defines all the API routes and their handlers,
  * organizing endpoints by functionality.
  */
@@ -78,15 +78,24 @@ apiRouter.get('/docs', (req, res) => {
                   properties: {
                     input: {
                       oneOf: [
-                        { type: 'string', description: 'File path or JSON string' },
+                        {
+                          type: 'string',
+                          description: 'File path or JSON string',
+                        },
                         { type: 'object', description: 'Flowise flow object' },
                       ],
                     },
                     options: {
                       type: 'object',
                       properties: {
-                        format: { type: 'string', enum: ['typescript', 'javascript', 'python'] },
-                        target: { type: 'string', enum: ['node', 'browser', 'edge'] },
+                        format: {
+                          type: 'string',
+                          enum: ['typescript', 'javascript', 'python'],
+                        },
+                        target: {
+                          type: 'string',
+                          enum: ['node', 'browser', 'edge'],
+                        },
                         withLangfuse: { type: 'boolean' },
                         includeTests: { type: 'boolean' },
                         includeDocs: { type: 'boolean' },
@@ -142,7 +151,10 @@ apiRouter.get('/docs', (req, res) => {
                   properties: {
                     input: {
                       oneOf: [
-                        { type: 'string', description: 'File path or JSON string' },
+                        {
+                          type: 'string',
+                          description: 'File path or JSON string',
+                        },
                         { type: 'object', description: 'Flowise flow object' },
                       ],
                     },
@@ -211,7 +223,10 @@ apiRouter.get('/docs', (req, res) => {
                     options: {
                       type: 'object',
                       properties: {
-                        testType: { type: 'string', enum: ['unit', 'integration', 'e2e', 'all'] },
+                        testType: {
+                          type: 'string',
+                          enum: ['unit', 'integration', 'e2e', 'all'],
+                        },
                         timeout: { type: 'number' },
                         mockExternal: { type: 'boolean' },
                         generateReport: { type: 'boolean' },
@@ -314,7 +329,10 @@ apiRouter.get('/docs', (req, res) => {
                       items: {
                         type: 'object',
                         properties: {
-                          type: { type: 'string', enum: ['convert', 'validate', 'test'] },
+                          type: {
+                            type: 'string',
+                            enum: ['convert', 'validate', 'test'],
+                          },
                           input: { type: 'object' },
                           options: { type: 'object' },
                         },

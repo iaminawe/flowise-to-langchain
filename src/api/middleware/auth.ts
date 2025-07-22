@@ -1,6 +1,6 @@
 /**
  * Authentication Middleware
- * 
+ *
  * Optional authentication middleware for API security.
  */
 
@@ -11,7 +11,7 @@ import { Request, Response, NextFunction } from 'express';
  */
 export const apiKeyAuth = (req: Request, res: Response, next: NextFunction) => {
   const apiKey = req.headers['x-api-key'] || req.query.apiKey;
-  
+
   // If no API key is configured, skip authentication
   if (!process.env.API_KEY) {
     return next();
@@ -33,12 +33,16 @@ export const apiKeyAuth = (req: Request, res: Response, next: NextFunction) => {
 /**
  * Optional authentication - only authenticate if API key is configured
  */
-export const optionalAuth = (req: Request, res: Response, next: NextFunction) => {
+export const optionalAuth = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   // If API key is configured, require authentication
   if (process.env.API_KEY) {
     return apiKeyAuth(req, res, next);
   }
-  
+
   // Otherwise, skip authentication
   next();
 };

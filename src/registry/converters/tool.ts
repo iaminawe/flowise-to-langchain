@@ -220,7 +220,8 @@ export class WebBrowserConverter extends BaseToolConverter {
     // Web browser requires model and embeddings from connections
     // This would need to be handled by the connection system
     config['model'] = `\${${this.generateVariableName(_node, 'llm')}}`;
-    config['embeddings'] = `\${${this.generateVariableName(_node, 'embeddings')}}`;
+    config['embeddings'] =
+      `\${${this.generateVariableName(_node, 'embeddings')}}`;
 
     const headless = this.getParameterValue(_node, 'headless');
     if (headless !== undefined) {

@@ -1,6 +1,6 @@
 /**
  * Validation Service
- * 
+ *
  * This service provides API integration with the existing CLI validation,
  * handling validation requests and providing detailed feedback.
  */
@@ -91,7 +91,7 @@ export class ValidationService extends EventEmitter {
       // Process input (either file path or JSON content)
       let inputPath: string;
       let inputContent: string;
-      
+
       if (typeof request.input === 'string') {
         // Assume it's a file path
         inputPath = request.input;
@@ -110,18 +110,27 @@ export class ValidationService extends EventEmitter {
       try {
         parsedInput = JSON.parse(inputContent);
       } catch (error) {
-        throw new Error(`Invalid JSON: ${error instanceof Error ? error.message : 'Unknown parsing error'}`);
+        throw new Error(
+          `Invalid JSON: ${error instanceof Error ? error.message : 'Unknown parsing error'}`
+        );
       }
 
       this.emitProgress(job, 50, 'Validating Flowise flow...');
 
       // Run basic validation using existing CLI validation
-      const validationResult = await this.runFlowiseValidation(inputPath, request.options || {});
+      const validationResult = await this.runFlowiseValidation(
+        inputPath,
+        request.options || {}
+      );
 
       this.emitProgress(job, 70, 'Generating suggestions...');
 
       // Generate additional suggestions based on API options
-      const suggestions = this.generateSuggestions(parsedInput, validationResult, request.options || {});
+      const suggestions = this.generateSuggestions(
+        parsedInput,
+        validationResult,
+        request.options || {}
+      );
 
       this.emitProgress(job, 90, 'Processing results...');
 
@@ -156,7 +165,8 @@ export class ValidationService extends EventEmitter {
       // Handle validation error
       const apiError: ApiError = {
         code: 'VALIDATION_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown validation error',
+        message:
+          error instanceof Error ? error.message : 'Unknown validation error',
         details: error,
       };
 
@@ -174,7 +184,9 @@ export class ValidationService extends EventEmitter {
       // Clean up temporary files after a delay
       setTimeout(() => {
         if (job.tempDir) {
-          rm(job.tempDir, { recursive: true, force: true }).catch(console.error);
+          rm(job.tempDir, { recursive: true, force: true }).catch(
+            console.error
+          );
         }
       }, 60000); // Clean up after 1 minute
     }
@@ -212,7 +224,9 @@ export class ValidationService extends EventEmitter {
 
     // Clean up temporary files
     if (job.tempDir) {
-      await rm(job.tempDir, { recursive: true, force: true }).catch(console.error);
+      await rm(job.tempDir, { recursive: true, force: true }).catch(
+        console.error
+      );
     }
 
     this.emit('validation:cancelled', { jobId });
@@ -223,7 +237,7 @@ export class ValidationService extends EventEmitter {
    * Get all jobs
    */
   public getAllJobs(): JobInfo[] {
-    return Array.from(this.jobs.values()).map(job => ({
+    return Array.from(this.jobs.values()).map((job) => ({
       id: job.id,
       type: 'validate',
       status: job.status,
@@ -239,7 +253,10 @@ export class ValidationService extends EventEmitter {
   /**
    * Subscribe to job progress updates
    */
-  public subscribeToJob(jobId: string, callback: (progress: any) => void): () => void {
+  public subscribeToJob(
+    jobId: string,
+    callback: (progress: any) => void
+  ): () => void {
     const job = this.jobs.get(jobId);
     if (!job) return () => {};
 
@@ -254,7 +271,9 @@ export class ValidationService extends EventEmitter {
   /**
    * Clean up completed jobs
    */
-  public cleanupJobs(olderThan: Date = new Date(Date.now() - 24 * 60 * 60 * 1000)): void {
+  public cleanupJobs(
+    olderThan: Date = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  ): void {
     for (const [jobId, job] of this.jobs.entries()) {
       if (job.completedAt && job.completedAt < olderThan) {
         this.jobs.delete(jobId);
@@ -270,18 +289,23 @@ export class ValidationService extends EventEmitter {
       const { readFile } = await import('fs/promises');
       return await readFile(filePath, 'utf-8');
     } catch (error) {
-      throw new Error(`Failed to read file ${filePath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to read file ${filePath}: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Run Flowise validation using existing CLI validation
    */
-  private async runFlowiseValidation(inputPath: string, options: ValidationOptions): Promise<ValidationResult> {
+  private async runFlowiseValidation(
+    inputPath: string,
+    options: ValidationOptions
+  ): Promise<ValidationResult> {
     try {
       // Use existing CLI validation
       await validateInputFile(inputPath);
-      
+
       // If no errors thrown, create a basic success result
       // TODO: Integrate with actual validation result from CLI
       return {
@@ -303,10 +327,13 @@ export class ValidationService extends EventEmitter {
       // Convert CLI validation error to API format
       return {
         isValid: false,
-        errors: [{
-          message: error instanceof Error ? error.message : 'Validation failed',
-          code: 'VALIDATION_ERROR',
-        }],
+        errors: [
+          {
+            message:
+              error instanceof Error ? error.message : 'Validation failed',
+            code: 'VALIDATION_ERROR',
+          },
+        ],
         warnings: [],
         suggestions: [],
         fixable: true,
@@ -343,7 +370,7 @@ export class ValidationService extends EventEmitter {
     }
 
     // Convert validation errors to suggestions
-    validationResult.errors.forEach(error => {
+    validationResult.errors.forEach((error) => {
       suggestions.push({
         type: 'error',
         message: error.message,
@@ -354,7 +381,7 @@ export class ValidationService extends EventEmitter {
     });
 
     // Convert validation warnings to suggestions
-    validationResult.warnings.forEach(warning => {
+    validationResult.warnings.forEach((warning) => {
       suggestions.push({
         type: 'warning',
         message: warning.message,
@@ -400,7 +427,8 @@ export class ValidationService extends EventEmitter {
     if (flow.nodes && flow.nodes.length > 20) {
       suggestions.push({
         type: 'optimization',
-        message: 'Large flow detected. Consider breaking it into smaller sub-flows for better performance.',
+        message:
+          'Large flow detected. Consider breaking it into smaller sub-flows for better performance.',
         fixable: false,
       });
     }
@@ -434,26 +462,25 @@ export class ValidationService extends EventEmitter {
    * Check if node type is deprecated
    */
   private isDeprecatedNodeType(nodeType: string): boolean {
-    const deprecatedTypes = [
-      'oldLLM',
-      'deprecatedMemory',
-      'legacyTool',
-    ];
+    const deprecatedTypes = ['oldLLM', 'deprecatedMemory', 'legacyTool'];
     return deprecatedTypes.includes(nodeType);
   }
 
   /**
    * Auto-fix flow issues
    */
-  private async autoFixFlow(inputContent: string, validationResult: ValidationResult): Promise<string> {
+  private async autoFixFlow(
+    inputContent: string,
+    validationResult: ValidationResult
+  ): Promise<string> {
     try {
       // Use the existing JSON fixer
       const fixedJson = await fixJsonIssues(inputContent);
-      
+
       if (fixedJson !== null) {
         return JSON.stringify(fixedJson, null, 2);
       }
-      
+
       return inputContent;
     } catch (error) {
       logger.error('Auto-fix failed:', { error });
@@ -464,9 +491,14 @@ export class ValidationService extends EventEmitter {
   /**
    * Emit progress update
    */
-  private emitProgress(job: ValidationJob, progress: number, step: string, details?: string): void {
+  private emitProgress(
+    job: ValidationJob,
+    progress: number,
+    step: string,
+    details?: string
+  ): void {
     job.progress = progress;
-    
+
     const progressMessage = {
       jobId: job.id,
       progress,

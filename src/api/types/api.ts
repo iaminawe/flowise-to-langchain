@@ -1,6 +1,6 @@
 /**
  * API Types and Interfaces
- * 
+ *
  * This module defines all TypeScript interfaces and types used across the API.
  */
 
@@ -295,7 +295,14 @@ export interface UploadedFile {
  */
 export interface WebSocketMessage {
   /** Message type */
-  type: 'ping' | 'pong' | 'progress' | 'result' | 'error' | 'subscribe' | 'unsubscribe';
+  type:
+    | 'ping'
+    | 'pong'
+    | 'progress'
+    | 'result'
+    | 'error'
+    | 'subscribe'
+    | 'unsubscribe';
   /** Message ID */
   id?: string;
   /** Message payload */
