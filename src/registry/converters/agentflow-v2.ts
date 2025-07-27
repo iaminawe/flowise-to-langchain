@@ -9,10 +9,147 @@ import { BaseConverter } from '../registry.js';
 import { IRNode, CodeFragment, GenerationContext } from '../../ir/types.js';
 
 /**
+ * Reference Resolution System
+ * Tracks dependencies and resolves references between nodes
+ */
+interface NodeReference {
+  nodeId: string;
+  variableName: string;
+  type: 'llm' | 'tool' | 'memory' | 'subflow' | 'agent' | 'function' | 'chain' | 'prompt' | 'vectorstore';
+}
+
+interface DependencyGraph {
+  nodes: Map<string, NodeReference>;
+  dependencies: Map<string, Set<string>>;
+}
+
+class ReferenceResolver {
+  private dependencyGraph: DependencyGraph = {
+    nodes: new Map(),
+    dependencies: new Map()
+  };
+
+  /**
+   * Register a node in the dependency graph
+   */
+  registerNode(nodeId: string, variableName: string, type: NodeReference['type']): void {
+    this.dependencyGraph.nodes.set(nodeId, { nodeId, variableName, type });
+  }
+
+  /**
+   * Add a dependency between nodes
+   */
+  addDependency(fromNodeId: string, toNodeId: string): void {
+    if (!this.dependencyGraph.dependencies.has(fromNodeId)) {
+      this.dependencyGraph.dependencies.set(fromNodeId, new Set());
+    }
+    this.dependencyGraph.dependencies.get(fromNodeId)!.add(toNodeId);
+  }
+
+  /**
+   * Get all dependencies for a node
+   */
+  getDependencies(nodeId: string): string[] {
+    return Array.from(this.dependencyGraph.dependencies.get(nodeId) || []);
+  }
+
+  /**
+   * Resolve a reference to its variable name
+   */
+  resolveReference(referenceId: string): string | null {
+    const node = this.dependencyGraph.nodes.get(referenceId);
+    return node ? node.variableName : null;
+  }
+
+  /**
+   * Get all nodes of a specific type
+   */
+  getNodesByType(type: NodeReference['type']): NodeReference[] {
+    return Array.from(this.dependencyGraph.nodes.values()).filter(node => node.type === type);
+  }
+
+  /**
+   * Check for circular dependencies
+   */
+  hasCircularDependency(nodeId: string, visited: Set<string> = new Set()): boolean {
+    if (visited.has(nodeId)) return true;
+    visited.add(nodeId);
+    
+    const deps = this.getDependencies(nodeId);
+    for (const dep of deps) {
+      if (this.hasCircularDependency(dep, new Set(visited))) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * Get topologically sorted nodes
+   */
+  getTopologicalOrder(): string[] {
+    const visited = new Set<string>();
+    const result: string[] = [];
+    
+    const visit = (nodeId: string) => {
+      if (visited.has(nodeId)) return;
+      visited.add(nodeId);
+      
+      const deps = this.getDependencies(nodeId);
+      for (const dep of deps) {
+        visit(dep);
+      }
+      
+      result.push(nodeId);
+    };
+    
+    for (const nodeId of this.dependencyGraph.nodes.keys()) {
+      visit(nodeId);
+    }
+    
+    return result;
+  }
+
+  /**
+   * Get initialization order for nodes
+   */
+  getInitializationOrder(): NodeReference[] {
+    const order = this.getTopologicalOrder();
+    return order
+      .map(nodeId => this.dependencyGraph.nodes.get(nodeId))
+      .filter((node): node is NodeReference => node !== undefined);
+  }
+
+  /**
+   * Clear the dependency graph
+   */
+  clear(): void {
+    this.dependencyGraph.nodes.clear();
+    this.dependencyGraph.dependencies.clear();
+  }
+}
+
+/**
  * Base AgentFlow V2 converter with common functionality
  */
 abstract class BaseAgentFlowV2Converter extends BaseConverter {
   readonly category = 'agentflow-v2';
+  protected static referenceResolver = new ReferenceResolver();
+
+  /**
+   * Get the reference resolver instance
+   */
+  static getReferenceResolver(): ReferenceResolver {
+    return BaseAgentFlowV2Converter.referenceResolver;
+  }
+
+  /**
+   * Reset the reference resolver for a new conversion
+   */
+  static resetReferenceResolver(): void {
+    BaseAgentFlowV2Converter.referenceResolver.clear();
+  }
 
   /**
    * Override getParameterValue to handle both parameter array and data object patterns
@@ -68,10 +205,18 @@ abstract class BaseAgentFlowV2Converter extends BaseConverter {
   protected abstract getNodeType(): string;
 
   convert(node: IRNode, context: GenerationContext): CodeFragment[] {
-    const variableName = this.generateVariableName(
-      node,
-      `${this.getNodeType()}_node`
+    const variableName = this.generateVariableName(node, `${this.getNodeType()}_node`);
+    
+    // Register this node in the reference resolver
+    BaseAgentFlowV2Converter.referenceResolver.registerNode(
+      node.id,
+      variableName,
+      this.getNodeType() as NodeReference['type']
     );
+    
+    // Track dependencies from input connections
+    this.trackNodeDependencies(node, context);
+    
     const config = this.generateV2NodeConfiguration(node, context);
     const fragments: CodeFragment[] = [];
 
@@ -135,15 +280,10 @@ abstract class BaseAgentFlowV2Converter extends BaseConverter {
       );
     }
 
-    // Configuration fragment
-    const configStr = this.generateConfigurationString(config.config);
-    const initCode = this.generateInitializationCode(
-      node,
-      context,
-      variableName,
-      config,
-      configStr
-    );
+    // Configuration fragment with resolved references
+    const resolvedConfig = this.resolveConfigReferences(config.config, node, context);
+    const configStr = this.generateConfigurationString(resolvedConfig);
+    const initCode = this.generateInitializationCode(node, context, variableName, config, configStr);
 
     fragments.push(
       this.createCodeFragment(
@@ -217,17 +357,111 @@ abstract class BaseAgentFlowV2Converter extends BaseConverter {
    * Generate initialization code with enhanced configuration handling
    */
   protected generateInitializationCode(
-    _node: IRNode,
-    _context: GenerationContext,
+    node: IRNode,
+    context: GenerationContext,
     variableName: string,
     config: any,
     configStr: string
   ): string {
+    // For agent nodes, we need special handling
+    if (this instanceof AgentNodeConverter) {
+      return this.generateAgentInitializationCode(node, context, variableName, config, configStr);
+    }
+    
     if (configStr) {
       return `const ${variableName} = new ${config.className}(${configStr});`;
     } else {
       return `const ${variableName} = new ${config.className}();`;
     }
+  }
+
+  /**
+   * Generate agent-specific initialization code
+   */
+  protected generateAgentInitializationCode(
+    node: IRNode,
+    context: GenerationContext,
+    variableName: string,
+    config: any,
+    _configStr: string
+  ): string {
+    const agentType = this.getParameterValue(node, 'agentType', 'openai-functions') as string;
+    const initLines: string[] = [];
+    
+    // Resolve references to get actual variable names
+    const llmVar = this.resolveLLMReference(node, context);
+    const toolsVar = this.resolveToolsReference(node, context);
+    const memoryVar = this.resolveMemoryReference(node, context);
+    
+    // Create the agent based on type
+    switch (agentType) {
+      case 'openai-functions':
+        initLines.push(`// Create OpenAI Functions agent`);
+        initLines.push(`const ${variableName}_agent = await createOpenAIFunctionsAgent({`);
+        initLines.push(`  llm: ${llmVar},`);
+        initLines.push(`  tools: ${toolsVar},`);
+        initLines.push(`  prompt: ChatPromptTemplate.fromMessages([`);
+        initLines.push(`    ['system', 'You are a helpful assistant.'],`);
+        initLines.push(`    ['human', '{input}'],`);
+        initLines.push(`    ['assistant', '{agent_scratchpad}']`);
+        initLines.push(`  ])`);
+        initLines.push(`});`);
+        break;
+      case 'structured-chat':
+        initLines.push(`// Create Structured Chat agent`);
+        initLines.push(`const ${variableName}_agent = await createStructuredChatAgent({`);
+        initLines.push(`  llm: ${llmVar},`);
+        initLines.push(`  tools: ${toolsVar},`);
+        initLines.push(`  prompt: ChatPromptTemplate.fromMessages([`);
+        initLines.push(`    ['system', 'You are a helpful assistant.'],`);
+        initLines.push(`    ['human', '{input}']`);
+        initLines.push(`  ])`);
+        initLines.push(`});`);
+        break;
+      case 'react':
+        initLines.push(`// Create ReAct agent`);
+        initLines.push(`const ${variableName}_agent = await createReactAgent({`);
+        initLines.push(`  llm: ${llmVar},`);
+        initLines.push(`  tools: ${toolsVar},`);
+        initLines.push(`  prompt: PromptTemplate.fromTemplate(`);
+        initLines.push(`    'Answer the following questions as best you can...\\n{input}\\n{agent_scratchpad}'`);
+        initLines.push(`  )`);
+        initLines.push(`});`);
+        break;
+      default:
+        // Default to OpenAI functions
+        initLines.push(`const ${variableName}_agent = await createOpenAIFunctionsAgent({`);
+        initLines.push(`  llm: ${llmVar},`);
+        initLines.push(`  tools: ${toolsVar},`);
+        initLines.push(`  prompt: ChatPromptTemplate.fromMessages([`);
+        initLines.push(`    ['system', 'You are a helpful assistant.'],`);
+        initLines.push(`    ['human', '{input}']`);
+        initLines.push(`  ])`);
+        initLines.push(`});`);
+    }
+    
+    // Create the executor with resolved configuration
+    initLines.push(`\n// Create agent executor`);
+    initLines.push(`const ${variableName} = new AgentExecutor({`);
+    initLines.push(`  agent: ${variableName}_agent,`);
+    initLines.push(`  tools: ${toolsVar},`);
+    if (memoryVar !== 'null') {
+      initLines.push(`  memory: ${memoryVar},`);
+    }
+    
+    // Add other configuration options
+    const maxIterations = this.getParameterValue(node, 'maxIterations', 10);
+    const verbose = this.getParameterValue(node, 'verbose', false);
+    const handleParsingErrors = this.getParameterValue(node, 'handleParsingErrors', true);
+    const returnIntermediateSteps = this.getParameterValue(node, 'returnIntermediateSteps', false);
+    
+    initLines.push(`  maxIterations: ${maxIterations},`);
+    initLines.push(`  verbose: ${verbose},`);
+    initLines.push(`  handleParsingErrors: ${handleParsingErrors},`);
+    initLines.push(`  returnIntermediateSteps: ${returnIntermediateSteps}`);
+    initLines.push(`});`);
+    
+    return initLines.join('\n');
   }
 
   /**
@@ -253,6 +487,247 @@ abstract class BaseAgentFlowV2Converter extends BaseConverter {
 
     return `{\n  ${configPairs.join(',\n  ')}\n}`;
   }
+
+  /**
+   * Track dependencies based on node connections
+   */
+  protected trackNodeDependencies(node: IRNode, context: GenerationContext): void {
+    // Check for input connections in the IR graph
+    if (!context.graph) return;
+    
+    // Look for edges that connect to this node
+    const incomingEdges = context.graph.edges.filter(edge => edge.target === node.id);
+    
+    for (const edge of incomingEdges) {
+      BaseAgentFlowV2Converter.referenceResolver.addDependency(node.id, edge.source);
+    }
+    
+    // Also check for parameter-based connections
+    const params = ['llm', 'tools', 'memory', 'chain', 'prompt', 'vectorStore'];
+    for (const param of params) {
+      const ref = this.getParameterValue(node, param, null);
+      if (ref && typeof ref === 'string' && ref !== '') {
+        // Check if it's a node ID
+        if (context.graph.nodes.some(n => n.id === ref)) {
+          BaseAgentFlowV2Converter.referenceResolver.addDependency(node.id, ref);
+        }
+      } else if (ref && typeof ref === 'object' && 'nodeId' in ref) {
+        BaseAgentFlowV2Converter.referenceResolver.addDependency(node.id, ref.nodeId);
+      }
+    }
+  }
+
+  /**
+   * Resolve references in configuration
+   */
+  protected resolveConfigReferences(
+    config: Record<string, unknown>,
+    node: IRNode,
+    context: GenerationContext
+  ): Record<string, unknown> {
+    const resolved: Record<string, unknown> = {};
+    
+    for (const [key, value] of Object.entries(config)) {
+      if (typeof value === 'string') {
+        // Check for placeholder patterns
+        if (value.includes('_REFERENCE_PLACEHOLDER')) {
+          resolved[key] = this.resolveReference(value, node, context);
+        } else if (value.includes('_PLACEHOLDER')) {
+          resolved[key] = this.resolvePlaceholder(value, node, context);
+        } else {
+          resolved[key] = value;
+        }
+      } else if (Array.isArray(value)) {
+        resolved[key] = value.map(item => 
+          typeof item === 'string' && item.includes('_PLACEHOLDER') 
+            ? this.resolvePlaceholder(item, node, context)
+            : item
+        );
+      } else if (typeof value === 'object' && value !== null) {
+        resolved[key] = this.resolveConfigReferences(value as Record<string, unknown>, node, context);
+      } else {
+        resolved[key] = value;
+      }
+    }
+    
+    return resolved;
+  }
+
+  /**
+   * Resolve a specific reference placeholder
+   */
+  protected resolveReference(placeholder: string, node: IRNode, context: GenerationContext): string {
+    // Extract reference type from placeholder
+    if (placeholder.includes('LLM_REFERENCE_PLACEHOLDER')) {
+      return this.resolveLLMReference(node, context);
+    } else if (placeholder.includes('TOOLS_REFERENCE_PLACEHOLDER')) {
+      return this.resolveToolsReference(node, context);
+    } else if (placeholder.includes('MEMORY_REFERENCE_PLACEHOLDER')) {
+      return this.resolveMemoryReference(node, context);
+    } else if (placeholder.includes('SUBFLOW_')) {
+      return this.resolveSubflowReference(placeholder, node, context);
+    }
+    
+    return placeholder;
+  }
+
+  /**
+   * Resolve general placeholders
+   */
+  protected resolvePlaceholder(placeholder: string, node: IRNode, context: GenerationContext): string {
+    // Check for specific placeholder patterns
+    if (placeholder.includes('FUNCTION_PLACEHOLDER')) {
+      return this.resolveFunctionReference(node, context);
+    }
+    
+    // Check for node ID references
+    const nodeIdMatch = placeholder.match(/NODE_([A-Za-z0-9_-]+)_PLACEHOLDER/);
+    if (nodeIdMatch) {
+      const nodeId = nodeIdMatch[1];
+      const resolved = BaseAgentFlowV2Converter.referenceResolver.resolveReference(nodeId);
+      return resolved || placeholder;
+    }
+    
+    // Default implementation - can be overridden by subclasses
+    return placeholder;
+  }
+
+  /**
+   * Resolve function reference
+   */
+  protected resolveFunctionReference(node: IRNode, context: GenerationContext): string {
+    // Check for connected function nodes
+    const functionRef = this.getParameterValue(node, 'functionRef', null);
+    if (functionRef && typeof functionRef === 'string') {
+      const resolved = BaseAgentFlowV2Converter.referenceResolver.resolveReference(functionRef);
+      if (resolved) return resolved;
+    }
+    
+    // Default function
+    return '(input) => input';
+  }
+
+  /**
+   * Resolve LLM reference
+   */
+  protected resolveLLMReference(node: IRNode, context: GenerationContext): string {
+    const llmRef = this.getParameterValue(node, 'llm', null);
+    if (!llmRef) return 'null';
+    
+    // Check if it's a reference to another node
+    if (typeof llmRef === 'string') {
+      const resolved = BaseAgentFlowV2Converter.referenceResolver.resolveReference(llmRef);
+      if (resolved) return resolved;
+    }
+    
+    // Check if llmRef is an object with connection info
+    if (typeof llmRef === 'object' && llmRef !== null && 'nodeId' in llmRef) {
+      const resolved = BaseAgentFlowV2Converter.referenceResolver.resolveReference(llmRef.nodeId);
+      if (resolved) return resolved;
+    }
+    
+    // Check context for LLM nodes
+    const llmNodes = BaseAgentFlowV2Converter.referenceResolver.getNodesByType('llm');
+    if (llmNodes.length > 0) {
+      // Use the first available LLM or match by specific criteria
+      return llmNodes[0].variableName;
+    }
+    
+    // Check for chain nodes that might contain LLMs
+    const chainNodes = BaseAgentFlowV2Converter.referenceResolver.getNodesByType('chain');
+    for (const chainNode of chainNodes) {
+      if (chainNode.variableName.includes('llm') || chainNode.variableName.includes('model')) {
+        return chainNode.variableName;
+      }
+    }
+    
+    return 'defaultLLM';
+  }
+
+  /**
+   * Resolve tools reference
+   */
+  protected resolveToolsReference(node: IRNode, context: GenerationContext): string {
+    const toolsRef = this.getParameterValue(node, 'tools', []);
+    const toolVariables: string[] = [];
+    
+    if (Array.isArray(toolsRef)) {
+      for (const toolRef of toolsRef) {
+        if (typeof toolRef === 'string') {
+          const resolved = BaseAgentFlowV2Converter.referenceResolver.resolveReference(toolRef);
+          if (resolved) {
+            toolVariables.push(resolved);
+          }
+        } else if (typeof toolRef === 'object' && toolRef !== null && 'nodeId' in toolRef) {
+          const resolved = BaseAgentFlowV2Converter.referenceResolver.resolveReference(toolRef.nodeId);
+          if (resolved) {
+            toolVariables.push(resolved);
+          }
+        }
+      }
+    }
+    
+    // Also check for all tool nodes in the graph that might be connected
+    const deps = BaseAgentFlowV2Converter.referenceResolver.getDependencies(node.id);
+    for (const dep of deps) {
+      const depNode = BaseAgentFlowV2Converter.referenceResolver.resolveReference(dep);
+      if (depNode) {
+        const nodeRef = Array.from(BaseAgentFlowV2Converter.referenceResolver['dependencyGraph'].nodes.values())
+          .find(n => n.nodeId === dep);
+        if (nodeRef && nodeRef.type === 'tool' && !toolVariables.includes(nodeRef.variableName)) {
+          toolVariables.push(nodeRef.variableName);
+        }
+      }
+    }
+    
+    return toolVariables.length > 0 ? `[${toolVariables.join(', ')}]` : '[]';
+  }
+
+  /**
+   * Resolve memory reference
+   */
+  protected resolveMemoryReference(node: IRNode, context: GenerationContext): string {
+    const memoryRef = this.getParameterValue(node, 'memory', null);
+    if (!memoryRef) return 'null';
+    
+    // Check if it's a reference to another node
+    if (typeof memoryRef === 'string') {
+      const resolved = BaseAgentFlowV2Converter.referenceResolver.resolveReference(memoryRef);
+      if (resolved) return resolved;
+    }
+    
+    // Check context for memory nodes
+    const memoryNodes = BaseAgentFlowV2Converter.referenceResolver.getNodesByType('memory');
+    if (memoryNodes.length > 0) {
+      return memoryNodes[0].variableName;
+    }
+    
+    return 'null';
+  }
+
+  /**
+   * Resolve subflow reference
+   */
+  protected resolveSubflowReference(placeholder: string, node: IRNode, context: GenerationContext): string {
+    const subflowId = this.getParameterValue(node, 'subflowId', '');
+    if (!subflowId) return '[]';
+    
+    // Check for subflow nodes
+    const subflowNodes = BaseAgentFlowV2Converter.referenceResolver.getNodesByType('subflow');
+    const matchingSubflow = subflowNodes.find(n => n.nodeId === subflowId);
+    
+    if (matchingSubflow) {
+      return matchingSubflow.variableName;
+    }
+    
+    // Check for other agent nodes that might be part of the subflow
+    const agentNodes = BaseAgentFlowV2Converter.referenceResolver.getNodesByType('agent');
+    if (agentNodes.length > 0) {
+      return `[${agentNodes.map(n => n.variableName).join(', ')}]`;
+    }
+    
+    return '[]';
+  }
 }
 
 /**
@@ -263,7 +738,25 @@ export class AgentNodeConverter extends BaseAgentFlowV2Converter {
   readonly flowiseType = 'agentNode';
 
   protected getRequiredImports(): string[] {
-    return ['AgentExecutor', 'createOpenAIFunctionsAgent'];
+    return ['AgentExecutor', 'createOpenAIFunctionsAgent', 'createStructuredChatAgent', 'createReactAgent'];
+  }
+
+  protected override getAdditionalImports(node: IRNode, _context: GenerationContext): string[] {
+    const imports: string[] = [];
+    const agentType = this.getParameterValue(node, 'agentType', 'openai-functions') as string;
+    
+    // Add prompt imports based on agent type
+    switch (agentType) {
+      case 'openai-functions':
+      case 'structured-chat':
+        imports.push('import { ChatPromptTemplate } from "@langchain/core/prompts";');
+        break;
+      case 'react':
+        imports.push('import { PromptTemplate } from "@langchain/core/prompts";');
+        break;
+    }
+    
+    return imports;
   }
 
   protected getPackageName(): string {
@@ -304,18 +797,18 @@ export class AgentNodeConverter extends BaseAgentFlowV2Converter {
     config['verbose'] = verboseMode;
     config['handleParsingErrors'] = handleParsingErrors;
     config['returnIntermediateSteps'] = returnIntermediateSteps;
-
-    // Add input references (to be resolved at runtime)
+    
+    // Add input references with placeholders for resolution
     if (llmRef) {
-      config['llm'] = '/* LLM_REFERENCE_PLACEHOLDER */';
+      config['llm'] = 'LLM_REFERENCE_PLACEHOLDER';
     }
 
     if (toolsRef && Array.isArray(toolsRef) && toolsRef.length > 0) {
-      config['tools'] = '/* TOOLS_REFERENCE_PLACEHOLDER */';
+      config['tools'] = 'TOOLS_REFERENCE_PLACEHOLDER';
     }
 
     if (memoryRef) {
-      config['memory'] = '/* MEMORY_REFERENCE_PLACEHOLDER */';
+      config['memory'] = 'MEMORY_REFERENCE_PLACEHOLDER';
     }
 
     return config;
@@ -614,7 +1107,13 @@ export class ToolNodeConverter extends BaseAgentFlowV2Converter {
     );
     const returnDirect = this.getParameterValue(node, 'returnDirect', false);
     const toolFunction = this.getParameterValue(node, 'func', null);
-
+    
+    // Check if tool function is a reference to another node
+    const connectedFunction = this.getParameterValue(node, 'connectedFunction', null);
+    if (connectedFunction) {
+      config['_connectedFunction'] = connectedFunction;
+    }
+    
     // Advanced configuration
     const timeout = this.getParameterValue(node, 'timeout', 10000);
     const enableRetry = this.getParameterValue(node, 'enableRetry', false);
@@ -680,10 +1179,13 @@ export class ToolNodeConverter extends BaseAgentFlowV2Converter {
 
       // Add the actual tool function
       funcLines.push(`    try {`);
-      funcLines.push(
-        `      const result = await (${toolFunction})(parsedInput || input);`
-      );
-
+      if (typeof toolFunction === 'string' && toolFunction.includes('_PLACEHOLDER')) {
+        const resolvedFunc = this.resolvePlaceholder(toolFunction, node, _context);
+        funcLines.push(`      const result = await (${resolvedFunc})(parsedInput || input);`);
+      } else {
+        funcLines.push(`      const result = await (${toolFunction})(parsedInput || input);`);
+      }
+      
       // Add output validation
       if (validateOutput && Object.keys(outputSchema || {}).length > 0) {
         funcLines.push(`      // Validate output`);
@@ -705,7 +1207,7 @@ export class ToolNodeConverter extends BaseAgentFlowV2Converter {
       if (enableRetry) {
         funcLines.push(`  });`);
       }
-
+      
       funcLines.push(`}`);
 
       config['func'] = funcLines.join('\n');
@@ -1120,7 +1622,13 @@ export class CustomFunctionNodeConverter extends BaseAgentFlowV2Converter {
       const contextVars = [];
       if (enableState) contextVars.push('state');
       if (enableContext) contextVars.push('context');
-
+      
+      // Check if function code contains references to resolve
+      let resolvedFunctionCode = functionCode;
+      if (typeof functionCode === 'string' && functionCode.includes('_PLACEHOLDER')) {
+        resolvedFunctionCode = this.resolvePlaceholder(functionCode, node, _context);
+      }
+      
       if (contextVars.length > 0) {
         funcLines.push(
           `    const userFunction = (input, ${contextVars.join(', ')}) => {`
@@ -1128,8 +1636,8 @@ export class CustomFunctionNodeConverter extends BaseAgentFlowV2Converter {
       } else {
         funcLines.push(`    const userFunction = (input) => {`);
       }
-
-      funcLines.push(`      ${functionCode}`);
+      
+      funcLines.push(`      ${resolvedFunctionCode}`);
       funcLines.push(`    };`);
 
       // Execute the function
@@ -1494,8 +2002,8 @@ export class SubflowNodeConverter extends BaseAgentFlowV2Converter {
     const parallelExecution = this.getParameterValue(node, 'parallel', false);
 
     config['subflowId'] = subflowId;
-    config['steps'] = '/* SUBFLOW_STEPS_PLACEHOLDER */';
-
+    config['steps'] = 'SUBFLOW_STEPS_PLACEHOLDER';
+    
     if (Object.keys(inputMapping || {}).length > 0) {
       config['inputMapping'] = inputMapping;
     }
@@ -1614,10 +2122,10 @@ export class SubflowNodeConverter extends BaseAgentFlowV2Converter {
       // Create conditional branch
       initLines.push(`// Create conditional subflow execution`);
       initLines.push(`let ${variableName} = RunnableBranch.from([`);
-      initLines.push(
-        `  [${variableName}_condition, /* CONDITIONAL_SUBFLOW_PLACEHOLDER */],`
-      );
-      initLines.push(`  /* DEFAULT_SUBFLOW_PLACEHOLDER */`);
+      const conditionalSteps = this.resolveSubflowReference('CONDITIONAL_SUBFLOW_PLACEHOLDER', node, _context);
+      const defaultSteps = this.resolveSubflowReference('DEFAULT_SUBFLOW_PLACEHOLDER', node, _context);
+      initLines.push(`  [${variableName}_condition, ${conditionalSteps}],`);
+      initLines.push(`  ${defaultSteps}`);
       initLines.push(`]);`);
     } else if (config.steps && Array.isArray(config.steps)) {
       if (parallelExecution) {
@@ -1638,10 +2146,9 @@ export class SubflowNodeConverter extends BaseAgentFlowV2Converter {
         initLines.push(`]);`);
       }
     } else {
-      // Fallback to simple sequence
-      initLines.push(
-        `let ${variableName} = RunnableSequence.from([/* SUBFLOW_STEPS_PLACEHOLDER */]);`
-      );
+      // Fallback to simple sequence with resolved steps
+      const resolvedSteps = this.resolveSubflowReference('SUBFLOW_STEPS_PLACEHOLDER', node, _context);
+      initLines.push(`let ${variableName} = RunnableSequence.from(${resolvedSteps});`);
     }
 
     // Add error handling wrapper
@@ -1660,7 +2167,8 @@ export class SubflowNodeConverter extends BaseAgentFlowV2Converter {
       if (errorStrategy === 'fallback' && fallbackSubflow) {
         initLines.push(`// Add error handling with fallback`);
         initLines.push(`${variableName} = ${variableName}.withFallbacks([`);
-        initLines.push(`  /* FALLBACK_SUBFLOW_PLACEHOLDER */`);
+        const fallbackSteps = this.resolveSubflowReference('FALLBACK_SUBFLOW_PLACEHOLDER', node, _context);
+        initLines.push(`  ${fallbackSteps}`);
         initLines.push(`]);`);
       }
     }

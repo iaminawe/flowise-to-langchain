@@ -96,11 +96,47 @@ ${
 async function rerankDocuments(docs: any[], query: string, strategy: string) {
   switch (strategy) {
     case 'cohere':
-      // Implement Cohere reranking
-      return docs; // Placeholder
+      // Cohere reranking implementation
+      const { CohereRerank } = await import('@langchain/cohere');
+      const cohereRerank = new CohereRerank({
+        apiKey: process.env.COHERE_API_KEY || '',
+        model: 'rerank-english-v2.0',
+        topN: docs.length,
+      });
+      
+      const rerankedDocs = await cohereRerank.rerank(docs, query);
+      return rerankedDocs.map((result: any) => ({
+        ...docs[result.index],
+        relevanceScore: result.relevance_score,
+      }));
     case 'sentence_transformers':
-      // Implement sentence transformers reranking
-      return docs; // Placeholder
+      // Sentence transformers reranking implementation
+      const { HuggingFaceTransformersEmbeddings } = await import('@langchain/community/embeddings/hf_transformers');
+      const embeddings = new HuggingFaceTransformersEmbeddings({
+        modelName: 'sentence-transformers/all-MiniLM-L6-v2',
+      });
+      
+      // Generate embeddings for query and documents
+      const queryEmbedding = await embeddings.embedQuery(query);
+      const docEmbeddings = await Promise.all(
+        docs.map(doc => embeddings.embedQuery(doc.pageContent))
+      );
+      
+      // Calculate cosine similarity scores
+      const scores = docEmbeddings.map(docEmb => {
+        const dotProduct = queryEmbedding.reduce((sum, val, i) => sum + val * docEmb[i], 0);
+        const queryNorm = Math.sqrt(queryEmbedding.reduce((sum, val) => sum + val * val, 0));
+        const docNorm = Math.sqrt(docEmb.reduce((sum, val) => sum + val * val, 0));
+        return dotProduct / (queryNorm * docNorm);
+      });
+      
+      // Sort documents by similarity score
+      const rankedDocs = docs
+        .map((doc, index) => ({ doc, score: scores[index] }))
+        .sort((a, b) => b.score - a.score)
+        .map(({ doc, score }) => ({ ...doc, relevanceScore: score }));
+      
+      return rankedDocs;
     default:
       return docs;
   }
@@ -393,8 +429,8 @@ Entities (person, organization, location, concept):\`;
         LIMIT 50
       \`;
       
-      // Execute graph query (placeholder for actual ${graphDatabase} integration)
-      const graphResults = await executeGraphQuery(graphQuery);
+      // Execute graph query with specific database integration
+      const graphResults = await executeGraphQuery(graphQuery, '${graphDatabase}');
       
       return graphResults.map(result => 
         \`\${result.name} -[\${result.relationship}]-> \${result.related}: \${result.description}\`
@@ -426,10 +462,67 @@ Provide a comprehensive answer using both sources of information:\`;
   }
 ]);
 
-async function executeGraphQuery(query: string) {
-  // Placeholder for actual graph database integration
-  console.log('Executing graph query:', query);
-  return []; // Return mock results
+async function executeGraphQuery(query: string, graphDatabase: string) {
+  // Graph database integration implementation
+  
+  switch (graphDatabase) {
+    case 'neo4j': {
+      const { Neo4jGraph } = await import('@langchain/community/graphs/neo4j_graph');
+      const graph = await Neo4jGraph.initialize({
+        url: process.env.NEO4J_URL || 'bolt://localhost:7687',
+        username: process.env.NEO4J_USERNAME || 'neo4j',
+        password: process.env.NEO4J_PASSWORD || '',
+      });
+      
+      const result = await graph.query(query);
+      return result.map((row: any) => ({
+        name: row.n?.name || '',
+        relationship: row.r?.type || '',
+        related: row.related?.name || '',
+        description: row.related?.description || '',
+      }));
+    }
+    
+    case 'arangodb': {
+      const { ArangoGraph } = await import('@langchain/community/graphs/arango_graph');
+      const graph = new ArangoGraph({
+        url: process.env.ARANGO_URL || 'http://localhost:8529',
+        databaseName: process.env.ARANGO_DATABASE || '_system',
+        username: process.env.ARANGO_USERNAME || 'root',
+        password: process.env.ARANGO_PASSWORD || '',
+      });
+      
+      const result = await graph.query(query);
+      return result.map((row: any) => ({
+        name: row.name || '',
+        relationship: row.relationship || '',
+        related: row.relatedName || '',
+        description: row.description || '',
+      }));
+    }
+    
+    case 'neptune': {
+      // Amazon Neptune integration
+      const { NeptuneGraph } = await import('@langchain/community/graphs/neptune_graph');
+      const graph = new NeptuneGraph({
+        endpoint: process.env.NEPTUNE_ENDPOINT || '',
+        port: parseInt(process.env.NEPTUNE_PORT || '8182'),
+        region: process.env.AWS_REGION || 'us-east-1',
+      });
+      
+      const result = await graph.query(query);
+      return result.map((row: any) => ({
+        name: row.name || '',
+        relationship: row.edgeLabel || '',
+        related: row.relatedName || '',
+        description: row.properties?.description || '',
+      }));
+    }
+    
+    default:
+      console.warn(\`Graph database '\${graphDatabase}' not implemented, returning empty results\`);
+      return [];
+  }
 }`;
 
     return [

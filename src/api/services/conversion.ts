@@ -167,7 +167,7 @@ export class ConversionService extends EventEmitter {
           unsupportedTypes: result.analysis.unsupportedTypes,
           coverage: result.analysis.coverage,
           complexity: result.analysis.complexity,
-          flowVersion: undefined, // TODO: Extract from flow data
+          flowVersion: this.extractFlowVersion(result),
         },
         warnings: result.warnings,
         errors: result.errors,
@@ -382,6 +382,50 @@ export class ConversionService extends EventEmitter {
     }
   }
 
+  /**
+   * Extract flow version from conversion result
+   */
+  private extractFlowVersion(result: any): string | undefined {
+    try {
+      // Check if the result contains flow data with chatflow metadata
+      if (result.flowData?.chatflow) {
+        // If chatflow metadata exists, use its version or dates
+        const chatflow = result.flowData.chatflow;
+        if (chatflow.version) {
+          return chatflow.version;
+        }
+        // Use updated date as version indicator
+        if (chatflow.updatedDate) {
+          return `flowise-${new Date(chatflow.updatedDate).toISOString().split('T')[0]}`;
+        }
+      }
+      
+      // Check node versions to determine Flowise version
+      if (result.flowData?.nodes?.length > 0) {
+        const nodeVersions = result.flowData.nodes
+          .map((node: any) => node.data?.version || 0)
+          .filter((v: number) => v > 0);
+        
+        if (nodeVersions.length > 0) {
+          const maxVersion = Math.max(...nodeVersions);
+          // Flowise 1.x typically has node versions 1-2
+          // Flowise 2.x typically has node versions 3+
+          if (maxVersion >= 3) {
+            return 'flowise-2.x';
+          } else if (maxVersion > 0) {
+            return 'flowise-1.x';
+          }
+        }
+      }
+      
+      // Default to unknown version
+      return 'flowise-unknown';
+    } catch (error) {
+      console.error('Failed to extract flow version:', error);
+      return undefined;
+    }
+  }
+  
   /**
    * Emit progress update
    */

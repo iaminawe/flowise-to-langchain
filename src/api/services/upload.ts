@@ -384,15 +384,50 @@ export class UploadService extends EventEmitter {
       }
     }
 
+    // Get actual available disk space
+    const availableSpace = await this.getAvailableDiskSpace();
+    
     return {
       totalFiles: jobs.length,
       totalSize,
-      availableSpace: 1024 * 1024 * 1024, // 1GB placeholder
+      availableSpace,
       oldestFile,
       newestFile,
     };
   }
 
+  /**
+   * Get available disk space for uploads
+   */
+  private async getAvailableDiskSpace(): Promise<number> {
+    try {
+      // Use platform-specific commands to get disk space
+      const { execSync } = await import('child_process');
+      const uploadDir = this.config.uploadDir;
+      
+      if (process.platform === 'win32') {
+        // Windows: Use wmic to get free space
+        const drive = uploadDir.substring(0, 2);
+        const output = execSync(
+          `wmic logicaldisk where caption="${drive}" get freespace /value`,
+          { encoding: 'utf8' }
+        );
+        const match = output.match(/FreeSpace=(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+      } else {
+        // Unix-like systems: Use df command
+        const output = execSync(`df -B1 "${uploadDir}" | tail -1`, { encoding: 'utf8' });
+        const parts = output.trim().split(/\s+/);
+        // Available space is typically the 4th column in df output
+        return parseInt(parts[3] || '0', 10);
+      }
+    } catch (error) {
+      console.error('Failed to get disk space:', error);
+      // Return a reasonable default if we can't determine actual space
+      return 10 * 1024 * 1024 * 1024; // 10GB default
+    }
+  }
+  
   /**
    * Validate upload
    */

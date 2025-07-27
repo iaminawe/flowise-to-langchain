@@ -303,28 +303,114 @@ export class ValidationService extends EventEmitter {
     options: ValidationOptions
   ): Promise<ValidationResult> {
     try {
-      // Use existing CLI validation
+      // Use existing CLI validation for basic file checks
       await validateInputFile(inputPath);
-
-      // If no errors thrown, create a basic success result
-      // TODO: Integrate with actual validation result from CLI
+      
+      // Parse and analyze the flow
+      const { parseFlowiseFile } = await import('../../parser/parser.js');
+      const { analyzeFlow } = await import('../../parser/utils.js');
+      const { getSupportedNodeTypes } = await import('../../registry/registry.js');
+      
+      const parseResult = await parseFlowiseFile(inputPath);
+      
+      if (!parseResult.success || !parseResult.data) {
+        return {
+          isValid: false,
+          errors: parseResult.errors.map(err => ({
+            message: err.message,
+            code: err.code || 'PARSE_ERROR',
+            line: err.line,
+            column: err.column,
+          })),
+          warnings: [],
+          suggestions: [],
+          fixable: parseResult.errors.some(err => err.code === 'FIXABLE_ERROR'),
+          analysis: {
+            nodeCount: 0,
+            connectionCount: 0,
+            coverage: 0,
+            complexity: 'high',
+            supportedTypes: [],
+            unsupportedTypes: [],
+          },
+        };
+      }
+      
+      // Analyze the parsed flow
+      const flowAnalysis = analyzeFlow(parseResult.data);
+      const supportedTypes = getSupportedNodeTypes();
+      
+      // Categorize node types
+      const usedNodeTypes = new Set(parseResult.data.nodes.map(node => node.data.type));
+      const supportedUsedTypes = Array.from(usedNodeTypes).filter(type => supportedTypes.includes(type));
+      const unsupportedUsedTypes = Array.from(usedNodeTypes).filter(type => !supportedTypes.includes(type));
+      
+      // Calculate coverage
+      const coverage = usedNodeTypes.size > 0 
+        ? Math.round((supportedUsedTypes.length / usedNodeTypes.size) * 100)
+        : 100;
+      
+      // Determine complexity based on flow analysis
+      let complexity: 'low' | 'medium' | 'high' = 'low';
+      if (flowAnalysis.cyclomaticComplexity > 10) complexity = 'high';
+      else if (flowAnalysis.cyclomaticComplexity > 5) complexity = 'medium';
+      
+      // Build validation result
+      const errors: ValidationError[] = [];
+      const warnings: ValidationWarning[] = [];
+      const suggestions: ValidationSuggestion[] = [];
+      
+      // Check for issues
+      if (flowAnalysis.orphanedNodes.length > 0) {
+        warnings.push({
+          message: `Found ${flowAnalysis.orphanedNodes.length} orphaned node(s) that are not connected`,
+          code: 'ORPHANED_NODES',
+          nodeIds: flowAnalysis.orphanedNodes,
+        });
+      }
+      
+      if (flowAnalysis.cycles.length > 0 && options.detectCycles) {
+        warnings.push({
+          message: `Detected ${flowAnalysis.cycles.length} cycle(s) in the flow`,
+          code: 'CIRCULAR_DEPENDENCY',
+          paths: flowAnalysis.cycles,
+        });
+      }
+      
+      if (unsupportedUsedTypes.length > 0) {
+        errors.push({
+          message: `Flow contains unsupported node types: ${unsupportedUsedTypes.join(', ')}`,
+          code: 'UNSUPPORTED_NODES',
+          nodeTypes: unsupportedUsedTypes,
+        });
+      }
+      
+      if (flowAnalysis.criticalPath.length > 20) {
+        suggestions.push({
+          message: 'Consider breaking down this complex flow into smaller sub-flows',
+          code: 'COMPLEX_FLOW',
+          actionable: true,
+          priority: 'medium',
+        });
+      }
+      
       return {
-        isValid: true,
-        errors: [],
-        warnings: [],
-        suggestions: [],
-        fixable: false,
+        isValid: errors.length === 0,
+        errors,
+        warnings,
+        suggestions,
+        fixable: errors.some(err => err.code === 'FIXABLE_ERROR'),
         analysis: {
-          nodeCount: 0,
-          connectionCount: 0,
-          coverage: 100,
-          complexity: 'low',
-          supportedTypes: [],
-          unsupportedTypes: [],
+          nodeCount: parseResult.data.nodes.length,
+          connectionCount: parseResult.data.edges.length,
+          coverage,
+          complexity,
+          supportedTypes: supportedUsedTypes,
+          unsupportedTypes: unsupportedUsedTypes,
         },
       };
     } catch (error) {
-      // Convert CLI validation error to API format
+      // Convert any unexpected errors to API format
       return {
         isValid: false,
         errors: [
@@ -336,7 +422,7 @@ export class ValidationService extends EventEmitter {
         ],
         warnings: [],
         suggestions: [],
-        fixable: true,
+        fixable: false,
         analysis: {
           nodeCount: 0,
           connectionCount: 0,

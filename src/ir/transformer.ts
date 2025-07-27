@@ -949,9 +949,118 @@ export class IRToCodeTransformer {
     node: IRNode,
     context: GenerationContext
   ): CodeFragment {
+    const variableName = this.getVariableName(node);
     let content = `// ${node.label} (${node.type})\n`;
-    content += `// TODO: Implement ${node.type} node\n`;
-    content += `const ${this.getVariableName(node)} = null; // Placeholder`;
+    
+    // Attempt to generate meaningful code based on node type patterns
+    const nodeType = node.type.toLowerCase();
+    
+    // Check for common patterns and generate appropriate code
+    if (nodeType.includes('loader') || nodeType.includes('reader')) {
+      // Document/Data loaders
+      content += `// Generic data loader implementation\n`;
+      content += `const ${variableName} = {\n`;
+      content += `  async load(source: string): Promise<any[]> {\n`;
+      content += `    console.warn('Generic loader for ${node.type} - implement specific logic');\n`;
+      content += `    // Placeholder: return empty array\n`;
+      content += `    return [];\n`;
+      content += `  }\n`;
+      content += `};`;
+    } else if (nodeType.includes('splitter') || nodeType.includes('chunker')) {
+      // Text splitters
+      content += `// Generic text splitter implementation\n`;
+      content += `const ${variableName} = {\n`;
+      content += `  splitText(text: string, chunkSize: number = 1000): string[] {\n`;
+      content += `    console.warn('Generic splitter for ${node.type} - implement specific logic');\n`;
+      content += `    // Simple character-based splitting\n`;
+      content += `    const chunks: string[] = [];\n`;
+      content += `    for (let i = 0; i < text.length; i += chunkSize) {\n`;
+      content += `      chunks.push(text.slice(i, i + chunkSize));\n`;
+      content += `    }\n`;
+      content += `    return chunks;\n`;
+      content += `  }\n`;
+      content += `};`;
+    } else if (nodeType.includes('parser') || nodeType.includes('extractor')) {
+      // Parsers/Extractors
+      content += `// Generic parser implementation\n`;
+      content += `const ${variableName} = {\n`;
+      content += `  parse(input: any): any {\n`;
+      content += `    console.warn('Generic parser for ${node.type} - implement specific logic');\n`;
+      content += `    // Pass through input\n`;
+      content += `    return input;\n`;
+      content += `  }\n`;
+      content += `};`;
+    } else if (nodeType.includes('transform') || nodeType.includes('processor')) {
+      // Transformers/Processors
+      content += `// Generic transformer implementation\n`;
+      content += `const ${variableName} = {\n`;
+      content += `  async transform(input: any): Promise<any> {\n`;
+      content += `    console.warn('Generic transformer for ${node.type} - implement specific logic');\n`;
+      content += `    // Pass through with timestamp\n`;
+      content += `    return {\n`;
+      content += `      ...input,\n`;
+      content += `      _processed: new Date().toISOString(),\n`;
+      content += `      _processorType: '${node.type}'\n`;
+      content += `    };\n`;
+      content += `  }\n`;
+      content += `};`;
+    } else if (nodeType.includes('store') || nodeType.includes('database')) {
+      // Storage nodes
+      content += `// Generic storage implementation\n`;
+      content += `const ${variableName} = {\n`;
+      content += `  async save(data: any, key?: string): Promise<void> {\n`;
+      content += `    console.warn('Generic storage for ${node.type} - implement specific logic');\n`;
+      content += `    // In-memory storage placeholder\n`;
+      content += `    console.log('Would save:', { key, data });\n`;
+      content += `  },\n`;
+      content += `  async retrieve(key: string): Promise<any> {\n`;
+      content += `    console.warn('Generic retrieval for ${node.type} - implement specific logic');\n`;
+      content += `    return null;\n`;
+      content += `  }\n`;
+      content += `};`;
+    } else if (nodeType.includes('api') || nodeType.includes('http') || nodeType.includes('webhook')) {
+      // API/HTTP nodes
+      content += `// Generic API client implementation\n`;
+      content += `const ${variableName} = {\n`;
+      content += `  async request(method: string, url: string, data?: any): Promise<any> {\n`;
+      content += `    console.warn('Generic API for ${node.type} - implement specific logic');\n`;
+      content += `    // Placeholder response\n`;
+      content += `    return {\n`;
+      content += `      status: 200,\n`;
+      content += `      data: { message: 'Generic API response for ${node.type}' }\n`;
+      content += `    };\n`;
+      content += `  }\n`;
+      content += `};`;
+    } else if (nodeType.includes('util') || nodeType.includes('helper')) {
+      // Utility nodes
+      content += `// Generic utility implementation\n`;
+      content += `const ${variableName} = {\n`;
+      content += `  execute(...args: any[]): any {\n`;
+      content += `    console.warn('Generic utility for ${node.type} - implement specific logic');\n`;
+      content += `    return args.length > 0 ? args[0] : null;\n`;
+      content += `  }\n`;
+      content += `};`;
+    } else {
+      // Default fallback for completely unknown types
+      content += `// Unknown node type - creating generic handler\n`;
+      content += `const ${variableName} = {\n`;
+      content += `  _nodeType: '${node.type}',\n`;
+      content += `  _nodeLabel: '${node.label}',\n`;
+      content += `  _warning: 'This is a generic placeholder for an unsupported node type',\n`;
+      content += `  \n`;
+      content += `  async process(input: any): Promise<any> {\n`;
+      content += `    console.warn(\`Unimplemented node type: ${node.type} (${node.label})\`);\n`;
+      content += `    console.log('Input received:', input);\n`;
+      content += `    console.log('Node configuration:', ${JSON.stringify(node.data, null, 2)});\n`;
+      content += `    \n`;
+      content += `    // Pass through the input unchanged\n`;
+      content += `    return input;\n`;
+      content += `  }\n`;
+      content += `};`;
+    }
+    
+    content += `\n\n// Note: This is a generic implementation for '${node.type}'.\n`;
+    content += `// You should replace this with the specific implementation for your use case.`;
 
     return {
       id: `node-${node.id}`,
@@ -962,8 +1071,10 @@ export class IRToCodeTransformer {
       metadata: {
         nodeId: node.id,
         order: 1000,
-        category: 'placeholder',
-        exports: [this.getVariableName(node)],
+        category: 'generic',
+        exports: [variableName],
+        isGeneric: true,
+        originalType: node.type,
       },
     };
   }
@@ -1019,8 +1130,133 @@ export class IRToCodeTransformer {
         content += `  return result.text || result.output || JSON.stringify(result);\n`;
       }
     } else {
-      content += `  // TODO: Implement flow execution logic\n`;
-      content += `  return "Flow execution not implemented";\n`;
+      // Complex flow with multiple entry points or no clear exit point
+      content += `  // Execute flow based on graph topology\n`;
+      
+      // Get entry points - nodes with no incoming edges
+      const entryPoints = graph.analysis?.entryPoints || [];
+      
+      if (entryPoints.length === 0) {
+        content += `  // No entry points found - check for isolated nodes\n`;
+        const isolatedNodes = graph.nodes.filter(node => {
+          const hasIncoming = graph.connections.some(c => c.target === node.id);
+          const hasOutgoing = graph.connections.some(c => c.source === node.id);
+          return !hasIncoming && !hasOutgoing;
+        });
+        
+        if (isolatedNodes.length > 0) {
+          content += `  // Execute isolated nodes\n`;
+          content += `  const results = [];\n`;
+          for (const node of isolatedNodes) {
+            const varName = this.getVariableName(node);
+            if (node.type.includes('Agent') || node.type.includes('agent')) {
+              content += `  if (!${varName}) {\n`;
+              content += `    ${varName} = await setupAgent();\n`;
+              content += `  }\n`;
+            }
+            content += `  results.push(await ${varName}.call({ input })`;;
+            if (context.includeLangfuse) {
+              content += `, callbacks: [langfuseHandler] }`;
+            } else {
+              content += ` }`;
+            }
+            content += `);\n`;
+          }
+          content += `  return results.length === 1 ? results[0] : results;\n`;
+        } else {
+          content += `  return "No executable nodes found in the flow";\n`;
+        }
+      } else {
+        // Multiple entry points - execute in topological order
+        content += `  // Execute nodes in topological order\n`;
+        
+        // Use topological sort to determine execution order
+        const sortResult = IRGraphAnalyzer.topologicalSort(graph);
+        
+        if (!sortResult.isAcyclic) {
+          content += `  // Warning: Cycles detected in graph\n`;
+          content += `  console.warn("Cycles detected:", ${JSON.stringify(sortResult.cycles)});\n`;
+        }
+        
+        content += `  const nodeOutputs = new Map();\n`;
+        content += `  nodeOutputs.set('input', input);\n\n`;
+        
+        // Generate execution code for each node in topological order
+        if (sortResult.sorted.length > 0) {
+          for (const nodeId of sortResult.sorted) {
+            const node = graph.nodes.find(n => n.id === nodeId);
+            if (!node) continue;
+            
+            const varName = this.getVariableName(node);
+            content += `  // Execute ${node.label}\n`;
+            
+            // Check if node needs special initialization
+            if (node.type.includes('Agent') || node.type.includes('agent')) {
+              content += `  if (!${varName}) {\n`;
+              content += `    ${varName} = await setupAgent();\n`;
+              content += `  }\n`;
+            }
+            
+            // Find inputs for this node
+            const nodeInputs = graph.connections
+              .filter(c => c.target === nodeId)
+              .map(c => ({
+                source: c.source,
+                targetHandle: c.targetHandle || 'input'
+              }));
+            
+            // Build input object
+            content += `  const ${varName}_input = {\n`;
+            if (nodeInputs.length === 0) {
+              // No inputs - use the main input
+              content += `    input: input,\n`;
+            } else {
+              // Map inputs from source nodes
+              for (const input of nodeInputs) {
+                const sourceOutput = `nodeOutputs.get('${input.source}')`;
+                content += `    ${input.targetHandle}: ${sourceOutput},\n`;
+              }
+            }
+            content += `  };\n\n`;
+            
+            // Execute the node
+            content += `  const ${varName}_output = await ${varName}.call({\n`;
+            content += `    ...${varName}_input,\n`;
+            if (context.includeLangfuse) {
+              content += `    callbacks: [langfuseHandler],\n`;
+            }
+            content += `  });\n`;
+            
+            // Store output for downstream nodes
+            content += `  nodeOutputs.set('${nodeId}', ${varName}_output.text || ${varName}_output.output || ${varName}_output);\n\n`;
+          }
+          
+          // Return the output of the last node(s)
+          const exitPoints = graph.analysis?.exitPoints || [];
+          if (exitPoints.length > 0) {
+            if (exitPoints.length === 1) {
+              content += `  return nodeOutputs.get('${exitPoints[0]}');\n`;
+            } else {
+              // Multiple exit points - return all outputs
+              content += `  const results = {};\n`;
+              for (const exitPoint of exitPoints) {
+                const node = graph.nodes.find(n => n.id === exitPoint);
+                if (node) {
+                  content += `  results['${node.label}'] = nodeOutputs.get('${exitPoint}');\n`;
+                }
+              }
+              content += `  return results;\n`;
+            }
+          } else {
+            // No explicit exit points - return last executed node's output
+            const lastNodeId = sortResult.sorted[sortResult.sorted.length - 1];
+            content += `  return nodeOutputs.get('${lastNodeId}');\n`;
+          }
+        } else {
+          // No nodes to execute
+          content += `  return "No nodes to execute";\n`;
+        }
+      }
     }
 
     content += `}\n\n`;
