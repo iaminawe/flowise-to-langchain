@@ -96,7 +96,8 @@
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
-    "@playwright/test": "^1.45.0",
+    "@langchain/cohere": "^0.3.4",
+    "@playwright/test": "^1.54.1",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.23",
     "@types/jest": "^29.5.12",
@@ -115,6 +116,7 @@
     "lighthouse": "^11.7.1",
     "prettier": "^3.3.3",
     "rimraf": "^5.0.10",
+    "supertest": "^7.1.4",
     "ts-jest": "^29.2.4",
     "tsx": "^4.16.5",
     "typescript": "^5.5.4"

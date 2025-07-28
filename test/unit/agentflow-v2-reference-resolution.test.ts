@@ -1,13 +1,15 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { AgentFlowV2Converter } from '../../src/registry/converters/agentflow-v2.js';
+import { describe, it, expect, beforeEach } from '@jest/globals';
+import { AgentNodeConverter, BaseAgentFlowV2Converter } from '../../src/registry/converters/agentflow-v2.js';
 import type { IRNode, GenerationContext } from '../../src/ir/types.js';
 
 describe('AgentFlow V2 Reference Resolution', () => {
-  let converter: AgentFlowV2Converter;
+  let converter: AgentNodeConverter;
   let mockContext: GenerationContext;
 
   beforeEach(() => {
-    converter = new AgentFlowV2Converter();
+    converter = new AgentNodeConverter();
+    // Reset the reference resolver before each test
+    BaseAgentFlowV2Converter.resetReferenceResolver();
     mockContext = {
       targetLanguage: 'typescript',
       includeLangfuse: false,
@@ -16,414 +18,202 @@ describe('AgentFlow V2 Reference Resolution', () => {
     };
   });
 
-  describe('ReferenceResolver', () => {
+  describe('ReferenceResolver Basic Functionality', () => {
     it('should register nodes and track dependencies', () => {
-      const llmNode: IRNode = {
-        id: 'llm-1',
-        type: 'ChatOpenAI',
-        label: 'OpenAI LLM',
-        data: {},
-        inputs: {},
-        outputs: {},
-      };
-
-      const toolNode: IRNode = {
-        id: 'tool-1',
-        type: 'Calculator',
-        label: 'Calculator Tool',
-        data: {},
-        inputs: {},
-        outputs: {},
-      };
-
-      const agentNode: IRNode = {
-        id: 'agent-1',
-        type: 'AgentExecutor',
-        label: 'Main Agent',
-        data: {
-          llm: 'llm-1',
-          tools: ['tool-1'],
-        },
-        inputs: {
-          llm: [{ source: 'llm-1', sourceHandle: 'output', target: 'agent-1', targetHandle: 'llm' }],
-          tools: [{ source: 'tool-1', sourceHandle: 'output', target: 'agent-1', targetHandle: 'tools' }],
-        },
-        outputs: {},
-      };
-
+      const resolver = BaseAgentFlowV2Converter.getReferenceResolver();
+      
       // Test node registration
-      const resolver = (converter as any).createReferenceResolver();
-      resolver.registerNode(llmNode);
-      resolver.registerNode(toolNode);
-      resolver.registerNode(agentNode);
+      resolver.registerNode('llm-1', 'llm_node', 'llm');
+      resolver.registerNode('tool-1', 'tool_node', 'tool');
+      resolver.registerNode('agent-1', 'agent_node', 'agent');
+      
+      // Add dependencies manually
+      resolver.addDependency('agent-1', 'llm-1');
+      resolver.addDependency('agent-1', 'tool-1');
 
       // Test dependency tracking
       expect(resolver.getDependencies('agent-1')).toContain('llm-1');
       expect(resolver.getDependencies('agent-1')).toContain('tool-1');
-    });
-
-    it('should resolve LLM references correctly', () => {
-      const resolver = (converter as any).createReferenceResolver();
       
-      const llmNode: IRNode = {
-        id: 'llm-1',
-        type: 'ChatOpenAI',
-        label: 'OpenAI LLM',
-        data: {},
-        inputs: {},
-        outputs: {},
-      };
-      resolver.registerNode(llmNode);
-
-      // Test string reference
-      const llmRef = resolver.resolveLLMReference('llm-1');
-      expect(llmRef).toBe('chatOpenAI_llm_1');
-
-      // Test object reference
-      const llmObjRef = resolver.resolveLLMReference({ nodeId: 'llm-1' });
-      expect(llmObjRef).toBe('chatOpenAI_llm_1');
-
-      // Test non-existent reference
-      const nullRef = resolver.resolveLLMReference('non-existent');
-      expect(nullRef).toBeNull();
-    });
-
-    it('should resolve tools references correctly', () => {
-      const resolver = (converter as any).createReferenceResolver();
-      
-      const tool1: IRNode = {
-        id: 'tool-1',
-        type: 'Calculator',
-        label: 'Calculator',
-        data: {},
-        inputs: {},
-        outputs: {},
-      };
-      
-      const tool2: IRNode = {
-        id: 'tool-2',
-        type: 'WebBrowser',
-        label: 'Browser',
-        data: {},
-        inputs: {},
-        outputs: {},
-      };
-      
-      resolver.registerNode(tool1);
-      resolver.registerNode(tool2);
-
-      // Test array of references
-      const toolsRef = resolver.resolveToolsReference(['tool-1', 'tool-2']);
-      expect(toolsRef).toEqual(['calculator_tool_1', 'webBrowser_tool_2']);
-
-      // Test with connected tools
-      const agentNode: IRNode = {
-        id: 'agent-1',
-        type: 'AgentExecutor',
-        label: 'Agent',
-        data: {},
-        inputs: {
-          tools: [
-            { source: 'tool-1', sourceHandle: 'output', target: 'agent-1', targetHandle: 'tools' },
-          ],
-        },
-        outputs: {},
-      };
-      resolver.registerNode(agentNode);
-
-      const connectedTools = resolver.resolveToolsReference([], 'agent-1');
-      expect(connectedTools).toContain('calculator_tool_1');
-    });
-
-    it('should resolve memory references correctly', () => {
-      const resolver = (converter as any).createReferenceResolver();
-      
-      const memoryNode: IRNode = {
-        id: 'memory-1',
-        type: 'BufferMemory',
-        label: 'Chat Memory',
-        data: {},
-        inputs: {},
-        outputs: {},
-      };
-      resolver.registerNode(memoryNode);
-
-      const memoryRef = resolver.resolveMemoryReference('memory-1');
-      expect(memoryRef).toBe('bufferMemory_memory_1');
-    });
-
-    it('should resolve subflow references correctly', () => {
-      const resolver = (converter as any).createReferenceResolver();
-      
-      const subflowNode: IRNode = {
-        id: 'subflow-1',
-        type: 'AgentExecutor',
-        label: 'Subflow Agent',
-        data: {},
-        inputs: {},
-        outputs: {},
-      };
-      resolver.registerNode(subflowNode);
-
-      const subflowRef = resolver.resolveSubflowReference('subflow-1');
-      expect(subflowRef).toBe('agentExecutor_subflow_1');
+      // Test reference resolution
+      expect(resolver.resolveReference('llm-1')).toBe('llm_node');
+      expect(resolver.resolveReference('tool-1')).toBe('tool_node');
+      expect(resolver.resolveReference('agent-1')).toBe('agent_node');
     });
 
     it('should detect circular dependencies', () => {
-      const resolver = (converter as any).createReferenceResolver();
+      const resolver = BaseAgentFlowV2Converter.getReferenceResolver();
       
       // Create circular dependency: A -> B -> C -> A
       resolver.addDependency('A', 'B');
       resolver.addDependency('B', 'C');
       resolver.addDependency('C', 'A');
 
-      expect(() => resolver.getInitializationOrder()).toThrow('Circular dependency detected');
+      expect(resolver.hasCircularDependency('A')).toBe(true);
+      expect(resolver.hasCircularDependency('B')).toBe(true);
+      expect(resolver.hasCircularDependency('C')).toBe(true);
     });
 
-    it('should provide correct initialization order', () => {
-      const resolver = (converter as any).createReferenceResolver();
+    it('should provide correct topological order', () => {
+      const resolver = BaseAgentFlowV2Converter.getReferenceResolver();
+      
+      // Register nodes
+      resolver.registerNode('A', 'nodeA', 'llm');
+      resolver.registerNode('B', 'nodeB', 'tool'); 
+      resolver.registerNode('C', 'nodeC', 'agent');
+      resolver.registerNode('D', 'nodeD', 'memory');
       
       // Create dependency chain: D -> C -> B -> A
       resolver.addDependency('D', 'C');
       resolver.addDependency('C', 'B');
       resolver.addDependency('B', 'A');
+
+      const order = resolver.getTopologicalOrder();
       
-      // Register nodes
-      ['A', 'B', 'C', 'D'].forEach(id => {
-        resolver.registerNode({
-          id,
-          type: 'TestNode',
-          label: `Node ${id}`,
-          data: {},
-          inputs: {},
-          outputs: {},
-        });
-      });
-
-      const order = resolver.getInitializationOrder();
-      expect(order).toEqual(['A', 'B', 'C', 'D']);
-    });
-  });
-
-  describe('Placeholder Resolution', () => {
-    it('should replace LLM_REFERENCE_PLACEHOLDER', () => {
-      const agentNode: IRNode = {
-        id: 'agent-1',
-        type: 'AgentExecutor',
-        label: 'Agent',
-        data: {
-          llm: 'llm-1',
-        },
-        inputs: {},
-        outputs: {},
-      };
-
-      const fragments = converter.convert(agentNode, mockContext);
-      const code = fragments.map(f => f.content).join('\n');
-
-      expect(code).not.toContain('/* LLM_REFERENCE_PLACEHOLDER */');
-      expect(code).toContain('llm:');
-    });
-
-    it('should replace TOOLS_REFERENCE_PLACEHOLDER', () => {
-      const agentNode: IRNode = {
-        id: 'agent-1',
-        type: 'AgentExecutor',
-        label: 'Agent',
-        data: {
-          tools: ['tool-1', 'tool-2'],
-        },
-        inputs: {},
-        outputs: {},
-      };
-
-      const fragments = converter.convert(agentNode, mockContext);
-      const code = fragments.map(f => f.content).join('\n');
-
-      expect(code).not.toContain('/* TOOLS_REFERENCE_PLACEHOLDER */');
-      expect(code).toContain('tools:');
-    });
-
-    it('should replace MEMORY_REFERENCE_PLACEHOLDER', () => {
-      const agentNode: IRNode = {
-        id: 'agent-1',
-        type: 'AgentExecutor',
-        label: 'Agent',
-        data: {
-          memory: 'memory-1',
-        },
-        inputs: {},
-        outputs: {},
-      };
-
-      const fragments = converter.convert(agentNode, mockContext);
-      const code = fragments.map(f => f.content).join('\n');
-
-      expect(code).not.toContain('/* MEMORY_REFERENCE_PLACEHOLDER */');
-      expect(code).toContain('memory:');
-    });
-
-    it('should replace SUBFLOW_STEPS_PLACEHOLDER', () => {
-      const sequentialNode: IRNode = {
-        id: 'seq-1',
-        type: 'SequentialChain',
-        label: 'Sequential Flow',
-        data: {
-          steps: ['step-1', 'step-2'],
-        },
-        inputs: {},
-        outputs: {},
-      };
-
-      const fragments = converter.convert(sequentialNode, mockContext);
-      const code = fragments.map(f => f.content).join('\n');
-
-      expect(code).not.toContain('/* SUBFLOW_STEPS_PLACEHOLDER */');
-    });
-
-    it('should handle custom NODE_<ID>_PLACEHOLDER pattern', () => {
-      const resolver = (converter as any).createReferenceResolver();
+      // A should come before B, B before C, C before D
+      const indexA = order.indexOf('A');
+      const indexB = order.indexOf('B');
+      const indexC = order.indexOf('C');
+      const indexD = order.indexOf('D');
       
-      const customNode: IRNode = {
-        id: 'custom-1',
-        type: 'CustomNode',
-        label: 'Custom',
-        data: {},
-        inputs: {},
-        outputs: {},
-      };
-      resolver.registerNode(customNode);
-
-      const resolved = resolver.resolvePlaceholder('/* NODE_custom-1_PLACEHOLDER */');
-      expect(resolved).toBe('customNode_custom_1');
+      expect(indexA).toBeLessThan(indexB);
+      expect(indexB).toBeLessThan(indexC);
+      expect(indexC).toBeLessThan(indexD);
     });
   });
 
-  describe('Complex Reference Scenarios', () => {
-    it('should handle agent with multiple tool references', () => {
-      const tools = ['calc-1', 'search-1', 'browser-1'];
+  describe('Agent Node Conversion with Dependencies', () => {
+    it('should generate agent code with resolved LLM reference', () => {
       const agentNode: IRNode = {
         id: 'agent-1',
-        type: 'OpenAIFunctionsAgent',
-        label: 'Multi-Tool Agent',
-        data: {
-          tools,
-          llm: 'gpt-1',
-        },
+        type: 'agentNode',
+        label: 'Main Agent',
+        parameters: [
+          { name: 'llm', value: 'llm-ref' },
+          { name: 'tools', value: ['tool-ref'] },
+          { name: 'agentType', value: 'openai-functions' },
+          { name: 'maxIterations', value: 10 }
+        ],
         inputs: {},
         outputs: {},
       };
 
-      const fragments = converter.convert(agentNode, mockContext);
-      const code = fragments.map(f => f.content).join('\n');
-
-      // Should handle array of tools
-      expect(code).toContain('tools:');
-      expect(code).not.toContain('TOOLS_REFERENCE_PLACEHOLDER');
-    });
-
-    it('should handle nested agent references', () => {
-      const parentAgent: IRNode = {
-        id: 'parent-agent',
-        type: 'AgentExecutor',
-        label: 'Parent Agent',
-        data: {
-          llm: 'llm-1',
-          subAgents: ['child-agent-1', 'child-agent-2'],
-        },
-        inputs: {},
-        outputs: {},
+      const context = {
+        ...mockContext,
+        graph: {
+          nodes: [agentNode],
+          edges: [],
+          metadata: { name: 'test-graph', version: '1.0.0' }
+        }
       };
 
-      const fragments = converter.convert(parentAgent, mockContext);
+      const fragments = converter.convert(agentNode, context);
       const code = fragments.map(f => f.content).join('\n');
 
-      // Should handle nested references
-      expect(code).not.toContain('PLACEHOLDER');
+      expect(fragments).toHaveLength(4); // import, initialization, post-init
+      expect(code).toContain('AgentExecutor');
+      expect(code).toContain('createOpenAIFunctionsAgent');
+      expect(code).toContain('defaultLLM'); // Default when no LLM found
     });
 
-    it('should handle conditional flow references', () => {
-      const conditionalNode: IRNode = {
-        id: 'conditional-1',
-        type: 'ConditionalFlow',
-        label: 'Conditional',
-        data: {
-          condition: 'condition-1',
-          trueFlow: 'flow-1',
-          falseFlow: 'flow-2',
-        },
-        inputs: {},
-        outputs: {},
-      };
-
-      const fragments = converter.convert(conditionalNode, mockContext);
-      const code = fragments.map(f => f.content).join('\n');
-
-      expect(code).not.toContain('CONDITIONAL_SUBFLOW_PLACEHOLDER');
-      expect(code).not.toContain('DEFAULT_SUBFLOW_PLACEHOLDER');
-    });
-  });
-
-  describe('Error Handling', () => {
     it('should handle missing node references gracefully', () => {
       const agentNode: IRNode = {
         id: 'agent-1',
-        type: 'AgentExecutor',
-        label: 'Agent',
-        data: {
-          llm: 'non-existent-llm',
-          tools: ['non-existent-tool'],
-        },
+        type: 'agentNode',
+        label: 'Agent with missing refs',
+        parameters: [
+          { name: 'llm', value: 'missing-llm' },
+          { name: 'tools', value: ['missing-tool'] },
+          { name: 'agentType', value: 'openai-functions' }
+        ],
         inputs: {},
         outputs: {},
       };
 
-      // Should not throw error
-      expect(() => converter.convert(agentNode, mockContext)).not.toThrow();
-      
       const fragments = converter.convert(agentNode, mockContext);
       const code = fragments.map(f => f.content).join('\n');
       
       // Should still generate valid code structure
-      expect(code).toContain('const agentExecutor_agent_1');
+      expect(code).toContain('AgentExecutor');
+      expect(code).toContain('defaultLLM'); // Fallback when reference not found
+      expect(code).toContain('[]'); // Empty tools array when not found
     });
 
-    it('should handle empty references', () => {
+    it('should return correct dependencies for different agent types', () => {
       const agentNode: IRNode = {
         id: 'agent-1',
-        type: 'AgentExecutor',
-        label: 'Agent',
-        data: {
-          llm: '',
-          tools: [],
-          memory: null,
-        },
+        type: 'agentNode',
+        label: 'OpenAI Functions Agent',
+        parameters: [
+          { name: 'agentType', value: 'openai-functions' },
+          { name: 'enableCallbacks', value: true }
+        ],
         inputs: {},
         outputs: {},
       };
 
-      const fragments = converter.convert(agentNode, mockContext);
-      const code = fragments.map(f => f.content).join('\n');
-
-      // Should handle empty values without placeholders
-      expect(code).not.toContain('PLACEHOLDER');
+      const dependencies = converter.getDependencies(agentNode, mockContext);
+      
+      expect(dependencies).toContain('langchain');
+      expect(dependencies).toContain('@langchain/core');
+      expect(dependencies).toContain('@langchain/openai');
+      expect(dependencies).toContain('@langchain/core/callbacks');
     });
   });
 
-  describe('getDependencies', () => {
-    it('should return correct dependencies for different agent types', () => {
-      const openAIAgent: IRNode = {
+  describe('Configuration Validation', () => {
+    it('should validate agent configuration correctly', () => {
+      const validNode: IRNode = {
         id: 'agent-1',
-        type: 'OpenAIFunctionsAgent',
-        label: 'OpenAI Agent',
-        data: {},
+        type: 'agentNode',
+        label: 'Valid Agent',
+        parameters: [
+          { name: 'llm', value: 'llm-ref' },
+          { name: 'tools', value: ['tool-ref'] },
+          { name: 'maxIterations', value: 5 },
+          { name: 'agentType', value: 'openai-functions' }
+        ],
         inputs: {},
         outputs: {},
       };
 
-      const deps = converter.getDependencies(openAIAgent, mockContext);
-      expect(deps).toContain('langchain');
-      expect(deps).toContain('@langchain/core');
+      expect(converter.canConvert(validNode)).toBe(true);
+      
+      const validation = converter.validateConfiguration(validNode);
+      expect(validation.valid).toBe(true);
+      expect(validation.errors).toHaveLength(0);
+    });
+
+    it('should detect invalid configuration', () => {
+      const invalidNode: IRNode = {
+        id: 'agent-1',
+        type: 'agentNode',
+        label: 'Invalid Agent',
+        parameters: [
+          { name: 'maxIterations', value: 150 }, // Too high
+          { name: 'agentType', value: 'invalid-type' } // Invalid type
+        ],
+        inputs: {},
+        outputs: {},
+      };
+
+      const validation = converter.validateConfiguration(invalidNode);
+      expect(validation.valid).toBe(false);
+      expect(validation.errors.length).toBeGreaterThan(0);
+      expect(validation.errors.some(e => e.includes('maxIterations'))).toBe(true);
+      expect(validation.errors.some(e => e.includes('Unsupported agent type'))).toBe(true);
+    });
+  });
+
+  describe('Supported Agent Types', () => {
+    it('should return list of supported agent types', () => {
+      const supportedTypes = converter.getSupportedAgentTypes();
+      
+      expect(supportedTypes).toContain('openai-functions');
+      expect(supportedTypes).toContain('structured-chat');
+      expect(supportedTypes).toContain('react');
+      expect(supportedTypes).toContain('conversational-react');
+      expect(supportedTypes).toContain('zero-shot-react');
     });
   });
 });

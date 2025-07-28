@@ -1,5 +1,5 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
-import { RerankingRAGChainConverter } from '../../src/registry/converters/rag-chains.js';
+import { AdvancedRAGChainConverter } from '../../src/registry/converters/rag-chains.js';
 import type { IRNode } from '../../src/ir/types.js';
 
 // Mock the external dependencies
@@ -28,21 +28,22 @@ jest.mock('@langchain/community/embeddings/hf_transformers', () => ({
   })),
 }));
 
-describe('RerankingRAGChainConverter', () => {
-  let converter: RerankingRAGChainConverter;
+describe('AdvancedRAGChainConverter - Reranking Functionality', () => {
+  let converter: AdvancedRAGChainConverter;
   let mockNode: IRNode;
 
   beforeEach(() => {
-    converter = new RerankingRAGChainConverter();
+    converter = new AdvancedRAGChainConverter();
     mockNode = {
-      id: 'reranking-rag-1',
-      type: 'RerankingRAGChain',
-      label: 'Reranking RAG Chain',
-      data: {
-        rerankStrategy: 'cohere',
-        rerankTopK: 5,
-        includeScore: true,
-      },
+      id: 'advanced-rag-1',
+      type: 'advancedRAGChain',
+      label: 'Advanced RAG Chain',
+      parameters: [
+        { name: 'rerankStrategy', value: 'cohere' },
+        { name: 'k', value: 5 },
+        { name: 'scoreThreshold', value: 0.5 },
+        { name: 'verbose', value: false }
+      ],
       inputs: {},
       outputs: {},
     };
@@ -71,7 +72,10 @@ describe('RerankingRAGChainConverter', () => {
       expect(fragments[0].type).toBe('import');
       expect(fragments[1].type).toBe('initialization');
 
+      const importCode = fragments[0].content;
       const initCode = fragments[1].content;
+      
+      // Check that reranking is enabled and function is included
       expect(initCode).toContain('rerankDocuments');
       expect(initCode).toContain('case \'cohere\'');
       expect(initCode).toContain('CohereRerank');
@@ -80,7 +84,12 @@ describe('RerankingRAGChainConverter', () => {
     });
 
     it('should generate code for sentence transformers reranking', () => {
-      mockNode.data.rerankStrategy = 'sentence_transformers';
+      mockNode.parameters = [
+        { name: 'rerankStrategy', value: 'sentence_transformers' },
+        { name: 'k', value: 5 },
+        { name: 'scoreThreshold', value: 0.5 },
+        { name: 'verbose', value: false }
+      ];
       
       const context = {
         targetLanguage: 'typescript' as const,
@@ -100,7 +109,12 @@ describe('RerankingRAGChainConverter', () => {
     });
 
     it('should handle no reranking strategy', () => {
-      mockNode.data.rerankStrategy = 'none';
+      mockNode.parameters = [
+        { name: 'rerankStrategy', value: 'none' },
+        { name: 'k', value: 4 },
+        { name: 'scoreThreshold', value: 0.5 },
+        { name: 'verbose', value: false }
+      ];
       
       const context = {
         targetLanguage: 'typescript' as const,
@@ -132,7 +146,12 @@ describe('RerankingRAGChainConverter', () => {
     });
 
     it('should respect rerankTopK parameter', () => {
-      mockNode.data.rerankTopK = 3;
+      mockNode.parameters = [
+        { name: 'rerankStrategy', value: 'cohere' },
+        { name: 'k', value: 3 },
+        { name: 'scoreThreshold', value: 0.5 },
+        { name: 'verbose', value: false }
+      ];
       
       const context = {
         targetLanguage: 'typescript' as const,
@@ -262,7 +281,12 @@ describe('RerankingRAGChainConverter', () => {
     });
 
     it('should handle invalid reranking strategy gracefully', () => {
-      mockNode.data.rerankStrategy = 'invalid_strategy';
+      mockNode.parameters = [
+        { name: 'rerankStrategy', value: 'invalid_strategy' },
+        { name: 'k', value: 5 },
+        { name: 'scoreThreshold', value: 0.5 },
+        { name: 'verbose', value: false }
+      ];
       
       const context = {
         targetLanguage: 'typescript' as const,

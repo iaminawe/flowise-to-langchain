@@ -133,7 +133,7 @@ class ReferenceResolver {
 /**
  * Base AgentFlow V2 converter with common functionality
  */
-abstract class BaseAgentFlowV2Converter extends BaseConverter {
+export abstract class BaseAgentFlowV2Converter extends BaseConverter {
   readonly category = 'agentflow-v2';
   protected static referenceResolver = new ReferenceResolver();
 

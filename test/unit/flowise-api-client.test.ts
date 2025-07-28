@@ -2,11 +2,11 @@
  * Unit Tests for Flowise API Client
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals'
 import { FlowiseApiClient } from '../../testing-ui/src/lib/flowise-api-client'
 
 // Mock fetch globally
-global.fetch = vi.fn()
+global.fetch = jest.fn()
 
 describe('FlowiseApiClient', () => {
   let client: FlowiseApiClient
@@ -14,18 +14,21 @@ describe('FlowiseApiClient', () => {
   const mockApiKey = 'test-api-key-123'
 
   beforeEach(() => {
-    client = new FlowiseApiClient(mockBaseUrl, mockApiKey)
-    vi.clearAllMocks()
+    client = new FlowiseApiClient({ 
+      url: mockBaseUrl, 
+      apiKey: mockApiKey 
+    })
+    jest.clearAllMocks()
   })
 
   afterEach(() => {
-    vi.restoreAllMocks()
+    jest.restoreAllMocks()
   })
 
   describe('Authentication', () => {
     it('should include API key in headers', async () => {
       const mockResponse = { status: 'healthy' }
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
       } as Response)
@@ -44,7 +47,7 @@ describe('FlowiseApiClient', () => {
     })
 
     it('should handle authentication errors', async () => {
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: false,
         status: 401,
         statusText: 'Unauthorized',
@@ -62,7 +65,7 @@ describe('FlowiseApiClient', () => {
         version: '1.0.0',
         timestamp: new Date().toISOString()
       }
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
       } as Response)
@@ -77,14 +80,14 @@ describe('FlowiseApiClient', () => {
     })
 
     it('should handle network errors', async () => {
-      vi.mocked(fetch).mockRejectedValueOnce(new Error('Network error'))
+      jest.mocked(fetch).mockRejectedValueOnce(new Error('Network error'))
 
       await expect(client.testConnection()).rejects.toThrow('Connection failed')
     })
 
     it('should handle timeout errors', async () => {
       // Mock a delayed response that exceeds timeout
-      vi.mocked(fetch).mockImplementationOnce(() => 
+      jest.mocked(fetch).mockImplementationOnce(() => 
         new Promise(resolve => setTimeout(() => resolve({
           ok: true,
           json: () => Promise.resolve({ status: 'healthy' }),
@@ -122,7 +125,7 @@ describe('FlowiseApiClient', () => {
     ]
 
     it('should list flows successfully', async () => {
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockFlows),
       } as Response)
@@ -142,7 +145,7 @@ describe('FlowiseApiClient', () => {
     })
 
     it('should handle empty flow list', async () => {
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([]),
       } as Response)
@@ -154,7 +157,7 @@ describe('FlowiseApiClient', () => {
 
     it('should get flow by ID', async () => {
       const mockFlow = mockFlows[0]
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockFlow),
       } as Response)
@@ -169,7 +172,7 @@ describe('FlowiseApiClient', () => {
     })
 
     it('should handle flow not found', async () => {
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: false,
         status: 404,
         statusText: 'Not Found',
@@ -181,7 +184,7 @@ describe('FlowiseApiClient', () => {
 
     it('should search flows with filters', async () => {
       const filteredFlows = [mockFlows[0]]
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(filteredFlows),
       } as Response)
@@ -203,7 +206,7 @@ describe('FlowiseApiClient', () => {
   describe('Retry Logic', () => {
     it('should retry failed requests', async () => {
       // First call fails, second succeeds
-      vi.mocked(fetch)
+      jest.mocked(fetch)
         .mockRejectedValueOnce(new Error('Network error'))
         .mockResolvedValueOnce({
           ok: true,
@@ -217,7 +220,7 @@ describe('FlowiseApiClient', () => {
     })
 
     it('should respect max retry attempts', async () => {
-      vi.mocked(fetch).mockRejectedValue(new Error('Persistent error'))
+      jest.mocked(fetch).mockRejectedValue(new Error('Persistent error'))
 
       await expect(client.testConnection()).rejects.toThrow('Connection failed')
       expect(fetch).toHaveBeenCalledTimes(4) // Initial + 3 retries
@@ -225,7 +228,7 @@ describe('FlowiseApiClient', () => {
 
     it('should use exponential backoff', async () => {
       const startTime = Date.now()
-      vi.mocked(fetch).mockRejectedValue(new Error('Persistent error'))
+      jest.mocked(fetch).mockRejectedValue(new Error('Persistent error'))
 
       try {
         await client.testConnection()
@@ -240,7 +243,7 @@ describe('FlowiseApiClient', () => {
   describe('Caching', () => {
     it('should cache flow list responses', async () => {
       const mockFlows = [{ id: 'flow-1', name: 'Cached Flow' }]
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockFlows),
       } as Response)
@@ -258,7 +261,7 @@ describe('FlowiseApiClient', () => {
 
     it('should invalidate cache after TTL', async () => {
       const mockFlows = [{ id: 'flow-1', name: 'TTL Test Flow' }]
-      vi.mocked(fetch).mockResolvedValue({
+      jest.mocked(fetch).mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockFlows),
       } as Response)
@@ -278,7 +281,7 @@ describe('FlowiseApiClient', () => {
 
     it('should clear cache manually', async () => {
       const mockFlows = [{ id: 'flow-1', name: 'Clear Cache Test' }]
-      vi.mocked(fetch).mockResolvedValue({
+      jest.mocked(fetch).mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockFlows),
       } as Response)
@@ -294,7 +297,7 @@ describe('FlowiseApiClient', () => {
   describe('Rate Limiting', () => {
     it('should queue requests when rate limited', async () => {
       const mockResponse = { status: 'healthy' }
-      vi.mocked(fetch).mockResolvedValue({
+      jest.mocked(fetch).mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
       } as Response)
@@ -309,7 +312,7 @@ describe('FlowiseApiClient', () => {
     })
 
     it('should handle 429 rate limit responses', async () => {
-      vi.mocked(fetch)
+      jest.mocked(fetch)
         .mockResolvedValueOnce({
           ok: false,
           status: 429,
@@ -331,7 +334,7 @@ describe('FlowiseApiClient', () => {
 
   describe('Error Handling', () => {
     it('should handle malformed JSON responses', async () => {
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.reject(new Error('Invalid JSON')),
       } as Response)
@@ -340,7 +343,7 @@ describe('FlowiseApiClient', () => {
     })
 
     it('should handle server errors gracefully', async () => {
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
@@ -357,7 +360,7 @@ describe('FlowiseApiClient', () => {
         code: 'VALIDATION_ERROR'
       }
       
-      vi.mocked(fetch).mockResolvedValueOnce({
+      jest.mocked(fetch).mockResolvedValueOnce({
         ok: false,
         status: 400,
         statusText: 'Bad Request',
