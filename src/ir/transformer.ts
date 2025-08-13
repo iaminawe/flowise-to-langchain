@@ -1073,8 +1073,6 @@ export class IRToCodeTransformer {
         order: 1000,
         category: 'generic',
         exports: [variableName],
-        isGeneric: true,
-        originalType: node.type,
       },
     };
   }

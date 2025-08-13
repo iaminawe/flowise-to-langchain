@@ -8,7 +8,7 @@ const router = Router()
  * POST /api/v1/jobs/create
  * Create a new job
  */
-router.post('/create', async (req: Request, res: Response) => {
+router.post('/create', async (req: Request, res: Response): Promise<Response | void> => {
     try {
         const { type, name, config, schedule } = req.body
         
@@ -20,7 +20,7 @@ router.post('/create', async (req: Request, res: Response) => {
             })
         }
         
-        const jobService = new JobService(AppDataSource)
+        const jobService = new JobService()
         const result = await jobService.createJob({
             type,
             name,
@@ -58,7 +58,7 @@ router.get('/', async (req: Request, res: Response) => {
     try {
         const { status, type, page = 1, limit = 20 } = req.query
         
-        const jobService = new JobService(AppDataSource)
+        const jobService = new JobService()
         const result = await jobService.listJobs({
             status: status as string,
             type: type as string,
@@ -91,11 +91,11 @@ router.get('/', async (req: Request, res: Response) => {
  * GET /api/v1/jobs/:jobId
  * Get job details
  */
-router.get('/:jobId', async (req: Request, res: Response) => {
+router.get('/:jobId', async (req: Request, res: Response): Promise<Response | void> => {
     try {
         const { jobId } = req.params
         
-        const jobService = new JobService(AppDataSource)
+        const jobService = new JobService()
         const job = await jobService.getJob(jobId)
         
         if (!job) {
@@ -129,7 +129,7 @@ router.post('/:jobId/start', async (req: Request, res: Response) => {
     try {
         const { jobId } = req.params
         
-        const jobService = new JobService(AppDataSource)
+        const jobService = new JobService()
         const result = await jobService.startJob(jobId)
         
         res.json({
@@ -160,7 +160,7 @@ router.post('/:jobId/stop', async (req: Request, res: Response) => {
     try {
         const { jobId } = req.params
         
-        const jobService = new JobService(AppDataSource)
+        const jobService = new JobService()
         const result = await jobService.stopJob(jobId)
         
         res.json({
@@ -192,7 +192,7 @@ router.put('/:jobId', async (req: Request, res: Response) => {
         const { jobId } = req.params
         const updates = req.body
         
-        const jobService = new JobService(AppDataSource)
+        const jobService = new JobService()
         const result = await jobService.updateJob(jobId, updates)
         
         res.json({
@@ -218,7 +218,7 @@ router.delete('/:jobId', async (req: Request, res: Response) => {
     try {
         const { jobId } = req.params
         
-        const jobService = new JobService(AppDataSource)
+        const jobService = new JobService()
         const result = await jobService.deleteJob(jobId)
         
         res.json({
@@ -245,7 +245,7 @@ router.get('/:jobId/logs', async (req: Request, res: Response) => {
         const { jobId } = req.params
         const { page = 1, limit = 100 } = req.query
         
-        const jobService = new JobService(AppDataSource)
+        const jobService = new JobService()
         const result = await jobService.getJobLogs(jobId, Number(page), Number(limit))
         
         res.json({

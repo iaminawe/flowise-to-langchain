@@ -7,12 +7,12 @@
 
 import { Router } from 'express';
 import { convertRouter } from './convert.js';
-import { validateRouter } from './validate.js';
-import { testRouter } from './test.js';
-import { uploadRouter } from './upload.js';
-import { batchRouter } from './batch.js';
-import { jobRouter } from './jobs.js';
-import { statsRouter } from './stats.js';
+import validateRouter from './validate.js';
+import testRouter from './test.js';
+import uploadRouter from './upload.js';
+import batchRouter from './batch.js';
+import jobRouter from './jobs.js';
+import statsRouter from './stats.js';
 
 /**
  * Main API router

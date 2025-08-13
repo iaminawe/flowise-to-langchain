@@ -18,59 +18,71 @@ function demonstrateReferenceResolution() {
   // Create sample nodes
   const llmNode: IRNode = {
     id: 'llm_1',
-    type: 'chatModel',
-    flowiseType: 'chatOpenAI',
+    type: 'chatOpenAI',
+    label: 'Chat OpenAI',
+    category: 'llm',
+    position: { x: 0, y: 0 },
     parameters: [
-      { name: 'temperature', value: 0.7 },
-      { name: 'modelName', value: 'gpt-4' }
+      { name: 'temperature', value: 0.7, type: 'number' },
+      { name: 'modelName', value: 'gpt-4', type: 'string' }
     ]
   };
   
   const toolNode: IRNode = {
     id: 'tool_1',
-    type: 'tool',
-    flowiseType: 'toolNode',
+    type: 'toolNode',
+    label: 'Tool Node',
+    category: 'tool',
+    position: { x: 0, y: 0 },
     parameters: [
-      { name: 'name', value: 'calculator' },
-      { name: 'description', value: 'A calculator tool' },
-      { name: 'func', value: '(input) => eval(input)' }
+      { name: 'name', value: 'calculator', type: 'string' },
+      { name: 'description', value: 'A calculator tool', type: 'string' },
+      { name: 'func', value: '(input) => eval(input)', type: 'code' }
     ]
   };
   
   const memoryNode: IRNode = {
     id: 'memory_1',
-    type: 'memory',
-    flowiseType: 'bufferMemory',
+    type: 'bufferMemory',
+    label: 'Buffer Memory',
+    category: 'memory',
+    position: { x: 0, y: 0 },
     parameters: [
-      { name: 'memoryKey', value: 'chat_history' }
+      { name: 'memoryKey', value: 'chat_history', type: 'string' }
     ]
   };
   
   const agentNode: IRNode = {
     id: 'agent_1',
-    type: 'agent',
-    flowiseType: 'agentNode',
+    type: 'agentNode',
+    label: 'Agent Node',
+    category: 'agent',
+    position: { x: 0, y: 0 },
     parameters: [
-      { name: 'agentType', value: 'openai-functions' },
-      { name: 'llm', value: 'llm_1' }, // Reference to LLM node
-      { name: 'tools', value: ['tool_1'] }, // Reference to tool node
-      { name: 'memory', value: 'memory_1' }, // Reference to memory node
-      { name: 'maxIterations', value: 10 }
+      { name: 'agentType', value: 'openai-functions', type: 'string' },
+      { name: 'llm', value: 'llm_1', type: 'string' }, // Reference to LLM node
+      { name: 'tools', value: ['tool_1'], type: 'array' }, // Reference to tool node
+      { name: 'memory', value: 'memory_1', type: 'string' }, // Reference to memory node
+      { name: 'maxIterations', value: 10, type: 'number' }
     ]
   };
   
   const context: GenerationContext = {
-    graph: {
-      nodes: [llmNode, toolNode, memoryNode, agentNode],
-      edges: [
-        { id: 'edge_1', source: 'llm_1', target: 'agent_1', sourceHandle: 'output', targetHandle: 'llm' },
-        { id: 'edge_2', source: 'tool_1', target: 'agent_1', sourceHandle: 'output', targetHandle: 'tools' },
-        { id: 'edge_3', source: 'memory_1', target: 'agent_1', sourceHandle: 'output', targetHandle: 'memory' }
-      ]
-    },
-    imports: new Map(),
-    variables: new Map(),
-    mainChain: null
+    targetLanguage: 'typescript',
+    outputPath: './output',
+    projectName: 'test-project',
+    includeTests: false,
+    includeDocs: false,
+    includeLangfuse: false,
+    packageManager: 'npm',
+    environment: {},
+    codeStyle: {
+      indentSize: 2,
+      useSpaces: true,
+      semicolons: true,
+      singleQuotes: true,
+      trailingCommas: true
+    }
   };
   
   // Register nodes (this would normally happen during conversion)
@@ -106,24 +118,34 @@ function demonstrateReferenceResolution() {
 function demonstrateSubflowResolution() {
   const subflowNode: IRNode = {
     id: 'subflow_1',
-    type: 'subflow',
-    flowiseType: 'subflowNode',
+    type: 'subflowNode',
+    label: 'Subflow Node',
+    category: 'control_flow',
+    position: { x: 0, y: 0 },
     parameters: [
-      { name: 'subflowId', value: 'workflow_123' },
-      { name: 'parallel', value: true },
-      { name: 'inputMapping', value: { input: 'query' } },
-      { name: 'outputMapping', value: { result: 'output' } }
+      { name: 'subflowId', value: 'workflow_123', type: 'string' },
+      { name: 'parallel', value: true, type: 'boolean' },
+      { name: 'inputMapping', value: { input: 'query' }, type: 'object' },
+      { name: 'outputMapping', value: { result: 'output' }, type: 'object' }
     ]
   };
   
   const context: GenerationContext = {
-    graph: {
-      nodes: [subflowNode],
-      edges: []
-    },
-    imports: new Map(),
-    variables: new Map(),
-    mainChain: null
+    targetLanguage: 'typescript',
+    outputPath: './output',
+    projectName: 'test-project',
+    includeTests: false,
+    includeDocs: false,
+    includeLangfuse: false,
+    packageManager: 'npm',
+    environment: {},
+    codeStyle: {
+      indentSize: 2,
+      useSpaces: true,
+      semicolons: true,
+      singleQuotes: true,
+      trailingCommas: true
+    }
   };
   
   const converter = new SubflowNodeConverter();
@@ -137,24 +159,34 @@ function demonstrateSubflowResolution() {
 function demonstrateCustomFunctionResolution() {
   const functionNode: IRNode = {
     id: 'function_1',
-    type: 'customFunction',
-    flowiseType: 'customFunctionNode',
+    type: 'customFunctionNode',
+    label: 'Custom Function',
+    category: 'utility',
+    position: { x: 0, y: 0 },
     parameters: [
-      { name: 'name', value: 'dataProcessor' },
-      { name: 'code', value: 'return processData(input);' },
-      { name: 'enableState', value: true },
-      { name: 'stateVariables', value: { count: 0, results: [] } }
+      { name: 'name', value: 'dataProcessor', type: 'string' },
+      { name: 'code', value: 'return processData(input);', type: 'code' },
+      { name: 'enableState', value: true, type: 'boolean' },
+      { name: 'stateVariables', value: { count: 0, results: [] }, type: 'object' }
     ]
   };
   
   const context: GenerationContext = {
-    graph: {
-      nodes: [functionNode],
-      edges: []
-    },
-    imports: new Map(),
-    variables: new Map(),
-    mainChain: null
+    targetLanguage: 'typescript',
+    outputPath: './output',
+    projectName: 'test-project',
+    includeTests: false,
+    includeDocs: false,
+    includeLangfuse: false,
+    packageManager: 'npm',
+    environment: {},
+    codeStyle: {
+      indentSize: 2,
+      useSpaces: true,
+      semicolons: true,
+      singleQuotes: true,
+      trailingCommas: true
+    }
   };
   
   const converter = new CustomFunctionNodeConverter();

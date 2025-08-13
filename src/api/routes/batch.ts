@@ -8,7 +8,7 @@ const router = Router()
  * POST /api/v1/batch/create
  * Create a new batch job
  */
-router.post('/create', async (req: Request, res: Response) => {
+router.post('/create', async (req: Request, res: Response): Promise<Response | void> => {
     try {
         const { type, data, options } = req.body
         
@@ -20,7 +20,7 @@ router.post('/create', async (req: Request, res: Response) => {
             })
         }
         
-        const batchService = new BatchService(AppDataSource)
+        const batchService = new BatchService()
         const result = await batchService.createBatch(type, data, options)
         
         res.json({
@@ -45,12 +45,12 @@ router.post('/create', async (req: Request, res: Response) => {
  * POST /api/v1/batch/execute/:batchId
  * Execute a batch job
  */
-router.post('/execute/:batchId', async (req: Request, res: Response) => {
+router.post('/execute/:batchId', async (req: Request, res: Response): Promise<Response | void> => {
     try {
         const { batchId } = req.params
         const { async = true } = req.body
         
-        const batchService = new BatchService(AppDataSource)
+        const batchService = new BatchService()
         
         if (async) {
             // Start async execution
@@ -91,11 +91,11 @@ router.post('/execute/:batchId', async (req: Request, res: Response) => {
  * GET /api/v1/batch/status/:batchId
  * Get batch job status
  */
-router.get('/status/:batchId', async (req: Request, res: Response) => {
+router.get('/status/:batchId', async (req: Request, res: Response): Promise<Response | void> => {
     try {
         const { batchId } = req.params
         
-        const batchService = new BatchService(AppDataSource)
+        const batchService = new BatchService()
         const result = await batchService.getBatchStatus(batchId)
         
         if (!result) {
@@ -139,7 +139,7 @@ router.post('/cancel/:batchId', async (req: Request, res: Response) => {
     try {
         const { batchId } = req.params
         
-        const batchService = new BatchService(AppDataSource)
+        const batchService = new BatchService()
         const result = await batchService.cancelBatch(batchId)
         
         res.json({
@@ -168,7 +168,7 @@ router.get('/results/:batchId', async (req: Request, res: Response) => {
         const { batchId } = req.params
         const { page = 1, limit = 100 } = req.query
         
-        const batchService = new BatchService(AppDataSource)
+        const batchService = new BatchService()
         const result = await batchService.getBatchResults(batchId, Number(page), Number(limit))
         
         res.json({
@@ -201,7 +201,7 @@ router.delete('/:batchId', async (req: Request, res: Response) => {
     try {
         const { batchId } = req.params
         
-        const batchService = new BatchService(AppDataSource)
+        const batchService = new BatchService()
         const result = await batchService.deleteBatch(batchId)
         
         res.json({
